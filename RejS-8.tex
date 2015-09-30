@@ -1,0 +1,845 @@
+\documentclass[twoside]{article}
+\usepackage{aistats2015}
+
+%=============================================================================
+% PACKAGES
+%=============================================================================
+
+\usepackage{url}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{braket}
+\usepackage{complexity}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{hyperref}
+\usepackage{enumerate}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+    \renewcommand{\algorithmicrequire}{\textbf{Input:}}
+    \renewcommand{\algorithmicensure}{\textbf{Output:}}
+    \newcommand{\inlinecomment}[1]{\Comment {\footnotesize #1} \normalsize}
+    \newcommand{\linecomment}[1]{\State \(\triangleright\) {\footnotesize #1} \normalsize}
+    %\renewcommand{\algorithmiccomment}[1]{\State\(\triangleright\) #1}
+    
+\usepackage{multirow}
+
+%=============================================================================
+% ENVIRONMENTS
+%=============================================================================
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+
+\newenvironment{proofof}[1]{\begin{trivlist}\item[]{\flushleft\it
+Proof of~#1.}}
+{\qed\end{trivlist}}
+
+%=============================================================================
+% HYPERREF SETUP
+%=============================================================================
+
+\newcommand{\eq}[1]{\hyperref[eq:#1]{(\ref*{eq:#1})}}
+\renewcommand{\sec}[1]{\hyperref[sec:#1]{Section~\ref*{sec:#1}}}
+\newcommand{\app}[1]{\hyperref[app:#1]{Appendix~\ref*{app:#1}}}
+\newcommand{\fig}[1]{\hyperref[fig:#1]{Figure~\ref*{fig:#1}}}
+\newcommand{\thm}[1]{\hyperref[thm:#1]{Theorem~\ref*{thm:#1}}}
+\newcommand{\lem}[1]{\hyperref[lem:#1]{Lemma~\ref*{lem:#1}}}
+\newcommand{\tab}[1]{\hyperref[tab:#1]{Table~\ref*{tab:#1}}}
+\newcommand{\cor}[1]{\hyperref[cor:#1]{Corollary~\ref*{cor:#1}}}
+\newcommand{\alg}[1]{\hyperref[alg:#1]{Algorithm~\ref*{alg:#1}}}
+\newcommand{\defn}[1]{\hyperref[def:#1]{Definition~\ref*{def:#1}}}
+
+%=============================================================================
+% COMMANDS
+%=============================================================================
+
+\newcommand{\ketbra}[2]{|#1\rangle\!\langle#2|}
+\newcommand{\prob}[1]{{\rm Pr}\left(#1 \right)}
+% \newcommand{\Tr}[1]{{\rm Tr}\!\left[#1 \right]}
+\newcommand{\expect}[2]{{\mathbb{E}_{#2}}\!\left\{#1 \right\}}
+\newcommand{\var}[2]{{\mathbb{V}_{#2}}\!\left\{#1 \right\}}
+\newcommand{\CRej}{\text{RejS}}
+\newcommand{\CSMC}{\text{SMC}}
+
+\newcommand{\ess}{\mathrm{ess}}
+
+\newcommand{\sinc}{\operatorname{sinc}}
+
+% fix: supported only for revtex
+%\newcommand{\openone}{\mathbb{I}}
+% fix: unsupported with iopart
+%\newcommand{\eqref}[1]{(\ref{#1})}
+
+\newcommand{\sde}{\mathrm{sde}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\NN}{\mathrm{N}}
+\newcommand{\w}{\omega}
+\newcommand{\Kap}{\kappa}
+
+\newcommand{\Tchar}{$T$}
+\newcommand{\T}{\Tchar~}
+\newcommand{\TT}{\mathrm{T}}
+\newcommand{\ClT}{\{{\rm Clifford}, \Tchar\}~}
+\newcommand{\Tcount}{\Tchar--count~}
+\newcommand{\Tcountper}{\Tchar--count}
+\newcommand{\Tcounts}{\Tchar--counts~}
+\newcommand{\Tdepth}{\Tchar--depth~}
+\newcommand{\Zr}{\Z[i,1/\sqrt{2}]}
+\newcommand{\ve}{\varepsilon}
+\newcommand{\defeq}{\mathrel{:=}}
+
+\newcommand{\cu}[1]{{\textcolor{red}{#1}}}
+\newcommand{\tout}[1]{{}}
+\newcommand{\good}{{\rm good}}
+\newcommand{\bad}{{\rm bad}}
+\newcommand{\dd}{\mathrm{d}}
+
+\newcommand{\id}{\openone}
+
+
+\begin{document} %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%=============================================================================
+% FRONT MATTER
+%=============================================================================
+
+\newcommand{\thetitle}{Bayesian inference via Rejection Filtering}
+\twocolumn[
+  \aistatstitle{\thetitle}
+  \aistatsauthor{
+    Nathan Wiebe$^\dagger$ \And
+    Chris Granade$^*$ \And
+    Ashish Kapoor$^\dagger$ \And
+    Krysta M Svore$^\dagger$
+  }
+  \aistatsaddress{
+    $^\dagger$Quantum Architectures and Computation Group \\ Microsoft Research \And
+    $^*$Centre for Engineered Quantum Systems \\ University of Sydney
+  }
+]
+
+
+\begin{abstract}
+We provide a method for approximating Bayesian inference using rejection sampling.  By introducing
+a new form of resampling we are able to not only make the process efficient but also dramatically
+reduces the memory required relative to conventional SMC methods.
+We also provide an approximate form of rejection sampling that allows the algorithm to be used
+in cases where traditional rejection sampling is not efficient.
+Finally, we consider several numerical examples that illustrate that ideas will work well in memory restricted
+problems that can arise in embedded applications.
+\end{abstract}
+
+%=====================================================================
+\section{Introduction}
+\label{sec:intro}
+%=====================================================================
+Particle filter methods have in recent years become an indispensable tool for model selection, object tracking
+and statistical inference in high--dimensional problems.  While these methods work well in conventional settings, 
+an interesting question to ask is whether particle filter methods can be used in a streaming setting wherein the
+user has access only to a constant amount of memory.  These problems are more than just curiousities.  If we
+consider tracking the motion of rapidly moving objects, for example, then it is common that the dynamics of
+the system can radically change over the time required to communicate between a system
+and a computer used to control its dynamics.  Such problems could be addressed by allowing the inference to performed inside
+the device itself, but this often places prohibitive restrictions on the processing power and memory of the 
+device.  Such restrictions can preclude the use of existing machine learning methods in such control problems.
+
+We present an approach that we call rejection filtering that employs rejection sampling to produce posterior samples in a
+\emph{streaming} fashion. Because our algorithm does not need to record more
+than a constant number of samples at any one time, \CRej~uses significantly
+less memory than existing particle filter methods. Moreover, we show that our algorithm can be
+easily parallelized at a fine-grained level, such that it can be used with an
+array of small processing cores. Thus, \CRej~allows for finding posterior
+samples using hybrid computing platforms based on GPU and FPGA computing, and
+for embedding Bayesian inference in experimental apparatus.
+
+Our algorithm accomplishes these gains by using particle filtering resampling
+and variational methods in a rejection sampling context. By using streaming
+algorithms for computing summary statistics and principal components, \CRej~
+can employ these methods to boost rejection sampling acceptance rates without
+compromising the online and parallel nature of rejection sampling. We also
+show that \CRej~can be applied to model selection problems and to time-
+dependent and state-space models by using diffusive updates similar to
+computer vision applications.
+
+We start in \sec{smc} by reviewing existing particle filtering methods. We
+then detail the \CRej~algorithm and discuss applications to state-space models
+such as those used in computer vision. In \sec{error-analysis}, we prove the
+stability of our algorithm and provide bounds on the errors incured in
+computing Bayesian mean estimators using \CRej. In \sec{variational}, we
+discuss the use of variational inference as a replacement for instrumental
+distributions in the resampling step. Finally, in \sec{numerical-experiments},
+we show numerical examples of the performance of \CRej~for periodic and
+strongly-peaked test cases.
+
+%=============================================================================
+\section{Particle Filters}
+\label{sec:smc}
+%=============================================================================
+
+Particle filter methods, also known as \emph{sequential Monte Carlo}, proceed
+by approximating the prior distribution $\pi(x)$ at each step as a weighted
+mixture of $\delta$-function distributions,
+\begin{equation}
+    \pi(x) \approx \sum_i w_i \delta(x - x_i),
+\end{equation}
+where each $x_i$ is termed a \emph{particle} with weight $w_i$.
+Bayes' update for the evidence datum $E$ then proceeds on the weights alone as
+\begin{equation}
+    w_i \mapsto w_i \cdot P(E | x_i) / \mathcal{N},
+\end{equation}
+where $\mathcal{N}$ is a normalization constant that can be found implicitly.
+
+As updates are performed, the effective sample size $n_\ess \defeq
+1 / \|w\|_2^2$ tends towards zero, such that the approximation must be
+\emph{resampled} to preserve numerical stability. The bootstrap filter,
+commonly used in state-space methods, draws each new particle from the categorical
+distribution over particle weights. In the case that only Bayes updates are
+performed, however, the bootstrap filter only replaces weight by multiplicity,
+such that the numerical stability is not restored.
+
+Instead, one can draw new particles an \emph{instrumental distribution} for
+the current posterior. For instance, using a normal distribution to resample,
+each new particle $x'$ can be drawn from $\NN(\mu, \Sigma)$, where
+$\mu = \expect{x}{x}$ and $\Sigma = \var{x}{x}$.
+
+The Liu-West resampling algorithm [cite] interpolates between these two
+behaviors by a parameter $a \in [0, 1]$. In particular, each new particle
+$x'$ is chosen from the distribution
+\begin{equation}
+  \label{eq:liu-west}
+  P(x') = \sum_i w_i \NN(\mu_i, \Sigma),
+\end{equation}
+where $\NN(\mu_i, \Sigma)$ is a normal density with mean
+$\mu_i = a x_i + (1 - a) \expect xx$
+and covariance $\Sigma = \sqrt{1 - a^2} \var{x}{x}$.
+This choice of resampling distribution explicitly preserves the mean
+and the covariance of the current posterior, while increasing the
+effective sample size. Liu and West recommend using $a = 0.98$ in practice.
+Choosing $a$ close to the bootstrap filter, however, can require a large
+initial sample size in order to process highly informative evidence
+in a numerically stable way. 
+
+Note that when the posterior is approximately normal, $a = 0$ approximately
+preserves all of the relevant information about the posterior, but require
+storing only summary statistics of particles rather than the entire particle
+approximation. [Cite SMC-ABC using summary statistics \cite{sisson_sequential_2007} over \emph{data}, not
+samples, to do similar in likelihood-free context.] This observation is key to
+the development of \CRej~in the next section.
+
+\begin{algorithm}[t!]
+    \caption{Update for \CRej}
+    \label{alg:crej}
+    \begin{algorithmic}
+        \Require Array of evidence $\vec{E}$, number of attempts $m$, a constant $0<\kappa_E\le 1$, a recovery factor $r \ge 0$ and the prior $P$.
+%        and a mapping $\operatorname{F}$ between $(\mu,\sigma^2)$ to a family of probability distributions that has mean $\mu$ and covariance matrix $\Sigma$. Typically $F$ will yield a Gaussian distribution but other possibilities exist.
+        \Function{\CRej Update}{$\vec{E}$, $\mu$, $\Sigma$, $m$, $\kappa_E$, $r$}
+    \State{$(M,S,N_a) \gets 0$}
+          \For{$i \in 1 \to m$}
+            \State $x \sim P$
+            \State $u \sim \operatorname{Uniform}(0, 1)$
+            \If{$\prod_{E\in \vec{E}}\min\left(P(E | x)/\kappa_E,1\right) \ge u$} %\Comment{Check if sample is accepted}
+%                \State Append $x$ to $X$.
+            \State $M \gets M+ x$
+            \State $S \gets S+ xx^T$
+    \State $N_a \gets N_a +1$.
+            \EndIf
+    \EndFor
+    \If{$N_a > 1$}
+       \State $\mu\gets M/N_a $
+       \State $\Sigma \gets \frac{1}{N_a -1}\left(S - N_a \mu\mu^T \right)$%\Comment{Use incremental formula for sample covariance}
+    \State\Return $(\mu,\Sigma,N_a)$
+   \Else
+    \State\Return $(\mu, (1+r)\Sigma),N_a)$%\Comment{Recover from failed update.}
+
+   \EndIf
+          
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+%---------------------------------------------------------------------
+\section{Rejection Filtering}
+%---------------------------------------------------------------------
+The idea of rejection filtering is to avoid storing the entirety of a
+particle cloud used to represent the prior and instead only store
+ summary statistics that are incrementally
+computed from samples drawn from the prior.  This is made possible
+using rejection sampling.  Specifically our process works as follows.
+Begin by drawing a sample from $P(x)$.  Then reject that sample with
+probability $P(E|x)$.  The probability 
+distribution of the samples that are not rejected is 
+\begin{equation}
+ \frac{P(E|x)P(x)}{\sum_x P(E|x)P(x)}= P(x|E),
+\end{equation}
+and the probability of accepting a sample is $\sum_x P(E|x)P(x)$.
+Thus rejection sampling can be used to perform Bayesian inference.  We
+call this approach rejection filtering.
+
+There are two major drawbacks to this simple approach, which have in part prevented the adoption
+of rejection sampling as a viable method for inference.  The first is that the probability of success shrinks exponentially with the number of updates
+in online inference problems.
+The second problem is that if $P(E|x)$ is exponentially small then the algorithm will not be efficient.
+We show below that resampling and approximate rejection sampling can be used to address 
+ these problems under appropriate assumptions.
+
+%---------------------------------------------------------------------
+\subsection{Resampling in Rejection Filtering}
+%---------------------------------------------------------------------
+We make rejection filtering efficient by using a process that we call resampling due to
+its similarity to resampling in sequential Monte Carlo algorithms.  We
+forgo trying to propagate samples through many rounds of rejection sampling and instead
+to use these samples to inform a new model for the posterior distribution.  For example, if
+we assume that our prior distribution is a Gaussian then a Gaussian model for the posterior
+distribution can be found by computing the mean and the covariance matrix for the samples
+that are accepted by the rejection sampling algorithm.  This approach is
+reminiscent of assumed density filtering~\cite{minka_expectation_2001}, which uses a similar strategy
+for modeling the prior distribution but is less memory efficient than
+our method.
+
+
+
+
+
+This method is described in detail in~\alg{crej}. We then discuss the efficiency of the algorithm in the following theorem.
+We consider an algorithm to be efficient if it runs in $O(\rm{poly}({\rm dim}(x)))$ time.
+
+
+%described above, as it allows a generic family of distributions specified by the mean
+%and covariance matrix of the sample data output by the rejection sampling step.  We use incremental
+%algorithms to compute both the mean and the covariance matrix for the samples that are accepted
+%by the rejection sampling step.  This is done to keep the memory usage low, which further exemplifies
+%the memory efficient nature of our algorithm.  Generalization of this model to Gaussian mixture models
+%is straightforward. \textbf{CG: if we have space, may be interesting to expand. Summary
+%statistics here require associating newly accepted particles with the appropriate accumulation
+%registers, then incrementing the correct $N_a$. That mixture distributions can also be
+%\emph{efficiently} estimated is something you don't even get with LW SMC, mLW not withstanding.}
+
+\begin{theorem}
+Assume that $P(E|x)\le \kappa_E$ can be computed efficiently for all hypotheses $x$, $\sum_x P(E|x)P(x)/\kappa_E$ is at most polynomially small for all
+evidences $E$ and $P(x)$ can be efficiently computed and sampled  then~\alg{crej} 
+can efficiently compute the mean and covariance of $P(x|E)$ within error $\epsilon$ in the max--norm using $O({\rm dim}(x)^2\log(1/\epsilon))$ memory.\label{thm:crej}
+\end{theorem}
+Formal proof is given in the supplemental material, but the intuition is that by drawing a
+sample from the prior distribution and rejecting it with probability $P(E|x)$, a sample from
+the posterior distribution can be non--deterministically drawn.  Incremental formulas are
+used in~\alg{crej} to estimate the mean and the covariance using such samples, which obviates the need
+to store $O(1/\epsilon^2)$ samples in memory in order to estimate the moments of the posterior distribution.
+
+Width can be traded for depth by batching the data and processing each of
+these pieces of evidence separately. We discuss this batched version of the
+inference algorithm in~\alg{batchcrej} (Supplemental Material) wherein we
+assume that a computational model is used with $N_{\rm batch}$ processing
+nodes and a server that accepts a stream of the incremental means and
+covariance sums from the processing nodes and combines them to produce the
+model used in the next step of the inference procedure. This allows \CRej~to
+easily be distributed over a cluster, GPU or on softcore processors within a
+FPGA. Thus, in turn, \CRej~allows for use in to novel contexts such as very
+small FPGAs for low-temperature use \cite{hornibrook_cryogenic_2015} or for
+integration with existing memory-intensive FPGA configurations
+\cite{casagrande_design_2014}.
+
+
+
+%=============================================================================
+\section{ Bayesian inference using Approximate Rejection Sampling}
+%=============================================================================
+
+To avoid the memory and numerical stability costs of kernel density (Liu-West)
+resampling, we perform Bayesian inference using rejection sampling together
+with resampling using summary statistics. Rejection sampling is a
+popular algorithm for drawing samples from a distribution $p$ given the
+ability to sample from an instrumental distribution $q$.  The algorithm works
+as follows. Draw a sample  $x$ from $q$, and then with probability $P(x)/M
+Q(x)$ accept the sample, where $M > 0$ is a normalizing constant inserted to
+guarantee that $p(x)/q(x) \le 1$.  The expected number of times that this
+process needs to be repeated before a sample is accepted is given by the
+geometric distribution to be $M$, if $q(x)$ is a normalized distribution.
+
+Assuming that we have a datum $E$ and the likelihood function is $P(E|x)$ then Bayesian inference
+involves preparing the a distribution that is proportional to $\sum_x P(E|x) P(x)$ where $P(x)$ is the
+prior distribution.  We can therefore draw a sample from the posterior distribution by taking
+$p(x)=P(E|x)P(x)$ and $q(x)=P(x)$.  Since $0\le P(E|x)\le 1$, the rejection probability is $P(E|x)$ and
+$M=1$ suffices.  However, if $P(E|x)\le 1/\kappa_E$ for the vast majority of the configurations then
+accepting the sample with probability $\min(1,P(E|x)/\kappa_E)$  can substantially reduce the 
+complexity of the algorithm.  This result is particularly useful when the likelihood function is exponentially
+small for each configuration but a tight upper bound on the likelihood is not known.
+
+This approximate strategy will incur errors depending on the total probability mass
+for which $P(E|x)/\kappa_E >1$.   The main question remaining is how substantial is the
+impact of these errors on the posterior distribution?  To understand this, let us define
+\begin{equation}
+{\rm bad} := \left\{x: \frac{P(E|x)}{\kappa_E} >1\right\}.
+\end{equation}
+If the set of bad configurations is non--empty then it naturally leads to errors in the posterior and
+can degrade the success probability for rejection filtering.  Bounds on these effects are
+provided below.
+
+\begin{corollary}\label{cor:badalgorithm}
+If the assumptions of~\thm{crej} are met and
+$$\sum_{x\in {\rm bad}}  \left([P(E|x)-\kappa_E] P(x)\right) \le \delta P(E),$$
+  then approximate rejection sampling is  efficient and samples from a distribution $\rho(x|E)$ such that ${\sum_x \sqrt{\rho(x|E) P(x|E)}} \ge 1-\delta$.
+The probability of accepting a sample is at least $\frac{P(E|x) (1-\delta)}{\kappa_E}$.\label{thm:kappa}
+\end{corollary}
+\begin{proof}
+Result follows directly from~\thm{crej} and theorem 1 in~\cite{WKGS15}.
+\end{proof}
+
+\cor{badalgorithm} gives an efficient method for sampling from the posterior distribution assuming that $P(E)/\kappa_E$ is at most polynomially small.  Furthermore it is incredibly space efficient since it does not require the posterior distribution to be explicitly stored.  However, it is not generally efficient when  used in an online fashion.  This is because the probability that a given sample is accepted after $L$ consecutive updates shrinks exponentially with $L$ unless $\frac{P(E)}{\kappa_E}=1-O(1/{\rm poly}(L))$.  Furthermore, even if we batch the updates together as a single update we do not expect that $\sum_x P(E|x) P(x) /\kappa_E$ is polynomially small for the majority of these examples.  
+
+%-----------------------------------------------------------------------------
+\subsection{Filtering Distributions for Time-Dependent Models}
+\label{sec:time-dep}
+%-----------------------------------------------------------------------------
+
+
+In many particle filter applications, Bayesian inference is combined with
+time-dependent models [cite others] \cite{isard_condensationconditional_1998}
+to perform object tracking and acquisition. Here, we show that such
+\CRej~naturally encompasses these applications as well by convolving posterior
+distributions with Gaussian update kernels.
+
+In particular, for time-dependent applications the true model is not
+stationary, but rather changes as observations are made.  This creates
+challenges for na\i ve applications of Bayesian inference because drift in the
+true model can cause it to move outside of the support of the  prior
+distribution.  This results in the online inference algorithm failing to track
+an object that moves suddenly and unexpectedly.
+
+To see how this can occur in problems where the true parameters are time-dependent consider the following likelihood function for a Bernoulli experiment
+and a family of prior distributions with mean $\bar{x}$ and variance $\sigma(x)$ such that
+the overlap between the likelihood and the prior is given by
+\begin{equation}
+    \sum_x P(0|x; \bar{x}, \sigma(x)) P(x) \le e^{-|x_{\rm true} - \bar{x}| \gamma/\sigma(x)}.
+\end{equation}
+If $\sigma(x)$ is small then the small deviations of $x_{\rm true}$ away from $\bar{x}$ introduced by neglecting the time-dependence of $x$ can cause the inner product to become exponentially small.
+This in turn causes the estimates of the complexity of resampling to be exponentially large, therefore preventing efficient learning.
+
+We can herald such failures in \CRej~by tracking the total number
+of accepted particles $N_a$ in each update, as $N_a$ estimates
+$P(E) = \sum_x P(E | x) P(x)$.
+Alternatively, we can to better by
+instead incorporating a prediction step that diffuses the mode parameters
+of each particle \cite{isard_condensationconditional_1998}.
+In particular, by convolving the prior with a filter function such as a
+Gaussian, the width of the resultant distribution can be increased without
+affecting the prior mean. 
+In a similar way, \CRej~can be extended to include diffusion by using a resampling kernel
+that has a broader variance than that of the accepted posterior samples. Doing so
+allows \CRej~to track stochastic processes in a similar way as \CSMC, as is illustrated
+in \fig{crej-diffusion}.
+
+Formally, we produce consider our posterior distribution to be found by
+\begin{equation}
+\tilde{P}(x|E;t) = P(x|E;t) \star \mathcal{B}(0,\beta),
+\end{equation}
+where $\mathcal{B}$ is a distribution with zero mean and standard deviation
+$\beta$ and $\star$ denotes a convolution over $x$.
+Convolution is in general an expensive operation, but since \CRej~uses a
+Gaussian model for the posterior distribution, the resulting distribution
+remains Gaussian under the convolution if $\mathcal{B}$ is also a Gaussian.
+If the variance of the prior distribution is $s$ then it is easy to see from
+the properties of the Fourier transform that the variance of
+$\tilde{P}(x|E;t)$ is $s+\beta$ and the mean remains $\bar{x}$.
+
+We also note that the ability of \CRej~to include time-dependence
+is especially useful when combined with Bayesian model selection.
+Since random variates of $N_a$ drawn at each step give a
+frequency drawn from the \emph{total likelihood} $P(E) = \expect{x}{P(E |
+x)}$, we can use \CRej~to estimate Bayes factors between two
+different likelihood functions. In particular, the probability that a hypothesis $x$ will be accepted
+by \alg{crej} is $P(E | x)$, so that marginalizing gives the desired $P(E)$.
+Thus, $N_a$ at each step is drawn from a binomial distribution with mean $m P(E)$.
+Using hedged maximum likelihood estimation \cite{ferrie_estimating_2012}, we can then
+estimate $P(E)$ given $N_a$, even in the cases that $N_a = 0$ or $m$.
+
+Consider running \CRej~in parallel for two
+distinct models $M \in \{A, B\}$, such that all likelihoods are conditioned on a value
+for $M$, $P(E | x, M)$. The estimated total likelihoods for each \CRej~run then give an
+estimate of the Bayes factor $K$,
+\begin{equation}
+    K := \frac{\prod_i P(E_i | A)}{\prod_i P(E_i | B)} = \frac{\expect{\prod_i P(E_i | x, A)}{x}}{\expect{\prod_i P(E_i | x, B)}{x}}.
+\end{equation}
+(Cite Akaike here.) If $K > 1$, then model $A$ is to be preferred as an explanation
+of the evidence seen thus far. In particular, the expectation over model parameters
+penalizes overfitting, such that a model preferred by $K$ must justify the dimensionality
+of $x$. This is made concrete by noting that $K$ is well-approximated by the Bayesian information
+criterion when the prior is a multivariate normal distributon.
+% CITE for that: https://www.stat.washington.edu/raftery/Research/PDF/weakliem1999.pdf
+
+Using \CRej~to perform model selection, then, consists of accumulating
+subsequent values of $N_a$ in a log-likelihood register $\ell$,
+\begin{equation}
+    \ell^{(k + 1)} = \ell^{(k)} + \ln\left[(N_a^{(k + 1)} + \beta) / (m + 2 \beta)\right],
+\end{equation}
+where superscripts are used to indicate the number of Bayes updates performed,
+and where $\beta$ is a \emph{hedging parameter} used to prevent
+divergences for when $N_a = 0$. Since this accumulation procedure
+estimates the total likelihood from a two-outcome event
+(acceptance/rejection of a sample), the value of $\beta = 1 / 2$ works
+well to deal with the zero-likelihood case (cite CF+RBK).
+The estimator $\hat{K} = e^{\ell_B} / e^{\ell_A}$ resulting from this hedging procedure
+is thus an asymtotically-unbiased estimator for $K$ that has well-defined
+confidence intervals \cite{cho_approximate_2013}.
+
+
+Incrementing in this way requires only constant memory, such that the utility
+to massively-parallel and embedded applications is preserved.
+Model selection of this form has been used, for instance, to decide if
+a diffusive model is appropriate for predicting future evidence \cite{granade_characterization_2015}.
+Given the aggressiveness of the \CRej~resampling step, streaming model selection
+will be especially important in assessing whether a diffusive inference model has
+``lost'' the true value. Moreover, since the $\ln(m + 2\beta)$ term is in common,
+it can be factored out in cases where $m$ is held constant across models and evidence.
+
+%%-----------------------------------------------------------------------------
+%\subsection{Principal Component Analysis for High-Dimensional Models}
+%%-----------------------------------------------------------------------------
+%
+%\textbf{CG: just copied from Old Stuff as a placeholder. Also, this needs to be made more precise, sorry.}
+%Other more sophisticated
+%algorithms exist that utilize principal component analysis that may be highly effective for
+%data that lies in a low-dimensional subspace of a large vector space.
+%For a $d$-dimensional model vector, the MCJ algorithm finds $k$ principal components
+%with memory limited by $O(kp)$, such that we retain the memory advantages of \CRej~in
+%this application. This comes at the cost, however, of parallelization, as the blocks in
+%the MCJ algorithm are processed sequentially. We address this by using the MCJ algorithm within
+%each processing element, then combining the PCA estimates from each with multilevel PCA.
+
+
+%=============================================================================
+\section{Error Analysis}
+\label{sec:error-analysis}
+%=============================================================================
+
+Since our algorithms are only approximate, an important remaining question is how the error in the estimates of the posterior mean
+and covariance matrix scale with the relevant parameters of the problem.  We provide such estimates below.  For notational convenience,
+we take $\langle \cdot\!~,\cdot \rangle$ to be the inner product between two distributions.
+
+\begin{lemma}
+    \label{lem:errprop}
+
+    Let $P(x)$ be the prior distribution and $\tilde{P}(x)$ be an approximation to the prior such that $\tilde{P}(x) = P(x) -\Delta(x)$ and let $P(x|E)$ and $\tilde{P}(x|E)$ be the posterior distributions after event $E$ is observed for $x\in V\subset \mathbb{R}^N$ where $V$ is compact and $|x|\le |x_{\rm max}|$ for all $x\in V$.  If $|\langle P(E|x),\Delta(x) \rangle|/\langle P(E|x),P(x)\rangle \le 1/2$ then the error in the posterior mean then satisfies
+    $$
+    E_1 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}|x_{\max}|,
+    $$
+    and similarly
+    $$
+    E_2 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}|x_{\max}|^2,
+    $$
+where $E_1:=\left|\int_V  (P(x|E) -\tilde{P}(x|E)) x \mathrm{d} x \right|$ and $E_2 \le \left\|\int  (P(E|x) -\tilde{P}(E|x)) xx^T \mathrm{d} x \right\|$
+\end{lemma}
+
+\lem{errprop} shows that the error in the posterior mean using an approximate prior is small given that the inner product of the likelihood function with the errors is small relative to $P(E)$. 
+
+\begin{theorem}\label{thm:meanCov}
+If the assumptions of~\lem{errprop} are met and the rejection sampling algorithm uses $m$ samples from the approximate posterior distribution to infer the posterior mean  and $x_j\sim \tilde{P}(x|E)$ and $\mu=\sum_{j=1}^m x_j/m$ then the error in the posterior mean scales as
+$$
+ O\left(\left[\frac{\sqrt{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]|x_{\max}|\right).
+$$
+and the error in the estimate of $\Sigma$ is
+
+$$
+ O\left(\left[\frac{{N} }{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]|x_{\max}|^2\right).
+$$
+\end{theorem}
+
+
+An important question to ask at this juncture is when do we expect the update process discussed in~\alg{crej} to be stable.  By stable, we mean that small initial errors do not exponentially magnify throughout the update process.  \thm{meanCov} shows that small errors in the prior distribution do not propagate into large errors in the estimates of the mean and posterior matrix given that $P(E)= \langle P(E|x),P(x)\rangle$ is sufficiently large.  In particular, an application of the Cauchy--Schwarz inequality shows that such errors are expected to be small if $|x_{\max}|\le 1$, $m\in \Omega(N^2)$, $\int_V |\Delta(x)| \mathrm{d}x\le 1$ and 
+$$
+\langle\Delta(x),\Delta(x)\rangle \ll \frac{P^2(E)}{{\langle P(E|x),P(E|x)\rangle}}.
+$$
+However, this does not directly address the question of stability because it does not consider the errors that are incurred in the modeling procedure for the new prior obtained from the accepted samples.
+
+We can assess the effect of these errors by assuming that, in the domain of interest, the updated model after an experiment satisfies a Lipshitz condition
+\begin{equation}
+\max_x|P_{\mu,\Sigma}(x) - P_{\mu' ,\Sigma'}(x)| \le L(|\mu- \mu'| +\|\sqrt{\Sigma}- \sqrt{\Sigma'}\|),
+\end{equation}
+for some $L\in \mathbb{R}$.  This implies that error in the approximation to the posterior distribution, $\Delta'(x)$ obeys
+\begin{equation}
+\max_x |\Delta'(x)| \in O\left( \frac{L\int_V P(E|x) \mathrm{d}x \max_x |\Delta(x)|}{P(E)}\right)
+\end{equation}
+This further suggests that, in cases where the model for the posterior is not conjugate to the prior that stability is expected if
+\begin{equation}
+P(E) \gg {L\int_V P(E|x) \mathrm{d}x }.
+\end{equation}
+Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz constant for the model is small.  In practice both of these potential failures can couple together to lead to rapidly growing errors in practice.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the variance of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm.  We deal with such instabilities with random restarts but other strategies exist.
+
+%%=============================================================================
+%\section{Variational Inference}
+%\label{sec:variational}
+%%=============================================================================
+%
+%Here we propose an alternative method of sampling from the posterior distribution.  Rather than boosting the probability of success by periodic resampling, another way that 
+%the success probability can be boosted is by starting in a distribution that is closer to the posterior distribution than the prior distribution.  In order to utilize this, one needs
+%an expedient method for estimating the posterior probability distribution.  In order for such evaluations to be practical, the likelihood function needs to have a particular form that lends itself to approximation. In fact, if an accurate and efficient method existed that could closely approximate the posterior distribution then Bayesian inference would be efficient which would imply that $\P=\NP$.  Consequently, we expect such methods to be either be inefficient or inexact.
+%
+%\begin{lemma}\label{lem:alpha}
+%Let $Q(x): x\in \mathbb{Z}^+_{2^n}$ and $P(x) : x\in \mathbb{Z}^+_{2^n}$ be probability distributions then
+%$$
+%\frac{\sum_{x\in {\rm bad}} \left(P(x) -\kappa_A Z_Q Q(x)\right)}{Z}\in O\left(\frac{ZD_2(P||Q)}{\kappa_AZ_Q}\right),
+%$$
+%where $D_2(P/Z||Q)=\frac{1}{2}\sum_x (P(x)/Z - Q(x))^2/Q(x)$ is the $\alpha=2$ divergence and we consider the asymptotic regime where $D_2(P/Z||Q)\gg 1$.
+%\end{lemma}
+
+%=============================================================================
+\section{Numerical Experiments}
+\label{sec:numerical-experiments}
+%=============================================================================
+
+Here, we demonstrate the effectiveness of our \CRej~algorithm using as an
+example strongly multimodal and periodic likelihood functions, such as arise
+in frequency estimation problems rising from the study of quantum mechanical
+systems (cite). These likelihood functions serve as useful test cases for
+Bayesian inference algorithms more generally, as the multimodality of these
+likelihoods forces a tradeoff between informative experiments and
+multimodality in the posteriors. Thus, \CRej~succeeds in these cases only
+if our method correctly models intermediate distributions so that appropriate
+experiments can be designed.
+
+Concretely, we will consider evidence $E\in\{0, 1\}$ drawn from a two-outcome
+experiment with controls $x_-$ and $t$, and with a single model parameter $x$.
+The likelihood is then
+\begin{equation}
+    \label{eq:inversion-precession-nogamma}
+    \Pr(1 | x; t, x_-) = \cos^2((x - x_-) t / 2).
+\end{equation}
+
+We design experiments $(x_-, t)$ using a variant of the particle guess
+heuristic (PGH) \cite{wiebe_hamiltonian_2014}. This
+heuristic serves as a useful example of the use of prior information in a
+heuristically-adaptive context.  The heuristic picks $x_-$ to be a random
+point sampled from the prior and $t=1/\sqrt{{\rm Tr}~ \Sigma}$.  We use
+it because it is known
+to saturate the Bayesian Cramer--Rao bound for this problem and is
+much faster than adaptively choosing $(t,x_-)$ to minimize the Bayes risk, which
+we take to be the expected quadratic loss after performing an experiment given
+the current prior.
+
+%
+%\begin{algorithm}
+%    \caption{Particle Guess Heuristic (PGH) for \CRej}
+%    \label{alg:pgh}
+%    \begin{algorithmic}
+%        \Require Prior \CRej~state $\mu$, $\Sigma$. Resampling kernel $\operatorname{F}$.
+%        \Ensure  An experiment $(t, x_-)$.
+%        \Function{$\text{PGH}_\text{\CRej}$}{$\mu$, $\Sigma$}
+%            \State $x_- \sim \operatorname{F}(\mu, \Sigma)$
+%            \State $t \gets 1 / \sqrt{{\rm Tr}(\Sigma)}$
+%            \State \Return $(t, x_-)$.
+%        \EndFunction
+%    \end{algorithmic}
+%\end{algorithm}
+
+In order to understand the possible failure modalities of \CRej, it is also useful to
+consider more tightly peaked periodic likelihoods. We can form such test cases
+by simply raising our original likelihoods to a power $\gamma$,
+\begin{equation}
+    \label{eq:inversion-likelihood}
+    \Pr(1 | \omega; t, \omega_-) = \cos^{2\gamma} ([\omega - \omega_-] t / 2).
+\end{equation}
+Similarly peaked likelihoods arise in the use of maximum \emph{a posteri} estimators
+[cite], and emulate the low acceptance rate of batched updates such as discussed in
+\app{batched-updates}.
+
+Using \CRej~together with the PGH to learn $x$ with the $\gamma = 5$ model,
+we obtain the Bayes risk shown in \fig{crej-risk-vs-m} after 100 updates, and
+with a varying number of sampling attempts $m$.
+For each of several fixed values of $m$, we show the scaling of \CRej~with
+the number of Bayes updates and the computation effort in \fig{crej-risk-vs-n}.
+From these demonstrations, we see that $m = 300$ suffices to continue learning
+for large numbers of updates, and offers a good tradeoff between the amount of
+evidence and computational effort required.
+
+A similar problem that occurs frequently in electrical engineering and experimental
+physics is that there is an unknown frequency for a device that drifts with time.
+The goal in such cases is to identify such drifts and perform active feedback to calibrate
+against the drift.  In such cases, the likelihood function is of a similar form
+\begin{equation}
+ \Pr(1 | x; t, x_-,k) = \cos^2((x(k) - x_-) t / 2),
+\end{equation}
+where $x$ is the parameter of interest, $(x_-, t)$ is an experiment design,
+and where $k$ is the index of the current update.  The true model $x(k)$ is taken to
+follow a random walk with $x(0)\sim {\rm Unif}(0,\pi/2)$ and the distribution
+of $x(k+1)$ given $x(k)$ is
+\begin{equation}
+    x(k+1)=x(k) + \NN(0,(\pi/120)^2).
+\end{equation}
+The performance of \CRej~applied to this case is shown ~\fig{crej-diffusion}.
+In particular, the median error incurred by \CRej~achieves the optimal
+achievable error $(\pi / 120)^2$ with as few as $m = 100$ sampling attempts.
+Thus, \CRej~algorithm continues to be useful in the case of time-dependent
+and other state-space models.
+
+\begin{figure}
+    \center{
+        \includegraphics[width=0.99\columnwidth]{crej-diffusion3.pdf}
+    }
+    \caption{
+        \label{fig:crej-diffusion}
+        \CRej~with diffusion in the true model according to
+        a normal random walk with standard deviation $\pi / 120$.  As expected, the error asymptotes to a value that is slightly less than the RMS error.
+    }
+\end{figure}
+
+
+\begin{figure}
+    \center{
+        \includegraphics[width=0.85\columnwidth]{crej-risk-vs-m}
+    }
+    \caption{\label{fig:crej-risk-vs-m}
+        Bayes risk for \CRej~after 100 updates, using inversion likelihood \eq{inversion-likelihood}
+        with $\gamma = 5$ and PGH experiment design.
+    }
+\end{figure}
+
+\begin{figure}
+    \center{
+        \includegraphics[width=0.8\columnwidth]{crej-risk-vs-n_upd.pdf}
+        \includegraphics[width=0.8\columnwidth]{crej-risk-vs-n_like.pdf}
+    }
+    \caption{\label{fig:crej-risk-vs-n}
+        Median loss for \CRej~as a function of the number of Bayes updates
+        (top) and the number of total likelihood calls used (bottom), varying over
+        the number of rejection sampling attempts $m$ used.
+        Simulations are performed with the inversion likelihood \eq{inversion-likelihood}
+        with $\gamma = 10$ and PGH experiment design (\alg{pgh}). A failure recovery of $r = 0.02$
+        is used.
+    }
+\end{figure}
+
+
+%=============================================================================
+\section{Conclusions}
+\label{sec:conclusions}
+%=============================================================================
+
+
+%% END MATTER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\appendix
+
+%=====================================================================
+\subsubsection*{Acknowledgements}
+%=====================================================================
+
+%=====================================================================
+\bibliographystyle{unsrt}
+\bibliography{qsmc}
+%=====================================================================
+
+
+\clearpage
+\onecolumn
+
+% Copied from aistats2015.sty to disable setting running head.
+\thispagestyle{empty}
+  \hsize\textwidth
+  \linewidth\hsize \toptitlebar {\centering
+  {\Large\bf \thetitle:\\ Supplemental Material \par}}
+ \bottomtitlebar \vskip 0.2in plus 1fil minus 0.1in
+
+%=============================================================================
+\section{Proofs of Theorems}
+%=============================================================================
+
+In this Appendix, we present proofs for the theorems presented in the main
+body.
+
+
+\begin{proofof}{\lem{errprop}}
+Using the definition of $\tilde{P}(x)$ and Bayes' rule it is easy to see that the error in the posterior mean is
+\begin{align}
+\Biggr| \int_V \frac{P(E|x)P(x)x}{\langle P(E|x),P(x) \rangle}\left( 1 - \frac{1}{1+\frac{\langle P(E|x),\Delta(x)\rangle }{\langle P(E|x),P(x) \rangle}}\right) - \frac{P(E|x) \Delta(x)x}{\langle P(E|x),P(x)\rangle}\left(\frac{1}{1+\frac{\langle P(E|x),\Delta(x)\rangle }{\langle P(E|x),P(x) \rangle}} \right)\mathrm{d}x \Biggr|.\label{eq:intbd}
+\end{align}
+Using the fact that $|1-1/(1-y)| \le 2|y|$ for all $y\in [-1/2,1/2]$ it follows from the assumptions of the theorem and the triangle inequality that~\eq{intbd} is bounded above by
+\begin{align}
+ \int_V \frac{2P(E|x)P(x)|x| |\langle P(E|x),\Delta(x) \rangle|}{\langle P(E|x),P(x) \rangle^2}\mathrm{d}x+ \int_V\frac{2P(E|x) |\Delta(x)||x|}{\langle P(E|x),P(x)\rangle}\mathrm{d}x.\label{eq:intbd2}
+\end{align}
+Now using the fact that $|x|\le |x_{\max}|$ and the definition of the inner product, we find that~\eq{intbd2} is bounded above by
+\begin{equation}
+\frac{2 (|\langle P(E|x),\Delta(x) \rangle| + \langle P(E|x), |\Delta(x)| \rangle))|x_{\max}|}{\langle P(E|x),P(x)\rangle}.
+\end{equation}
+The  result then follows from a final application of the triangle inequality.
+
+The analogous proof for the error in the posterior expectation of $xx^T$ follows using the exact same argument after replacing the Euclidean norm with the induced $2$--norm for matrices.  Since both norms satisfy the triangle inequality, the proof follows using exactly the same steps after observing that $\|xx^T\|\le |x_{\max}|^2$ for all $x\in V$.
+\end{proofof}
+
+\begin{proofof}{\thm{meanCov}}
+\lem{errprop} provides an upper bound on the error in the mean of the posterior distribution that propagates from errors in the components of our prior distribution.  We then have that if we sample from this distribution then the sample standard deviation of each of the $N$ components of $x$ is $O(\sigma_{\max}/\sqrt{m})$.  Thus the sample standard deviation of $\sum_{i=1}^N (x_i-\tilde{\mu}_i)^2$ is at most $O(\sqrt{N}\sigma_{\max}/\sqrt{m})$.  The triangle inequality shows that the sampling error and the error that propagates from having an incorrect prior are at most additive. 
+
+ The calculation for the error in the estimate of the covariance matrix is similar.  First, note that $1/(m-1)= 1/m +O(1/m^2)$ so we can asymptotically ignore $m/(m-1)$.  Let $\mu = \int_V P(x|E) x\mathrm{d}x +\epsilon v$, where $|v|=1$.  We then have from our error bounds on the estimate of the posterior mean that
+\begin{eqnarray}
+\| \mu\mu^T - \int_V P(x|E) x\mathrm{d}x \int_V P(x|E) x^T\mathrm{d}x \|&\le& \epsilon \left\|\int_V P(x|E) x\mathrm{d}x v^T\right\|+\epsilon\left\|v\int_V  P(x|E) x^T\mathrm{d}x\right\| + \epsilon^2.\nonumber\\
+&\in&  O\left(\left[\frac{\sqrt{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]|x_{\max}|^2\right).
+\end{eqnarray}
+
+Now let us focus on bounding the error in our calculation of $\int_V P(E|x) xx^T \mathrm{d}x$. Using the triangle inequality, the error in the estimate of the expectation value of $x x^T$ is, to within error $O(1/m^{3/2})$, at most
+\begin{equation}
+\Biggr\|\frac{1}{m} \sum_{j=1}^m x_j x_j^T - \int_V \tilde{P}(x|E) x x^T\mathrm{d}x\Biggr\|+\Biggr\| \int_V \tilde{P}(x|E) x x^T\mathrm{d}x-\int_V {P}(x|E) x x^T\mathrm{d}x\Biggr\|.\label{eq:xxT}
+\end{equation}
+The first term in \eq{xxT} can be bounded by bounding the sample error in each of the components of the matrix.  For any component $[xx^T]_{k,\ell}$ the Monte--Carlo error in its estimate is
+\begin{equation}
+O\left(\frac{\sigma({[x]_k[x]_\ell})}{\sqrt{m}}\right)\in O\left(\frac{|x_{\max}|^2}{\sqrt{m}}\right).
+\end{equation}
+The $2$--Norm of an $N\times N$ matrix is at most $N$ times its max--norm, which means that
+\begin{equation}
+\Biggr\|\frac{1}{m} \sum_{j=1}^m x_j x_j^T - \int_V \tilde{P}(x|E) x x^T\mathrm{d}x\Biggr\|\in O\left(\frac{N|x_{\max}|^2}{\sqrt{m}}\right).\label{eq:xxTMC}
+\end{equation}
+The theorem then follows from inserting~\eq{xxTMC} into~\eq{xxT} and applying~\lem{errprop}.
+\end{proofof}
+
+%=============================================================================
+\section{Batched Updating}
+\label{app:batched-updates}
+%=============================================================================
+
+\begin{algorithm}
+    \caption{Batched update for \CRej}
+    \label{alg:batchcrej}
+    \begin{algorithmic}
+        \Require Prior distribution $\pi:\mathbb{R}^D \mapsto [0,1]$, array of evidence $\vec{E}$, number of attempts $m$, a constant $0<\kappa_E\le 1$, a recovery factor $r \ge 0$, the prior mean $\mu$ and the covariance matrix $\Sigma$.
+%        and a mapping $\operatorname{F}$ between $(\mu,\sigma^2)$ to a family of probability distributions that has mean $\mu$ and covariance matrix $\Sigma$. Typically $F$ will yield a Gaussian distribution but other possibilities exist.
+        \Ensure  The mean and coviariance matrix of updated distribution $\mu$,$\Sigma$ and $N_a$ which is the number of samples accepted.
+        \Function{\CRej BatchUpdate}{$\vec{E}$, $m$, $\kappa_E$, $\mu$, $\Sigma$, $r$, $N_{\rm batch}$}
+  \State{$(M,S,N_a) \gets 0$}
+          \For{{\bf each} $i \in 1 \to N_{\rm batch}$}
+  \State Pass $\vec{E},m,\kappa_E, \mu,\Sigma,r$ to processing node $i$.
+  \State Set local variables $(\mu^{i}, \Sigma^{i},N_a^{i})\gets \Call{\CRej Update}{\vec{E},m,\kappa_E,\mu,\Sigma,r}$.
+  \If{$N_a^i >0$}
+  \State $M^i \gets \mu^i N_a^i$
+  \State $S^i \gets (N_a^i-1)\Sigma +N_a^i\mu\mu^T$ 
+  \State Pass $N_a^i$, $M^i$ and $S^i$ back to server.       
+  \Else \State Return $(0,0,0)$.
+  \EndIf
+  \EndFor
+    \If{$\sum_i N_a^i > 0$}
+     \State $\mu\gets \sum_i M^{i}/\sum_i N_a^i $
+     \State $\Sigma \gets \frac{1}{\sum_i N_a^i -1}\left(\sum_i S^i - \sum_i N_a^i \mu\mu^T \right)$
+  \State\Return $(\mu,\Sigma,N_a)$
+   \Else
+  \State\Return $(\mu, (1+r)\Sigma),N_a)$
+
+   \EndIf
+          
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
+%=============================================================================
+\section{Old stuff}
+%=============================================================================
+
+\textbf{CG: this should still be somewhere.}
+This approach is
+reminiscent of assumed density filtering~\cite{minka_expectation_2001}, which uses a similar strategy
+for modeling the prior distribution but is less memory efficient than
+our method.
+
+\end{document}
