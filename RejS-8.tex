@@ -919,6 +919,11 @@ The theorem then follows from inserting~\eq{xxTMC} into~\eq{xxT} and applying~\l
 %=============================================================================
 \section{Batched Updating}
 \label{app:batched-updates}
+
+Although we focused in the discussion in the main body on memory restricted applications, it is also possible to exploit the fact that the
+rejection sampling procedure is inherently parallelizable.  This comes at the price of increasing the overall
+memory usage.  We describe such an algorithm above and assume in the algorithm a model where samples are sent by a server to
+individual processing nodes and the accepted samples are then returned to the server.
 %=============================================================================
 
 \begin{algorithm}
@@ -928,7 +933,7 @@ The theorem then follows from inserting~\eq{xxTMC} into~\eq{xxT} and applying~\l
         \Require Prior distribution $\pi:\mathbb{R}^D \mapsto [0,1]$, array of evidence $\vec{E}$, number of attempts $m$, a constant $0<\kappa_E\le 1$, a recovery factor $r \ge 0$, the prior mean $\mu$ and the covariance matrix $\Sigma$.
 %        and a mapping $\operatorname{F}$ between $(\mu,\sigma^2)$ to a family of probability distributions that has mean $\mu$ and covariance matrix $\Sigma$. Typically $F$ will yield a Gaussian distribution but other possibilities exist.
         \Ensure  The mean and coviariance matrix of updated distribution $\mu$,$\Sigma$ and $N_a$ which is the number of samples accepted.
-        \Function{\CRej BatchUpdate}{$\vec{E}$, $m$, $\kappa_E$, $\mu$, $\Sigma$, $r$, $N_{\rm batch}$}
+        \Function{BatchUpdate}{$\vec{E}$, $m$, $\kappa_E$, $\mu$, $\Sigma$, $r$, $N_{\rm batch}$}
   \State{$(M,S,N_a) \gets 0$}
           \For{{\bf each} $i \in 1 \to N_{\rm batch}$}
   \State Pass $\vec{E},m,\kappa_E, \mu,\Sigma,r$ to processing node $i$.
@@ -953,14 +958,6 @@ The theorem then follows from inserting~\eq{xxTMC} into~\eq{xxT} and applying~\l
     \end{algorithmic}
 \end{algorithm}
 
-%=============================================================================
-\section{Old stuff}
-%=============================================================================
 
-\textbf{CG: this should still be somewhere.}
-This approach is
-reminiscent of assumed density filtering~\cite{minka_expectation_2001}, which uses a similar strategy
-for modeling the prior distribution but is less memory efficient than
-our method.
 
 \end{document}
