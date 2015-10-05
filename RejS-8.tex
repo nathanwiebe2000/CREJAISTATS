@@ -64,7 +64,7 @@ Proof of~#1.}}
 % \newcommand{\Tr}[1]{{\rm Tr}\!\left[#1 \right]}
 \newcommand{\expect}[2]{{\mathbb{E}_{#2}}\!\left\{#1 \right\}}
 \newcommand{\var}[2]{{\mathbb{V}_{#2}}\!\left\{#1 \right\}}
-\newcommand{\CRej}{\text{RejS}}
+\newcommand{\CRej}{\text{rejection filtering}}
 \newcommand{\CSMC}{\text{SMC}}
 
 \newcommand{\ess}{\mathrm{ess}}
@@ -172,9 +172,7 @@ We start in \sec{smc} by reviewing existing particle filtering methods. We
 then detail the \CRej~algorithm and discuss applications to state-space models
 such as those used in computer vision. In \sec{error-analysis}, we prove the
 stability of our algorithm and provide bounds on the errors incured in
-computing Bayesian mean estimators using \CRej. In \sec{variational}, we
-discuss the use of variational inference as a replacement for instrumental
-distributions in the resampling step. Finally, in \sec{numerical-experiments},
+computing Bayesian mean estimators using \CRej. Finally, in \sec{numerical-experiments},
 we show numerical examples of the performance of \CRej~for periodic and
 strongly-peaked test cases.
 
@@ -195,7 +193,6 @@ Bayes' update for the evidence datum $E$ then proceeds on the weights alone as
     w_i \mapsto w_i \cdot P(E | x_i) / \mathcal{N},
 \end{equation}
 where $\mathcal{N}$ is a normalization constant that can be found implicitly.
-
 As updates are performed, the effective sample size $n_\ess \defeq
 1 / \|w\|_2^2$ tends towards zero, such that the approximation must be
 \emph{resampled} to preserve numerical stability. The bootstrap filter,
@@ -209,7 +206,7 @@ the current posterior. For instance, using a normal distribution to resample,
 each new particle $x'$ can be drawn from $\NN(\mu, \Sigma)$, where
 $\mu = \expect{x}{x}$ and $\Sigma = \var{x}{x}$.
 
-The Liu-West resampling algorithm [cite] interpolates between these two
+The Liu-West resampling algorithm~\cite{liu2001combined} interpolates between these two
 behaviors by a parameter $a \in [0, 1]$. In particular, each new particle
 $x'$ is chosen from the distribution
 \begin{equation}
@@ -229,8 +226,7 @@ in a numerically stable way.
 Note that when the posterior is approximately normal, $a = 0$ approximately
 preserves all of the relevant information about the posterior, but require
 storing only summary statistics of particles rather than the entire particle
-approximation. [Cite SMC-ABC using summary statistics \cite{sisson_sequential_2007} over \emph{data}, not
-samples, to do similar in likelihood-free context.] This observation is key to
+approximation~\cite{sisson_sequential_2007,del2012adaptive}.   This observation is key to
 the development of \CRej~in the next section.
 
 \begin{algorithm}[t!]
@@ -483,7 +479,7 @@ and where $\beta$ is a \emph{hedging parameter} used to prevent
 divergences for when $N_a = 0$. Since this accumulation procedure
 estimates the total likelihood from a two-outcome event
 (acceptance/rejection of a sample), the value of $\beta = 1 / 2$ works
-well to deal with the zero-likelihood case (cite CF+RBK).
+well to deal with the zero-likelihood case~\cite{ferrie2012estimating}.
 The estimator $\hat{K} = e^{\ell_B} / e^{\ell_A}$ resulting from this hedging procedure
 is thus an asymtotically-unbiased estimator for $K$ that has well-defined
 confidence intervals \cite{cho_approximate_2013}.
@@ -593,13 +589,13 @@ Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz
 \label{sec:numerical-experiments}
 %=============================================================================
 
-Here, we demonstrate the effectiveness of our \CRej~algorithm using as an
+Here, we demonstrate the effectiveness of rejection filtering using as an
 example strongly multimodal and periodic likelihood functions, such as arise
 in frequency estimation problems rising from the study of quantum mechanical
 systems (cite). These likelihood functions serve as useful test cases for
 Bayesian inference algorithms more generally, as the multimodality of these
 likelihoods forces a tradeoff between informative experiments and
-multimodality in the posteriors. Thus, \CRej~succeeds in these cases only
+multimodality in the posteriors. Thus, it succeeds in these cases only
 if our method correctly models intermediate distributions so that appropriate
 experiments can be designed.
 
@@ -674,11 +670,8 @@ against the drift.
     }
 \end{figure}
 
-We design experiments $(x_-, t)$ using a variant of the particle guess
-heuristic (PGH) \cite{wiebe_hamiltonian_2014}. This
-heuristic serves as a useful example of the use of prior information in a
-heuristically-adaptive context.  The heuristic picks $x_-$ to be a random
-point sampled from the prior and $t=1/\sqrt{{\rm Tr}~ \Sigma}$.  We use
+We design experiments $(x_-, t)$ using a heuristic that picks $x_-$ to be a random
+vector sampled from the prior and $t=1/\sqrt{{\rm Tr}~ \Sigma}$.  We use
 it because it is known
 to saturate the Bayesian Cramer--Rao bound for this problem and is
 much faster than adaptively choosing $(t,x_-)$ to minimize the Bayes risk, which
@@ -702,7 +695,7 @@ We cast the problem in the language of Bayesian inference by assuming the follow
 function, which predicts the probability that a given pixel takes the value $E$ given that training
 image $x$ is the true model that it drew from.
 \begin{equation}
-P(E|x;i,\sigma)\propto e^{-(x_i - E)^2/2\sigma^2}.
+P(E|x;i,\sigma)\propto e^{-(x_i - E)^2/2\sigma^2}.\label{eq:gausseq}
 \end{equation}
 We pick this likelihood function because if we imagine measuring every pixel in the image then the
 posterior probability distriution, given a uniform initial distribution, will typically be sharply peaked around
@@ -715,7 +708,7 @@ the training vector that is closest to the observed vector of pixel intensities.
 \includegraphics[width=0.49\columnwidth]{OEexpHM.pdf}
 \includegraphics[width=0.49\columnwidth]{OEHM.pdf}
 \caption{(top left) Heat map of frequency pixel is queried in zero vs one data set.  (top right) Heat map of variance of pixel data over data set.
-Bottom plots are the corresponding plots for the odd/even digits.}
+Bottom plots are the corresponding plots for the odd/even digits.}\label{fig:HM}
 \end{figure}
 
 Unlike the previous experiment, we do not implement this in a memory--restricted
@@ -726,10 +719,10 @@ in search wherein features, such as page rank, can be expensive to compute on th
 occur in experimental sciences where each data point may take minutes or hours to either measure
 or compute accurately.  In these cases it is vital to minimize the number of queries made to the training
 data.  We will show that our Bayesian inference approach to this problem allows this to be solved using
-far fewer queries than other methods, such as KNN, would require.  We also show that our method can
+far fewer queries than other methods, such as kNN, would require.  We also show that our method can
 be used to \emph{extract} the relevant important features (i.e. pixels) from the data set.
 
-We perform these experiments using an adaptive guess heuristic, similar to the PGH employed earlier.
+We perform these experiments using an adaptive guess heuristic, similar to that employed in the frequency estimation example.
 The heuristic works by choosing the pixel label, $i$, to query that has the largest variance of intensity
 over the $m$ training vectors that compose the particle cloud.  We then pick $\sigma$ to be the standard
 deviation of the intensity of that pixel.  This method has the advantage that once the set of particles
@@ -737,9 +730,37 @@ considered becomes small then the variance shrinks and allowing $\sigma$ to shri
 speeds up the inference process.  
 
 \begin{figure}
-\includegraphics[width=0.49\columnwidth]{ErrorPlot.pdf}
-\caption{Classification errors for odd/even MNIST digits for rejection filtering with 784 maximum experiments distributed over 1,3,5 restarts (from left to right).}
+\includegraphics[width=\columnwidth]{ErrorPlot.pdf}
+\caption{Classification errors for odd/even MNIST digits for rejection filtering with 784 maximum experiments distributed over 1,3,5 restarts and stopping condition $\mathcal{P}=0.1,0.01,0.001$.}\label{fig:errorplot}
 \end{figure}
+
+We repeat this process of querying pixels until the sample probability distribution has converged to a distribution that
+assigns probability at most $\mathcal{P}$ to one of the two classes in the problem.  This process is restarted a total of
+$1,3$ or $5$ times subject to the constraint that at most $784$ queries are made in the inference process (divided equally over each of the restarts).
+The label assigned to the test vector is then the most frequently appearing label out of these tests.  This choice ensures that our method will at most
+incurr the same cost as na\i ve kNN, but is pessimistic we do not allow the algorithm to store the results of prior queries which could reduce the 
+complexity of the inference.
+
+We make one further modification of the rejection filtering algorithm in order to fit it to this problem.  Since our classification problem has only two classes, we cannot directly apply the resampling step as described in~\alg{crej}.  Instead, we use a method similar to the bootstrap filter.  Specifically, when resampling we draw a number of particles from both
+classes proportional to the sample frequency in the posterior distribution.  For each of these classes we then replicate the surviving particles until $95\%$ of the total population is replenished
+by copies from the posterior cloud of samples.  The remaining $5\%$ are drawn uniformly from the training vectors with the corresponding class labels.
+
+The natural algorithm to compare our method to is kNN classification.  kNN is known to perform well for digit classification but it can be prohibitively slow for
+large training sets (indexing strategies can be used to combat this problem~\cite{yu2001indexing}).  In order to make the comparison as fair as possible between the two, we compare kNN to rejection filtering by truncating the 
+MNIST examples by removing pixels that have low variance over the training set.  This removes some of the advantage our method has by culling pixels near
+the boundary of the image that contain very little signal  (see~\fig{HM}) and yet substantially contribute to the cost of kNN in an active learning setting.
+
+Further optimizations can be used to improve the performance of kNN such as feature extraction~\cite{zhang2006svm,weinberger2008fast,min2009deep} or the use of 
+deformation models~\cite{keysers2007deformation};
+however we suspect that they will only serve to improve the performance of both methods. We leave investigation of the performance of rejection filtering under such optimization
+for future work.
+
+\fig{errorplot} shows that in certain parameter regimes, approximate Bayesian inference via rejection sampling can not only achieve higher classification accuracy on average for a smaller
+number of queries to the test vector, but also can achieve $39.5\%$ less error even if these constraints are removed.  This result is somewhat surprising given that we chose our likelihood function to correspond to nearest neighbor classification if $\sigma$ is held constant.  However, we do not hold $\sigma$ constant in our inference but rather choose it adaptively as the experiment proceeds.  This fact changes the weight of the evidence provided by each pixel query and explains why it is possible for our algorithm to outperform kNN classification despite the apparent similarities between the two approaches.
+
+
+
+
 
 %\begin{figure}
 %    \center{
@@ -768,8 +789,24 @@ speeds up the inference process.
 
 
 %=============================================================================
-\section{Conclusions}
+\section{Conclusion}
+We have provided a method for performing Bayesian inference that we call rejection filtering, which provides a means to use
+rejection sampling to perform Bayesian inference without requiring an exponentially large number of samples.  This method has a substantial
+advantage over conventional particle filter methods in that only one particle needs to be stored for the method to work, rather
+than an entire ensemble.  This is significant because it allows ideas from particle filtering to be deployed in severely memory restricted
+environments such as in embedded application.  We further illustrate the viability of these ideas through numerical experiments
+involving tracking the time-dependent drift of an unknown frequency and also in handwriting recognition.
+
+While our work has shown that rejection sampling can be a viable method for performing Bayesian inference, there are many
+avenues for future work that remain open.  One such avenue involves investigating whether ideas borrowed from the particle
+filter literature, such as the unscented particle filter or using a genetic mutation-selection algorithm, can be adapted to fit our setting.
+  These improvements may help mitigate the information loss that necessarily occurs in the resampling step.  An even more exciting
+application of these ideas may be to examine their application in online data acquisition in science and engineering.  Rejection
+filtering provides the ability to perform adaptive experiments using embedded hardware, which potentially will not only allow
+much more responsive systems but may also reveal new ways of probing nature that otherwise would be impossible.
 \label{sec:conclusions}
+
+
 %=============================================================================
 
 
