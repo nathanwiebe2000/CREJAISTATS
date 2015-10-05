@@ -745,7 +745,15 @@ We make one further modification of the rejection filtering algorithm in order t
 classes proportional to the sample frequency in the posterior distribution.  For each of these classes we then replicate the surviving particles until $95\%$ of the total population is replenished
 by copies from the posterior cloud of samples.  The remaining $5\%$ are drawn uniformly from the training vectors with the corresponding class labels.
 
-The natural algorithm to compare our method to is kNN classification.  kNN is known to perform well for digit classification but it can be prohibitively slow for
+\fig{HM} illustrates the differences between maximum variance experiment design and the adaptive method we use in rejection filtering.  These differences
+are perhaps most clearly seen in the problem of classifying one vs zero digits from MNIST.  Our adaptive approach most frequently queries the middle pixel, which is the 
+highest variance feature over the training set.  This is unsurprising, but the interesting fact is that the second most frequently queried pixel is one that has relatively low variance
+over the training set.  In contrast, many of the high-variance pixels near the maximum variance pixel are never queried despite the fact that they have large variance over the set.
+This illustrates that they carry redundant information and can be removed from the training set.  Thus this adaptive learning algorithm can also be used to provide a type of model compression, similar to PCA.
+
+The case for odd vs even is more complicated.  This is because the hand written examples have much less structure in them and so it is perhaps unsurprising that less dramatic compression is possible when examining that class. However, the data still reveals qualitatively that even here there is a disconnect between the variance of the features over the training set and their importance in classification.
+
+We will now go beyond these qualitative discussions to quantitatively compare rejection filtering to kNN classification.  kNN is known to perform well for digit classification but it can be prohibitively slow for
 large training sets (indexing strategies can be used to combat this problem~\cite{yu2001indexing}).  In order to make the comparison as fair as possible between the two, we compare kNN to rejection filtering by truncating the 
 MNIST examples by removing pixels that have low variance over the training set.  This removes some of the advantage our method has by culling pixels near
 the boundary of the image that contain very little signal  (see~\fig{HM}) and yet substantially contribute to the cost of kNN in an active learning setting.
@@ -756,7 +764,7 @@ however we suspect that they will only serve to improve the performance of both 
 for future work.
 
 \fig{errorplot} shows that in certain parameter regimes, approximate Bayesian inference via rejection sampling can not only achieve higher classification accuracy on average for a smaller
-number of queries to the test vector, but also can achieve $39.5\%$ less error even if these constraints are removed.  This result is somewhat surprising given that we chose our likelihood function to correspond to nearest neighbor classification if $\sigma$ is held constant.  However, we do not hold $\sigma$ constant in our inference but rather choose it adaptively as the experiment proceeds.  This fact changes the weight of the evidence provided by each pixel query and explains why it is possible for our algorithm to outperform kNN classification despite the apparent similarities between the two approaches.
+number of queries to the test vector, but also can achieve $25\%$ less error even if these constraints are removed.  This result is somewhat surprising given that we chose our likelihood function to correspond to nearest neighbor classification if $\sigma$ is held constant.  However, we do not hold $\sigma$ constant in our inference but rather choose it adaptively as the experiment proceeds.  This fact changes the weight of the evidence provided by each pixel query and explains why it is possible for our algorithm to outperform kNN classification despite the apparent similarities between the two approaches.
 
 
 
