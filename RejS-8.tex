@@ -140,42 +140,38 @@ time dependent parameters in online settings and also benchmark its performance 
 \section{Introduction}
 \label{sec:intro}
 %=====================================================================
+
 Particle filters have become an indispensable tool for model selection, object tracking
-and statistical inference in high--dimensional problems~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined}.  While these methods work well in conventional settings, 
-an interesting question to ask is whether particle filter methods can be used in a setting where the
+and statistical inference in
+high--dimensional problems~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined}. 
+While particle filtering works well in many conventional settings, 
+the method is less well-suited to settings where the
 user has access only to a constant amount of memory.  
 
-Memory restricted problems are more than just curiousities.  In control problems
-in electrical engineering and experimental physics it is common that the dynamics of
-the system can radically change over the time required to communicate between a system
-and the computer used to control its dynamics.  The latency can be reduced to acceptable levels by allowing the inference to performed inside
-the device itself, but this often places prohibitive restrictions on the processing power and memory on processors embedded on or near the 
-system.  These restrictions can preclude the use of traditional particle filter methods.
+Memory restricted problems are more than just curiosities. In control problems
+in electrical engineering and experimental physics, for instance,
+it is common that the dynamics of
+a system can radically change over the time required to communicate between a system
+and the computer used to control its dynamics.  This latency can be reduced to acceptable levels by allowing the inference to performed inside
+the device itself, but this often places prohibitive restrictions on the processing power and memory on processors embedded on or near the system.
+These restrictions can preclude the use of traditional particle filter methods.
 
-We present an approach that we call rejection filtering that employs rejection sampling and resampling, which efficiently samples from
-an approximation to the posterior. This allows rejection filtering does to perform the inference task while storing no more
-than a constant number of samples at any one time in typical use cases.  Rejection filtering therefore can require significantly
+We present an approach that we call rejection filtering that efficiently samples from
+an approximation to the posterior by using rejection sampling and resampling together.
+This allows rejection filtering to perform the inference task while storing no more
+than a constant number of samples at any one time in typical use cases.
+Rejection filtering therefore can require significantly
 less memory than traditional particle filter methods. Moreover, we show that our algorithm can be
 easily parallelized at a fine-grained level, such that it can be used with an
-array of small processing cores. Thus \CRej~is well suited for inference
- using hybrid computing platforms based on GPU and FPGA computing and
- memory restricted computing environments.
+array of small processing cores. Thus, \CRej~is well suited for inference
+ using hybrid computing and memory-restricted platforms.
 For example, \CRej~allows for inference to be embedded in novel contexts such
-as very small FPGAs for low-temperature use \cite{hornibrook_cryogenic_2015} or for
-integration with existing memory-intensive FPGA configurations
+as very small cryogenic controllers \cite{hornibrook_cryogenic_2015}, or for
+integration with existing memory-intensive digital signal processing systems
 \cite{casagrande_design_2014}.
 
-%Our algorithm accomplishes these gains by using particle filtering resampling
-%and variational methods in a rejection sampling context. By using streaming
-%algorithms for computing summary statistics and principal components, \CRej~
-%can employ these methods to boost rejection sampling acceptance rates without
-%compromising the online and parallel nature of rejection sampling. We also
-%show that \CRej~can be applied to model selection problems and to time-
-%dependent and state-space models by using diffusive updates similar to
-%computer vision applications.
-
-We start in \sec{smc} by discussing rejection sampling and particle filter methods. We
-then detail the \CRej~algorithm and discuss applications to state-space models
+We start in \sec{smc} by discussing rejection sampling and particle filter methods.
+In \sec{rejf}, we then detail the \CRej~algorithm and discuss applications to state-space models
 such as those used in computer vision. In \sec{error-analysis}, we prove the
 stability of our algorithm and provide bounds on the errors incured in
 computing Bayesian mean estimators using \CRej. Finally, in \sec{numerical-experiments},
@@ -286,6 +282,7 @@ the development of \CRej~in the next section.
 
 %---------------------------------------------------------------------
 \section{Rejection Filtering}
+\label{sec:rejf}
 %---------------------------------------------------------------------
 
 
