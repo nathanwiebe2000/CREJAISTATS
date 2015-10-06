@@ -129,18 +129,18 @@ Proof of~#1.}}
 \begin{abstract}
 We provide a method for approximating Bayesian inference using rejection sampling.  By introducing
 a new form of resampling we are able to not only make the process efficient but also dramatically
-reduces the memory required relative to conventional SMC methods.
-We also provide an approximate form of rejection sampling that allows the algorithm to be used
-in cases where traditional rejection sampling is not efficient.
-Finally, we consider several numerical examples that illustrate that ideas will work well in memory restricted
-problems that can arise in embedded applications.
+reduce the memory required relative to conventional SMC methods.
+We also provide an approximate form of rejection sampling that makes rejection filtering tractable
+in cases where exact rejection sampling is not efficient.
+Finally, we consider several numerical examples of rejection filtering that show its ability to track
+time dependent parameters in online settings and also benchmark its performance on MNIST classification problems.
 \end{abstract}
 
 %=====================================================================
 \section{Introduction}
 \label{sec:intro}
 %=====================================================================
-Particle filter methods have in recent years become an indispensable tool for model selection, object tracking
+Particle filters have become an indispensable tool for model selection, object tracking
 and statistical inference in high--dimensional problems.  While these methods work well in conventional settings, 
 an interesting question to ask is whether particle filter methods can be used in a streaming setting wherein the
 user has access only to a constant amount of memory.  These problems are more than just curiousities.  If we
@@ -148,25 +148,25 @@ consider tracking the motion of rapidly moving objects, for example, then it is 
 the system can radically change over the time required to communicate between a system
 and a computer used to control its dynamics.  Such problems could be addressed by allowing the inference to performed inside
 the device itself, but this often places prohibitive restrictions on the processing power and memory of the 
-device.  Such restrictions can preclude the use of existing machine learning methods in such control problems.
+device.  These restrictions can preclude the use of particle filter methods in such control problems.
 
-We present an approach that we call rejection filtering that employs rejection sampling to produce posterior samples in a
-\emph{streaming} fashion. Because our algorithm does not need to record more
-than a constant number of samples at any one time, \CRej~uses significantly
-less memory than existing particle filter methods. Moreover, we show that our algorithm can be
+We present an approach that we call rejection filtering that employs rejection sampling and resampling to produce posterior samples in a
+\emph{streaming} fashion. This allows rejection filtering does to perform the inference task while storing no more
+than a constant number of samples at any one time in typical use cases.  Rejection filtering therefore uses significantly
+less memory than traditional particle filter methods. Moreover, we show that our algorithm can be
 easily parallelized at a fine-grained level, such that it can be used with an
 array of small processing cores. Thus, \CRej~allows for finding posterior
-samples using hybrid computing platforms based on GPU and FPGA computing, and
-for embedding Bayesian inference in experimental apparatus.
+samples using hybrid computing platforms based on GPU and FPGA computing, as
+well as memory restricted computing environment.
 
-Our algorithm accomplishes these gains by using particle filtering resampling
-and variational methods in a rejection sampling context. By using streaming
-algorithms for computing summary statistics and principal components, \CRej~
-can employ these methods to boost rejection sampling acceptance rates without
-compromising the online and parallel nature of rejection sampling. We also
-show that \CRej~can be applied to model selection problems and to time-
-dependent and state-space models by using diffusive updates similar to
-computer vision applications.
+%Our algorithm accomplishes these gains by using particle filtering resampling
+%and variational methods in a rejection sampling context. By using streaming
+%algorithms for computing summary statistics and principal components, \CRej~
+%can employ these methods to boost rejection sampling acceptance rates without
+%compromising the online and parallel nature of rejection sampling. We also
+%show that \CRej~can be applied to model selection problems and to time-
+%dependent and state-space models by using diffusive updates similar to
+%computer vision applications.
 
 We start in \sec{smc} by reviewing existing particle filtering methods. We
 then detail the \CRej~algorithm and discuss applications to state-space models
@@ -181,7 +181,7 @@ strongly-peaked test cases.
 \label{sec:smc}
 %=============================================================================
 
-Particle filter methods, also known as \emph{sequential Monte Carlo}, proceed
+Particle filter methods, also known as \emph{sequential Monte Carlo} methods, proceed
 by approximating the prior distribution $\pi(x)$ at each step as a weighted
 mixture of $\delta$-function distributions,
 \begin{equation}
@@ -223,8 +223,8 @@ Choosing $a$ close to the bootstrap filter, however, can require a large
 initial sample size in order to process highly informative evidence
 in a numerically stable way. 
 
-Note that when the posterior is approximately normal, $a = 0$ approximately
-preserves all of the relevant information about the posterior, but require
+When the posterior is approximately normal, $a = 0$ approximately
+preserves all of the relevant information about the posterior, but requires
 storing only summary statistics of particles rather than the entire particle
 approximation~\cite{sisson_sequential_2007,del2012adaptive}.   This observation is key to
 the development of \CRej~in the next section.
