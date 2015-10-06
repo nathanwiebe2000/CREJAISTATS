@@ -606,10 +606,20 @@ Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz
 \label{sec:numerical-experiments}
 %=============================================================================
 
+In this section, we demonstrate rejection filtering both in the context of
+learning simple functions in a memory-restricted and time-dependent fashion,
+and in the context of learning more involved models such as handwriting
+recognition. In both cases, we see that rejection filtering provides significant
+advantages over either particle filtering or rejection sampling alone.
+
+%-----------------------------------------------------------------------------
+\subsection{Multimodal Frequency Estimation}
+%-----------------------------------------------------------------------------
+
 Here, we demonstrate the effectiveness of rejection filtering using as an
 example strongly multimodal and periodic likelihood functions, such as arise
 in frequency estimation problems rising from the study of quantum mechanical
-systems (cite). These likelihood functions serve as useful test cases for
+systems \cite{ferrie_how_2013}. These likelihood functions serve as useful test cases for
 Bayesian inference algorithms more generally, as the multimodality of these
 likelihoods forces a tradeoff between informative experiments and
 multimodality in the posteriors. Thus, it succeeds in these cases only
@@ -619,56 +629,12 @@ experiments can be designed.
 Concretely, we will consider evidence $E\in\{0, 1\}$ drawn from a two-outcome
 experiment with controls $x_-$ and $t$, and with a single model parameter $x$.
 The likelihood is then
-%\begin{equation}
-%    \label{eq:inversion-precession-nogamma}
-%    \Pr(1 | x; t, x_-) = \cos^2((x - x_-) t / 2).
-%\end{equation}
-%
-%
-%%
-%%\begin{algorithm}
-%%    \caption{Particle Guess Heuristic (PGH) for \CRej}
-%%    \label{alg:pgh}
-%%    \begin{algorithmic}
-%%        \Require Prior \CRej~state $\mu$, $\Sigma$. Resampling kernel $\operatorname{F}$.
-%%        \Ensure  An experiment $(t, x_-)$.
-%%        \Function{$\text{PGH}_\text{\CRej}$}{$\mu$, $\Sigma$}
-%%            \State $x_- \sim \operatorname{F}(\mu, \Sigma)$
-%%            \State $t \gets 1 / \sqrt{{\rm Tr}(\Sigma)}$
-%%            \State \Return $(t, x_-)$.
-%%        \EndFunction
-%%    \end{algorithmic}
-%%\end{algorithm}
-%
-%In order to understand the possible failure modalities of \CRej, it is also useful to
-%consider more tightly peaked periodic likelihoods. We can form such test cases
-%by simply raising our original likelihoods to a power $\gamma$,
-%\begin{equation}
-%    \label{eq:inversion-likelihood}
-%    \Pr(1 | \omega; t, \omega_-) = \cos^{2\gamma} ([\omega - \omega_-] t / 2).
-%\end{equation}
-%Similarly peaked likelihoods arise in the use of maximum \emph{a posteri} estimators
-%[cite], and emulate the low acceptance rate of batched updates such as discussed in
-%\app{batched-updates}.
-%
-%%Using \CRej~together with the PGH to learn $x$ with the $\gamma = 5$ model,
-%%we obtain the Bayes risk shown in \fig{crej-risk-vs-m} after 100 updates, and
-%%with a varying number of sampling attempts $m$.
-%%For each of several fixed values of $m$, we show the scaling of \CRej~with
-%%the number of Bayes updates and the computation effort in \fig{crej-risk-vs-n}.
-%%From these demonstrations, we see that $m = 300$ suffices to continue learning
-%%for large numbers of updates, and offers a good tradeoff between the amount of
-%%evidence and computational effort required.
-%
-%A similar problem that occurs frequently in electrical engineering and experimental
-%physics is that there is an unknown frequency for a device that drifts with time.
-
 \begin{equation}
  \Pr(1 | x; t, x_-,k) = \cos^2((x(k) - x_-) t / 2),
 \end{equation}
 where $x$ is the parameter of interest, $(x_-, t)$ is an experiment design,
 and where $k$ is the index of the current update.  The true model $x(k)$ is taken to
-follow a random walk with $x(0)\sim {\rm Unif}(0,\pi/2)$ and the distribution
+follow a random walk with $x(0)\sim \operatorname{Uniform}(0,\pi/2)$ and the distribution
 of $x(k+1)$ given $x(k)$ is
 \begin{equation}
     x(k+1)=x(k) + \NN(0,(\pi/120)^2).
@@ -698,25 +664,33 @@ the current prior.
 The performance of \CRej~applied to this case is shown ~\fig{crej-diffusion}.
 In particular, the median error incurred by \CRej~achieves the optimal
 achievable error $(\pi / 120)^2$ with as few as $m = 100$ sampling attempts.
-Thus, \CRej~algorithm continues to be useful in the case of time-dependent
+Thus, our \CRej~algorithm continues to be useful in the case of time-dependent
 and other state-space models.  Although this demonstration is quite simple, it
 is important to emphasize the miniscule memory requirements for this task
 mean that this tracking problem can be solved using a small processor in
 close proximity to the device in question.
 
+%-----------------------------------------------------------------------------
+\subsection{Handwriting Recognition}
+%-----------------------------------------------------------------------------
+
 A more involved example is handwriting recognition.  Our goal in this task is to use
 Bayesian inference to classify an unknown digit taken from the MNIST repository in
 one of two classes.  Here we consider two cases: $1$ vs $0$ and even vs odd.
 
-We cast the problem in the language of Bayesian inference by assuming the following likelihood
-function, which predicts the probability that a given pixel takes the value $E$ given that training
-image $x$ is the true model that it drew from.
+We cast the problem in the language of Bayesian inference by assuming the likelihood
+function
 \begin{equation}
-P(E|x;i,\sigma)\propto e^{-(x_i - E)^2/2\sigma^2}.\label{eq:gausseq}
+P(E|x;i,\sigma)\propto e^{-(x_i - E)^2/2\sigma^2}\label{eq:gausseq},
 \end{equation}
+which predicts the probability that a given pixel $i$ takes the value $E$,
+given that the training image $x$ is the true model that it drew from.
+
 We pick this likelihood function because if we imagine measuring every pixel in the image then the
-posterior probability distriution, given a uniform initial distribution, will typically be sharply peaked around
+posterior probability distribution, given a uniform initial distribution, will typically be sharply peaked around
 the training vector that is closest to the observed vector of pixel intensities.
+Indeed, taking the product over all pixels in an image produces the radial basis function
+familiar to kernel learning \cite{scholkopf_learning_2001}.
 
 \begin{figure}
 \centering
@@ -730,8 +704,8 @@ Bottom plots are the corresponding plots for the odd/even digits.}\label{fig:HM}
 
 Unlike the previous experiment, we do not implement this in a memory--restricted
 setting because of the size of the MNIST training set.
-Our goal instead, is to view the image classification problem through the lens of active learning.  In such
-problems it is assumed that the feature data is very expensive to compute.  This happens frequently
+Our goal instead is to view the image classification problem through the lens of active learning.  In such
+problems, it is assumed that the feature data is very expensive to compute.  This happens frequently
 in search wherein features, such as page rank, can be expensive to compute on the fly.  It also can
 occur in experimental sciences where each data point may take minutes or hours to either measure
 or compute accurately.  In these cases it is vital to minimize the number of queries made to the training
