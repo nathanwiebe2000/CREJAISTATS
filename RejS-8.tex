@@ -284,7 +284,7 @@ the development of \CRej~in the next section.
 \subsection{Resampling in Rejection Filtering}
 %---------------------------------------------------------------------
 
-We make rejection sampling efficient by integrating it with particle
+We make rejection sampling efficient by combining it with particle
 filtering methods using \emph{resampling}.
 Our resulting particle filtering algorithm does not try to
 to propagate samples through many rounds of rejection sampling, but instead
@@ -293,7 +293,7 @@ For example, if
 we assume that our prior distribution is a Gaussian then a Gaussian model for the posterior
 distribution can be found by computing the mean and the covariance matrix for the samples
 that are accepted by the rejection sampling algorithm.  This approach is
-reminiscent of assumed density filtering~\cite{minka_expectation_2001}, which uses a similar strategy
+reminiscent of assumed density filtering~\cite{minka_expectation_2001}, which uses an analogous strategy
 for modeling the prior distribution but is less memory efficient than
 our method.
 
@@ -342,7 +342,7 @@ the posterior distribution can be non--deterministically drawn.  Incremental for
 used in~\alg{crej} to estimate the mean and the covariance using such samples, which obviates the need
 to store $O(1/\epsilon^2)$ samples in memory in order to estimate the moments of the posterior distribution within error $\epsilon$.
 In practice, one can use the Welford algorithm \cite{welford_note_1962} to more precisely accumulate means
-and variances, but our theorem shows that~\alg{crej} suffices.
+and variances, but doing so does not change the asymptotic scaling of the memory with $\epsilon$ that~\alg{crej} requires.
 
 Width can be traded for depth by batching the data and processing each of
 these pieces of evidence separately. We discuss this batched version of the
@@ -380,7 +380,7 @@ in cases where a tight bound is unknown or when the prior has little support ove
 The main question remaining is how substantial the
 impacts of errors due to $P(E|x) > \kappa_E$ are on the posterior distribution?  To understand this, let us define
 \begin{equation}
-{\rm bad} := \left\{x: \frac{P(E|x)}{\kappa_E} >1\right\}.
+{\rm bad} := \left\{x: {P(E|x)} >{\kappa_E}\right\}.
 \end{equation}
 If the set of bad configurations is non--empty then it naturally leads to errors in the posterior and
 can degrade the success probability for rejection filtering.  Bounds on these effects are
@@ -409,26 +409,26 @@ to perform object tracking and acquisition. Here, we show that such
 \CRej~naturally encompasses these applications as well by convolving posterior
 distributions with Gaussian update kernels.
 
-In particular, for time-dependent applications the true model is not
-stationary, but rather changes as observations are made.  This creates
-challenges for na\i ve applications of Bayesian inference because drift in the
+In time-dependent applications the true model is not
+stationary, but rather changes as observations are made.  This poses a
+challenge for na\i ve applications of Bayesian inference because drift in the
 true model can cause it to move outside of the support of the  prior
-distribution.  This results in the online inference algorithm failing to track
+distribution.  This drift results in the online inference algorithm failing to track
 an object that moves suddenly and unexpectedly.
 
-To see how this can occur in problems where the true parameters are time-dependent consider the following likelihood function for a Bernoulli experiment
-and a family of prior distributions with mean $\bar{x}$ and variance $\sigma(x)$ such that
+To see how this can occur in problems where the true parameters are time-dependent, consider the following likelihood function for a Bernoulli experiment
+and a family of prior distributions with mean $\bar{x}$ and variance $\sigma$ such that
 the overlap between the likelihood and the prior is given by
 \begin{equation}
-    \sum_x P(0|x; \bar{x}, \sigma(x)) P(x) \le e^{-|x_{\rm true} - \bar{x}| \gamma/\sigma(x)}.
+    \sum_x P(0|x; \bar{x}, \sigma(x)) P(x) \le e^{-|x_{\rm true} - \bar{x}| \gamma/\sigma}.
 \end{equation}
-If $\sigma(x)$ is small then the small deviations of $x_{\rm true}$ away from $\bar{x}$ introduced by neglecting the time-dependence of $x$ can cause the inner product to become exponentially small.
-This in turn causes the estimates of the complexity of resampling to be exponentially large, therefore preventing efficient learning.
+If $\sigma$ is small then the small deviations of $x_{\rm true}$ away from $\bar{x}$ introduced by neglecting the time-dependence of $x$ can cause the inner product to become exponentially small.
+This in turn causes the complexity of resampling to be exponentially large, thereby removing guarantees of efficient learning.
 
-We can herald such failures in \CRej~by tracking the total number
-of accepted particles $N_a$ in each update, as $N_a$ estimates
+Such failures in \CRej~are heralded by tracking the total number
+of accepted particles $N_a$ in each update.  This is because $N_a$ estimates
 $P(E) = \sum_x P(E | x) P(x)$.
-Alternatively, we can to better by
+Alternatively, we can do better by
 instead incorporating a prediction step that diffuses the mode parameters
 of each particle \cite{isard_condensationconditional_1998}.
 In particular, by convolving the prior with a filter function such as a
@@ -436,21 +436,21 @@ Gaussian, the width of the resultant distribution can be increased without
 affecting the prior mean. 
 In a similar way, \CRej~can be extended to include diffusion by using a resampling kernel
 that has a broader variance than that of the accepted posterior samples. Doing so
-allows \CRej~to track stochastic processes in a similar way as \CSMC, as is illustrated
+allows \CRej~to track stochastic processes in a similar way to \CSMC, as is illustrated
 in \fig{crej-diffusion}.
 
-Formally, we produce consider our posterior distribution to be found by
+Formally, we model our posterior distribution as
 \begin{equation}
-\tilde{P}(x|E;t) = P(x|E;t) \star \mathcal{B}(0,\beta),
+\tilde{P}(x|E;t) = P(x|E;t) \star \mathcal{B}(0,\eta),
 \end{equation}
-where $\mathcal{B}$ is a distribution with zero mean and standard deviation
-$\beta$ and $\star$ denotes a convolution over $x$.
-Convolution is in general an expensive operation, but since \CRej~uses a
+where $\mathcal{B}$ is a distribution with zero mean and variance
+$\eta$ and $\star$ denotes a convolution over $x$.
+Convolution is in general an expensive operation, but for cases where \CRej~uses a
 Gaussian model for the posterior distribution, the resulting distribution
 remains Gaussian under the convolution if $\mathcal{B}$ is also a Gaussian.
 If the variance of the prior distribution is $s$ then it is easy to see from
 the properties of the Fourier transform that the variance of
-$\tilde{P}(x|E;t)$ is $s+\beta$ and the mean remains $\bar{x}$.
+$\tilde{P}(x|E;t)$ is $s+\eta$ and the mean remains $\bar{x}$.
 
 
 %-----------------------------------------------------------------------------
@@ -493,10 +493,9 @@ subsequent values of $N_a$ in a log-likelihood register $\ell$,
 \end{equation}
 where superscripts are used to indicate the number of Bayes updates performed,
 and where $\beta$ is a \emph{hedging parameter} used to prevent
-divergences for when $N_a = 0$. Since this accumulation procedure
+divergences that occur when $N_a = 0$. Since this accumulation procedure
 estimates the total likelihood from a two-outcome event
-(acceptance/rejection of a sample), the value of $\beta = 1 / 2$ works
-well to deal with the zero-likelihood case~\cite{ferrie_estimating_2012}.
+(acceptance/rejection of a sample), the value of $\beta = 1 / 2$ deals with the zero-likelihood case~\cite{ferrie_estimating_2012}.
 The estimator $\hat{K} = e^{\ell_B} / e^{\ell_A}$ resulting from this hedging procedure
 is thus an asymtotically-unbiased estimator for $K$ that has well-defined
 confidence intervals \cite{cho_approximate_2013}.
@@ -538,15 +537,15 @@ we take $\langle \cdot\!~,\cdot \rangle$ to be the inner product between two dis
 \begin{lemma}
     \label{lem:errprop}
 
-    Let $P(x)$ be the prior distribution and $\tilde{P}(x)$ be an approximation to the prior such that $\tilde{P}(x) = P(x) -\Delta(x)$ and let $P(x|E)$ and $\tilde{P}(x|E)$ be the posterior distributions after event $E$ is observed for $x\in V\subset \mathbb{R}^N$ where $V$ is compact and $|x|\le |x_{\rm max}|$ for all $x\in V$.  If $|\langle P(E|x),\Delta(x) \rangle|/\langle P(E|x),P(x)\rangle \le 1/2$ then the error in the posterior mean then satisfies
+    Let $P(x)$ be the prior distribution and $\tilde{P}(x)$ be an approximation to the prior such that $\tilde{P}(x) = P(x) -\Delta(x)$ and let $P(x|E)$ and $\tilde{P}(x|E)$ be the posterior distributions after event $E$ is observed for $x\in V\subset \mathbb{R}^N$ where $V$ is compact and $\|x\|\le \|x_{\rm max}\|$ for all $x\in V$.  If $|\langle P(E|x),\Delta(x) \rangle|/\langle P(E|x),P(x)\rangle \le 1/2$ then the error in the posterior mean then satisfies
     $$
-    E_1 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}|x_{\max}|,
+    E_1 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\|x_{\max}\|,
     $$
     and similarly
     $$
-    E_2 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}|x_{\max}|^2,
+    E_2 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\|x_{\max}\|^2,
     $$
-where $E_1:=\left|\int_V  (P(x|E) -\tilde{P}(x|E)) x \mathrm{d} x \right|$ and $E_2 \le \left\|\int  (P(E|x) -\tilde{P}(E|x)) xx^T \mathrm{d} x \right\|$
+where $E_1:=\left|\int_V  (P(x|E) -\tilde{P}(x|E)) x \mathrm{d} x \right|$ and $E_2 \le \left|\int  (P(E|x) -\tilde{P}(E|x)) xx^T \mathrm{d} x \right|$
 \end{lemma}
 
 \lem{errprop} shows that the error in the posterior mean using an approximate prior is small given that the inner product of the likelihood function with the errors is small relative to $P(E)$. 
@@ -554,17 +553,17 @@ where $E_1:=\left|\int_V  (P(x|E) -\tilde{P}(x|E)) x \mathrm{d} x \right|$ and $
 \begin{theorem}\label{thm:meanCov}
 If the assumptions of~\lem{errprop} are met and the rejection sampling algorithm uses $m$ samples from the approximate posterior distribution to infer the posterior mean  and $x_j\sim \tilde{P}(x|E)$ and $\mu=\sum_{j=1}^m x_j/m$ then the error in the posterior mean scales as
 $$
- O\left(\left[\frac{\sqrt{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]|x_{\max}|\right).
+ O\left(\left[\frac{\sqrt{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]\|x_{\max}\|\right).
 $$
 and the error in the estimate of $\Sigma$ is
 
 $$
- O\left(\left[\frac{{N} }{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]|x_{\max}|^2\right).
+ O\left(\left[\frac{{N} }{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]\|x_{\max}\|^2\right).
 $$
 \end{theorem}
 
 
-An important question to ask at this juncture is when do we expect the update process discussed in~\alg{crej} to be stable.  By stable, we mean that small initial errors do not exponentially magnify throughout the update process.  \thm{meanCov} shows that small errors in the prior distribution do not propagate into large errors in the estimates of the mean and posterior matrix given that $P(E)= \langle P(E|x),P(x)\rangle$ is sufficiently large.  In particular, an application of the Cauchy--Schwarz inequality shows that such errors are expected to be small if $|x_{\max}|\le 1$, $m\in \Omega(N^2)$, $\int_V |\Delta(x)| \mathrm{d}x\le 1$ and 
+An important question to ask at this juncture is when do we expect the update process discussed in~\alg{crej} to be stable.  By stable, we mean that small initial errors do not exponentially magnify throughout the update process.  \thm{meanCov} shows that small errors in the prior distribution do not propagate into large errors in the estimates of the mean and posterior matrix given that $P(E)= \langle P(E|x),P(x)\rangle$ is sufficiently large.  In particular, an application of the Cauchy--Schwarz inequality shows that such errors are expected to be small if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$, $\int_V |\Delta(x)| \mathrm{d}x\le 1$ and 
 $$
 \langle\Delta(x),\Delta(x)\rangle \ll \frac{P^2(E)}{{\langle P(E|x),P(E|x)\rangle}}.
 $$
