@@ -221,7 +221,7 @@ $x'$ is chosen from the distribution
 \end{equation}
 where $\NN(\mu_i, \Sigma)$ is a normal density with mean
 $\mu_i = a x_i + (1 - a) \expect xx$
-and covariance $\Sigma = \sqrt{1 - a^2} \var{x}{x}$.
+and covariance $\Sigma = \sqrt{1 - a^2}\,\var{x}{x}$.
 This choice of resampling distribution explicitly preserves the mean
 and the covariance of the current posterior, while increasing the
 effective sample size.
@@ -270,20 +270,21 @@ the development of \CRej~in the next section.
 \section{Rejection Filtering}
 %---------------------------------------------------------------------
 
-In many applications, we want to maintain both the advantages of
-particle filtering and of rejection sampling. We introduce rejection
-filtering as a method which uses resampling to connect these two
-algorithms. 
-
-Specifically, our process works as follows.
-Begin by drawing a sample from $P(x)$.  Then reject that sample with
+As an alternative to particle filtering, rejection sampling can also
+be used to perform Bayesian inference. In particular, to draw a sample
+from a posterior distribution, begin by drawing a sample from $P(x)$.
+Then, reject that sample with
 probability $P(E|x)$.  The probability 
 distribution of the samples that are not rejected is 
 \begin{equation}
  \frac{P(E|x)P(x)}{\sum_x P(E|x)P(x)}= P(x|E),
 \end{equation}
 and the probability of accepting a sample is $\sum_x P(E|x)P(x)$.
-Thus, rejection filtering can be used to perform Bayesian inference.
+
+There are two major drawbacks to this simple approach, which have in part prevented the adoption
+of rejection sampling as a viable method for inference.  The first is that the probability of success shrinks exponentially with the number of updates
+in online inference problems.
+The second problem is that if $P(E|x)$ is exponentially small then the algorithm will not be efficient.
 
 {\bf CG: rewrite this to consolidate notation, esp $M$ vs $\kappa_E$.}
 More generally, rejection sampling is a
@@ -295,16 +296,15 @@ guarantee that $p(x)/q(x) \le 1$.  The expected number of times that this
 process needs to be repeated before a sample is accepted is given by the
 geometric distribution to be $M$, if $q(x)$ is a normalized distribution.
 
-There are two major drawbacks to this simple approach, which have in part prevented the adoption
-of rejection sampling as a viable method for inference.  The first is that the probability of success shrinks exponentially with the number of updates
-in online inference problems.
-The second problem is that if $P(E|x)$ is exponentially small then the algorithm will not be efficient.
-We show below that resampling and approximate rejection sampling can be used to address 
- these problems under appropriate assumptions.
+
+In this section, we introduce particle filtering as a method to
+integrate rejection sampling and particle filtering using resampling to
+address the problems of na\"ive rejection sampling--based inference.
 
 %---------------------------------------------------------------------
 \subsection{Resampling in Rejection Filtering}
 %---------------------------------------------------------------------
+
 We make rejection filtering efficient by using a process that we call resampling due to
 its similarity to resampling in sequential Monte Carlo algorithms.  We
 forgo trying to propagate samples through many rounds of rejection sampling and instead
