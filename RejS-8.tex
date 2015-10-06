@@ -387,16 +387,16 @@ can degrade the success probability for rejection filtering.  Bounds on these ef
 provided below.
 
 \begin{corollary}\label{cor:badalgorithm}
-If the assumptions of~\thm{crej} are met and
+If the assumptions of~\thm{crej} are met, except for the requirement that $P(x|E) \le \kappa_E$, and
 $$\sum_{x\in {\rm bad}}  \left([P(E|x)-\kappa_E] P(x)\right) \le \delta P(E),$$
   then approximate rejection sampling is  efficient and samples from a distribution $\rho(x|E)$ such that ${\sum_x \sqrt{\rho(x|E) P(x|E)}} \ge 1-\delta$.
 The probability of accepting a sample is at least $\frac{\min_x P(E|x) (1-\delta)}{\kappa_E}$.\label{thm:kappa}
 \end{corollary}
 \begin{proof}
-Result follows directly from~\thm{crej} and theorem 1 in~\cite{WKGS15}.
+Result follows directly from~\thm{crej} and Theorem 1 in~\cite{WKGS15}.
 \end{proof}
 
-\cor{badalgorithm} gives an efficient method for sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use it. % However, it is not generally efficient when  used in an online fashion.  %This is because the probability that a given sample is accepted after $L$ consecutive updates shrinks exponentially with $L$ unless $\frac{P(E)}{\kappa_E}=1-O(1/{\rm poly}(L))$.  Furthermore, even if we batch the updates together as a single update then we do not expect that $\sum_x P(E|x) P(x) /\kappa_E$ is polynomially small for the majority of these examples.  
+\cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too large for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily lead to substantial errors in the posterior distribution.  This allows efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use it. % However, it is not generally efficient when  used in an online fashion.  %This is because the probability that a given sample is accepted after $L$ consecutive updates shrinks exponentially with $L$ unless $\frac{P(E)}{\kappa_E}=1-O(1/{\rm poly}(L))$.  Furthermore, even if we batch the updates together as a single update then we do not expect that $\sum_x P(E|x) P(x) /\kappa_E$ is polynomially small for the majority of these examples.  
 
 %-----------------------------------------------------------------------------
 \subsection{Filtering Distributions for Time-Dependent Models}
@@ -674,7 +674,7 @@ close proximity to the device in question.
 %-----------------------------------------------------------------------------
 
 A more involved example is handwriting recognition.  Our goal in this task is to use
-Bayesian inference to classify an unknown digit taken from the MNIST repository in
+Bayesian inference to classify an unknown digit taken from the MNIST repository~\cite{lecun1998mnist} in
 one of two classes.  Here we consider two cases: $1$ vs $0$ and even vs odd.
 
 We cast the problem in the language of Bayesian inference by assuming the likelihood
@@ -791,21 +791,21 @@ number of queries to the test vector, but also can achieve $25\%$ less error eve
 \label{sec:conclusions}
 %=============================================================================
 
-In this work, we have introduced a new method, particle filtering, that integrates
-rejection sampling with particle filtering. Our method retains many of the benefits
-of each, while using substantially less memory than conventional methods for Bayesian inference.
-In particular, our method only requires remembering a single sample at a time, making it ideal
+We introduce a method, rejection filtering, that integrates
+rejection sampling with particle filtering. Rejection filtering retains many of the benefits
+of each, while using substantially less memory than conventional methods for Bayesian inference in typical use cases.
+In particular, if a Gaussian resampling algorithm is used then our method only requires remembering a single sample at a time, making it ideal
 for memory-constrained and active learning applications.
 We further illustrate the viability of our rejection filtering approach through numerical experiments
 involving tracking the time-dependent drift of an unknown frequency and also in handwriting recognition.
 
 While our work has shown that rejection sampling can be a viable method for performing Bayesian inference, there are many
 avenues for future work that remain open.  One such avenue involves investigating whether ideas borrowed from the particle
-filter literature, such as the unscented particle filter or using a genetic mutation-selection algorithm, can be adapted to fit our setting.
+filter literature, such as the unscented transformation~\cite{van2000unscented} or genetic mutation-selection algorithms~\cite{del2012adaptive,del2000branching}, can be adapted to fit our setting.
   These improvements may help mitigate the information loss that necessarily occurs in the resampling step.  An even more exciting
 application of these ideas may be to examine their application in online data acquisition in science and engineering.  Rejection
-filtering provides the ability to perform adaptive experiments using embedded hardware, which potentially will not only allow
-much more responsive systems but may also reveal new ways of probing nature that otherwise would be impossible.
+filtering provides the ability to perform adaptive experiments using embedded hardware, which may lead to a host of applications
+within robotics and experimental physics that are impractical with existing technology.
 
 %% END MATTER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -870,15 +870,15 @@ Using the definition of $\tilde{P}(x)$ and Bayes' rule it is easy to see that th
 \end{align}
 Using the fact that $|1-1/(1-y)| \le 2|y|$ for all $y\in [-1/2,1/2]$ it follows from the assumptions of the theorem and the triangle inequality that~\eq{intbd} is bounded above by
 \begin{align}
- \int_V \frac{2P(E|x)P(x)|x| |\langle P(E|x),\Delta(x) \rangle|}{\langle P(E|x),P(x) \rangle^2}\mathrm{d}x+ \int_V\frac{2P(E|x) |\Delta(x)||x|}{\langle P(E|x),P(x)\rangle}\mathrm{d}x.\label{eq:intbd2}
+ \int_V \frac{2P(E|x)P(x)\|x\| |\langle P(E|x),\Delta(x) \rangle|}{\langle P(E|x),P(x) \rangle^2}\mathrm{d}x+ \int_V\frac{2P(E|x) |\Delta(x)|\|x\|}{\langle P(E|x),P(x)\rangle}\mathrm{d}x.\label{eq:intbd2}
 \end{align}
-Now using the fact that $|x|\le |x_{\max}|$ and the definition of the inner product, we find that~\eq{intbd2} is bounded above by
+Now using the fact that $\|x\|\le \|x_{\max}\|$ and the definition of the inner product, we find that~\eq{intbd2} is bounded above by
 \begin{equation}
-\frac{2 (|\langle P(E|x),\Delta(x) \rangle| + \langle P(E|x), |\Delta(x)| \rangle))|x_{\max}|}{\langle P(E|x),P(x)\rangle}.
+\frac{2 (|\langle P(E|x),\Delta(x) \rangle| + \langle P(E|x), |\Delta(x)| \rangle))\|x_{\max}\|}{\langle P(E|x),P(x)\rangle}.
 \end{equation}
 The  result then follows from a final application of the triangle inequality.
 
-The analogous proof for the error in the posterior expectation of $xx^T$ follows using the exact same argument after replacing the Euclidean norm with the induced $2$--norm for matrices.  Since both norms satisfy the triangle inequality, the proof follows using exactly the same steps after observing that $\|xx^T\|\le |x_{\max}|^2$ for all $x\in V$.
+The analogous proof for the error in the posterior expectation of $xx^T$ follows using the exact same argument after replacing the Euclidean norm with the induced $2$--norm for matrices.  Since both norms satisfy the triangle inequality, the proof follows using exactly the same steps after observing that $\|xx^T\|\le \|x_{\max}\|^2$ for all $x\in V$.
 \end{proofof}
 
 \begin{proofof}{\thm{meanCov}}
@@ -887,7 +887,7 @@ The analogous proof for the error in the posterior expectation of $xx^T$ follows
  The calculation for the error in the estimate of the covariance matrix is similar.  First, note that $1/(m-1)= 1/m +O(1/m^2)$ so we can asymptotically ignore $m/(m-1)$.  Let $\mu = \int_V P(x|E) x\mathrm{d}x +\epsilon v$, where $|v|=1$.  We then have from our error bounds on the estimate of the posterior mean that
 \begin{eqnarray}
 \| \mu\mu^T - \int_V P(x|E) x\mathrm{d}x \int_V P(x|E) x^T\mathrm{d}x \|&\le& \epsilon \left\|\int_V P(x|E) x\mathrm{d}x v^T\right\|+\epsilon\left\|v\int_V  P(x|E) x^T\mathrm{d}x\right\| + \epsilon^2.\nonumber\\
-&\in&  O\left(\left[\frac{\sqrt{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]|x_{\max}|^2\right).
+&\in&  O\left(\left[\frac{\sqrt{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]\|x_{\max}\|^2\right).
 \end{eqnarray}
 
 Now let us focus on bounding the error in our calculation of $\int_V P(E|x) xx^T \mathrm{d}x$. Using the triangle inequality, the error in the estimate of the expectation value of $x x^T$ is, to within error $O(1/m^{3/2})$, at most
@@ -896,11 +896,11 @@ Now let us focus on bounding the error in our calculation of $\int_V P(E|x) xx^T
 \end{equation}
 The first term in \eq{xxT} can be bounded by bounding the sample error in each of the components of the matrix.  For any component $[xx^T]_{k,\ell}$ the Monte--Carlo error in its estimate is
 \begin{equation}
-O\left(\frac{\sigma({[x]_k[x]_\ell})}{\sqrt{m}}\right)\in O\left(\frac{|x_{\max}|^2}{\sqrt{m}}\right).
+O\left(\frac{\sigma({[x]_k[x]_\ell})}{\sqrt{m}}\right)\in O\left(\frac{\|x_{\max}\|^2}{\sqrt{m}}\right).
 \end{equation}
 The $2$--Norm of an $N\times N$ matrix is at most $N$ times its max--norm, which means that
 \begin{equation}
-\Biggr\|\frac{1}{m} \sum_{j=1}^m x_j x_j^T - \int_V \tilde{P}(x|E) x x^T\mathrm{d}x\Biggr\|\in O\left(\frac{N|x_{\max}|^2}{\sqrt{m}}\right).\label{eq:xxTMC}
+\Biggr\|\frac{1}{m} \sum_{j=1}^m x_j x_j^T - \int_V \tilde{P}(x|E) x x^T\mathrm{d}x\Biggr\|\in O\left(\frac{N\|x_{\max}\|^2}{\sqrt{m}}\right).\label{eq:xxTMC}
 \end{equation}
 The theorem then follows from inserting~\eq{xxTMC} into~\eq{xxT} and applying~\lem{errprop}.
 \end{proofof}
