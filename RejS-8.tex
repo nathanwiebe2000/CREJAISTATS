@@ -142,17 +142,19 @@ time dependent parameters in online settings and also benchmark its performance 
 %=====================================================================
 Particle filters have become an indispensable tool for model selection, object tracking
 and statistical inference in high--dimensional problems~\cite{doucet2000sequential,del2012adaptive,van2000unscented}.  While these methods work well in conventional settings, 
-an interesting question to ask is whether particle filter methods can be used in a streaming setting wherein the
-user has access only to a constant amount of memory.  Memory restricted problems are more than just curiousities.  If we
-consider tracking the motion of rapidly moving objects, for example, then it is common that the dynamics of
+an interesting question to ask is whether particle filter methods can be used in a setting where the
+user has access only to a constant amount of memory.  
+
+Memory restricted problems are more than just curiousities.  In control problems
+in electrical engineering and experimental physics it is common that the dynamics of
 the system can radically change over the time required to communicate between a system
-and a computer used to control its dynamics.  Such problems could be addressed by allowing the inference to performed inside
-the device itself, but this often places prohibitive restrictions on the processing power and memory of the 
+and the computer used to control its dynamics.  Such problems could be addressed by allowing the inference to performed inside
+the device itself, but this often places prohibitive restrictions on the processing power and memory on processors embedded on or near the 
 device.  These restrictions can preclude the use of particle filter methods in such control problems.
 
-We present an approach that we call rejection filtering that employs rejection sampling and resampling to produce posterior samples in a
-\emph{streaming} fashion. This allows rejection filtering does to perform the inference task while storing no more
-than a constant number of samples at any one time in typical use cases.  Rejection filtering therefore uses significantly
+We present an approach that we call rejection filtering that employs rejection sampling and resampling, which efficiently samples from
+an approximation to the posterior. This allows rejection filtering does to perform the inference task while storing no more
+than a constant number of samples at any one time in typical use cases.  Rejection filtering therefore can require significantly
 less memory than traditional particle filter methods. Moreover, we show that our algorithm can be
 easily parallelized at a fine-grained level, such that it can be used with an
 array of small processing cores. Thus, \CRej~allows for finding posterior
@@ -177,15 +179,15 @@ then detail the \CRej~algorithm and discuss applications to state-space models
 such as those used in computer vision. In \sec{error-analysis}, we prove the
 stability of our algorithm and provide bounds on the errors incured in
 computing Bayesian mean estimators using \CRej. Finally, in \sec{numerical-experiments},
-we show numerical examples of the performance of \CRej~for periodic and
-strongly-peaked test cases.
+we provide experimental results on rejection filtering for tracking periodically drifting frequencies and
+also for classifying MNIST digits.
 
 %=============================================================================
 \section{Particle Filters}
 \label{sec:smc}
 %=============================================================================
 
-Particle filter methods, also known as \emph{sequential Monte Carlo} methods, proceed
+Particle filter methods, also known as \emph{sequential Monte Carlo} (SMC) methods, proceed
 by approximating the prior distribution $\pi(x)$ at each step as a weighted
 mixture of $\delta$-function distributions,
 \begin{equation}
@@ -205,7 +207,7 @@ distribution over particle weights. In the case that only Bayes updates are
 performed, however, the bootstrap filter only replaces weight by multiplicity,
 such that the numerical stability is not restored.
 
-Instead, one can draw new particles an \emph{instrumental distribution} for
+Alternatively one can draw new particles an \emph{instrumental distribution} for
 the current posterior. For instance, using a normal distribution to resample,
 each new particle $x'$ can be drawn from $\NN(\mu, \Sigma)$, where
 $\mu = \expect{x}{x}$ and $\Sigma = \var{x}{x}$.
