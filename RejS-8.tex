@@ -340,7 +340,7 @@ A formal proof is given in the supplemental material, but the intuition is that 
 sample from the prior distribution and rejecting it with probability $P(E|x)$, a sample from
 the posterior distribution can be non--deterministically drawn.  Incremental formulas are
 used in~\alg{crej} to estimate the mean and the covariance using such samples, which obviates the need
-to store $O(1/\epsilon^2)$ samples in memory in order to estimate the moments of the posterior distribution.
+to store $O(1/\epsilon^2)$ samples in memory in order to estimate the moments of the posterior distribution within error $\epsilon$.
 In practice, one can use the Welford algorithm \cite{welford_note_1962} to more precisely accumulate means
 and variances, but our theorem shows that~\alg{crej} suffices.
 
@@ -358,7 +358,11 @@ model used in the next step of the inference procedure.
 
 Having used resampling to integrate rejection sampling into particle filtering,
 we can significantly improve the complexity of the resulting rejection filtering
-algorithm by relaxing to use approximate rejection sampling.
+algorithm by relaxing to use approximate rejection sampling.  Approximate rejection
+sampling takes the exact same form as traditional rejection sampling except does
+not require that $P(E|x) \le \kappa_E$.  This means that the rescaled likelihood, $P(E|x)/\kappa_E$, is greater than $1$ for some
+configurations.  This innevitably results in errors in the posterior distribution but can make the inference process much more efficient
+in cases where a tight bound is unknown or when the prior has little support over the region where $P(E|x)/\kappa_E >1$.
 
 %
 %That is, assuming that we have a datum $E$ and the likelihood function is $P(E|x)$ then Bayesian inference
@@ -373,9 +377,8 @@ algorithm by relaxing to use approximate rejection sampling.
 
 
 
-This approximate strategy will incur errors depending on the total probability mass
-for which $P(E|x)/\kappa_E >1$.   The main question remaining is how substantial is the
-impact of these errors on the posterior distribution?  To understand this, let us define
+The main question remaining is how substantial the
+impacts of errors due to $P(E|x) > \kappa_E$ are on the posterior distribution?  To understand this, let us define
 \begin{equation}
 {\rm bad} := \left\{x: \frac{P(E|x)}{\kappa_E} >1\right\}.
 \end{equation}
@@ -393,7 +396,7 @@ The probability of accepting a sample is at least $\frac{\min_x P(E|x) (1-\delta
 Result follows directly from~\thm{crej} and theorem 1 in~\cite{WKGS15}.
 \end{proof}
 
-\cor{badalgorithm} gives an efficient method for sampling from the posterior distribution assuming that $P(E)/\kappa_E$ is at most polynomially small.  Furthermore it is incredibly space efficient since it does not require the posterior distribution to be explicitly stored.  However, it is not generally efficient when  used in an online fashion.  This is because the probability that a given sample is accepted after $L$ consecutive updates shrinks exponentially with $L$ unless $\frac{P(E)}{\kappa_E}=1-O(1/{\rm poly}(L))$.  Furthermore, even if we batch the updates together as a single update we do not expect that $\sum_x P(E|x) P(x) /\kappa_E$ is polynomially small for the majority of these examples.  
+\cor{badalgorithm} gives an efficient method for sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use it. % However, it is not generally efficient when  used in an online fashion.  %This is because the probability that a given sample is accepted after $L$ consecutive updates shrinks exponentially with $L$ unless $\frac{P(E)}{\kappa_E}=1-O(1/{\rm poly}(L))$.  Furthermore, even if we batch the updates together as a single update then we do not expect that $\sum_x P(E|x) P(x) /\kappa_E$ is polynomially small for the majority of these examples.  
 
 %-----------------------------------------------------------------------------
 \subsection{Filtering Distributions for Time-Dependent Models}
