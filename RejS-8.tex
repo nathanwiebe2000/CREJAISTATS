@@ -157,7 +157,11 @@ less memory than traditional particle filter methods. Moreover, we show that our
 easily parallelized at a fine-grained level, such that it can be used with an
 array of small processing cores. Thus, \CRej~allows for finding posterior
 samples using hybrid computing platforms based on GPU and FPGA computing, as
-well as memory restricted computing environment.
+well as memory restricted computing environments.
+For example, \CRej~allows for inference to be embedded in novel contexts such
+as very small FPGAs for low-temperature use \cite{hornibrook_cryogenic_2015} or for
+integration with existing memory-intensive FPGA configurations
+\cite{casagrande_design_2014}.
 
 %Our algorithm accomplishes these gains by using particle filtering resampling
 %and variational methods in a rejection sampling context. By using streaming
@@ -346,13 +350,6 @@ assume that a computational model is used with $N_{\rm batch}$ processing
 nodes and a server that accepts a stream of the incremental means and
 covariance sums from the processing nodes and combines them to produce the
 model used in the next step of the inference procedure.
-{\textbf{CG: move to intro}}
-This allows \CRej~to
-easily be distributed over a cluster, GPU or on softcore processors within a
-FPGA. Thus, in turn, \CRej~allows for use in to novel contexts such as very
-small FPGAs for low-temperature use \cite{hornibrook_cryogenic_2015} or for
-integration with existing memory-intensive FPGA configurations
-\cite{casagrande_design_2014}.
 
 %=============================================================================
 \subsection{Bayesian inference using Approximate Rejection Sampling}
