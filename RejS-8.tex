@@ -645,14 +645,14 @@ against the drift.
     }
     \caption{
         \label{fig:crej-diffusion}
-        \CRej~with diffusion in the true model according to
+        Rejection filtering with diffusion in the true model according to
         a normal random walk with standard deviation $\pi / 120$.  As expected, the error asymptotes to a value that is slightly less than the RMS error.
     }
 \end{figure}
 
 We design experiments $(x_-, t)$ using a heuristic that picks $x_-$ to be a random
-vector sampled from the prior and $t=1/\sqrt{{\rm Tr}~ \Sigma}$.  We use
-it because it is known
+vector sampled from the prior and $t=1/\sqrt{{\rm Tr}~ \Sigma}$ \cite{wiebe_efficient_2015}.
+We use this heuristic here because it is known
 to saturate the Bayesian Cramer--Rao bound for this problem and is
 much faster than adaptively choosing $(t,x_-)$ to minimize the Bayes risk, which
 we take to be the expected quadratic loss after performing an experiment given
@@ -786,11 +786,15 @@ number of queries to the test vector, but also can achieve $25\%$ less error eve
 
 %=============================================================================
 \section{Conclusion}
-We have provided a method for performing Bayesian inference that we call rejection filtering, which provides a means to use
-rejection sampling to perform Bayesian inference without requiring an exponentially large number of samples.  This method has a substantial
-advantage over conventional particle filter methods in that only one particle needs to be stored for the method to work, rather
-than an entire ensemble.  This is significant because it allows ideas from particle filtering to be deployed in severely memory restricted
-environments such as in embedded application.  We further illustrate the viability of these ideas through numerical experiments
+\label{sec:conclusions}
+%=============================================================================
+
+In this work, we have introduced a new method, particle filtering, that integrates
+rejection sampling with particle filtering. Our method retains many of the benefits
+of each, while using substantially less memory than conventional methods for Bayesian inference.
+In particular, our method only requires remembering a single sample at a time, making it ideal
+for memory-constrained and active learning applications.
+We further illustrate the viability of our rejection filtering approach through numerical experiments
 involving tracking the time-dependent drift of an unknown frequency and also in handwriting recognition.
 
 While our work has shown that rejection sampling can be a viable method for performing Bayesian inference, there are many
@@ -800,11 +804,6 @@ filter literature, such as the unscented particle filter or using a genetic muta
 application of these ideas may be to examine their application in online data acquisition in science and engineering.  Rejection
 filtering provides the ability to perform adaptive experiments using embedded hardware, which potentially will not only allow
 much more responsive systems but may also reveal new ways of probing nature that otherwise would be impossible.
-\label{sec:conclusions}
-
-
-%=============================================================================
-
 
 %% END MATTER %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
