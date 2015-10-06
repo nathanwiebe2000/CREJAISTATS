@@ -257,7 +257,7 @@ the development of \CRej~in the next section.
     \begin{algorithmic}
         \Require Array of evidence $\vec{E}$, number of attempts $m$, a constant $0<\kappa_E\le 1$, a recovery factor $r \ge 0$ and the prior $P$.
 %        and a mapping $\operatorname{F}$ between $(\mu,\sigma^2)$ to a family of probability distributions that has mean $\mu$ and covariance matrix $\Sigma$. Typically $F$ will yield a Gaussian distribution but other possibilities exist.
-        \Function{\CRej Update}{$\vec{E}$, $\mu$, $\Sigma$, $m$, $\kappa_E$, $r$}
+        \Function{RFUpdate}{$\vec{E}$, $\mu$, $\Sigma$, $m$, $\kappa_E$, $r$}
     \State{$(M,S,N_a) \gets 0$}
           \For{$i \in 1 \to m$}
             \State $x \sim P$
@@ -307,10 +307,12 @@ address the problems of na\"ive rejection sampling--based inference.
 \subsection{Resampling in Rejection Filtering}
 %---------------------------------------------------------------------
 
-We make rejection filtering efficient by using a process that we call resampling due to
-its similarity to resampling in sequential Monte Carlo algorithms.  We
-forgo trying to propagate samples through many rounds of rejection sampling and instead
-to use these samples to inform a new model for the posterior distribution.  For example, if
+We make rejection sampling efficient by integrating it with particle
+filtering methods using \emph{resampling}.
+Our resulting particle filtering algorithm does not try to
+to propagate samples through many rounds of rejection sampling, but instead
+uses these samples to inform a new model for the posterior distribution. 
+For example, if
 we assume that our prior distribution is a Gaussian then a Gaussian model for the posterior
 distribution can be found by computing the mean and the covariance matrix for the samples
 that are accepted by the rejection sampling algorithm.  This approach is
@@ -318,27 +320,12 @@ reminiscent of assumed density filtering~\cite{minka_expectation_2001}, which us
 for modeling the prior distribution but is less memory efficient than
 our method.
 
-
-
-
-
-This method is described in detail in~\alg{crej}. We then discuss the efficiency of the algorithm in the following theorem.
+Our method is described in detail in~\alg{crej}. We then discuss the efficiency of the algorithm in the following theorem.
 We consider an algorithm to be efficient if it runs in $O(\rm{poly}({\rm dim}(x)))$ time.
-
-
-%described above, as it allows a generic family of distributions specified by the mean
-%and covariance matrix of the sample data output by the rejection sampling step.  We use incremental
-%algorithms to compute both the mean and the covariance matrix for the samples that are accepted
-%by the rejection sampling step.  This is done to keep the memory usage low, which further exemplifies
-%the memory efficient nature of our algorithm.  Generalization of this model to Gaussian mixture models
-%is straightforward. \textbf{CG: if we have space, may be interesting to expand. Summary
-%statistics here require associating newly accepted particles with the appropriate accumulation
-%registers, then incrementing the correct $N_a$. That mixture distributions can also be
-%\emph{efficiently} estimated is something you don't even get with LW SMC, mLW not withstanding.}
 
 \begin{theorem}
 Assume that $P(E|x)\le \kappa_E$ can be computed efficiently for all hypotheses $x$, $\sum_x P(E|x)/\kappa_E$ is at most polynomially small for all
-evidences $E$ and $P(x)$ can be efficiently computed and sampled and an efficient sampling algorithm for $U(0,1)$ is provided.  \alg{crej} 
+evidences $E$ and $P(x)$ can be efficiently computed and sampled and an efficient sampling algorithm for $\operatorname{Uniform}(0,1)$ is provided.  \alg{crej} 
 can then efficiently compute the mean and covariance of $P(x|E)$ within error $\epsilon$ in the max--norm using $O({\rm dim}(x)^2\log({\rm dim}(x)/\epsilon))$ memory.\label{thm:crej}
 \end{theorem}
 Formal proof is given in the supplemental material, but the intuition is that by drawing a
@@ -346,6 +333,8 @@ sample from the prior distribution and rejecting it with probability $P(E|x)$, a
 the posterior distribution can be non--deterministically drawn.  Incremental formulas are
 used in~\alg{crej} to estimate the mean and the covariance using such samples, which obviates the need
 to store $O(1/\epsilon^2)$ samples in memory in order to estimate the moments of the posterior distribution.
+In practice, one can use the Welford algorithm \cite{welford_note_1962} to more precisely accumulate means
+and variances, but our theorem shows that~\alg{crej} suffices.
 
 Width can be traded for depth by batching the data and processing each of
 these pieces of evidence separately. We discuss this batched version of the
@@ -471,11 +460,11 @@ estimate $P(E)$ given $N_a$, even in the cases that $N_a = 0$ or $m$.
 Concretely, consider running \CRej~in parallel for two
 distinct models $M \in \{A, B\}$, such that all likelihoods are conditioned on a value
 for $M$, $P(E | x, M)$. The estimated total likelihoods for each \CRej~run then give an
-estimate of the Bayes factor $K$,
+estimate of the Bayes factor $K$ \cite{akaike_likelihood_1981},
 \begin{equation}
     K := \frac{\prod_i P(E_i | A)}{\prod_i P(E_i | B)} = \frac{\expect{\prod_i P(E_i | x, A)}{x}}{\expect{\prod_i P(E_i | x, B)}{x}}.
 \end{equation}
-(Cite Akaike here.) If $K > 1$, then model $A$ is to be preferred as an explanation
+If $K > 1$, then model $A$ is to be preferred as an explanation
 of the evidence seen thus far. In particular, the expectation over model parameters
 penalizes overfitting, such that a model preferred by $K$ must justify the dimensionality
 of $x$. This is made concrete by noting that $K$ is well-approximated by the Bayesian information
