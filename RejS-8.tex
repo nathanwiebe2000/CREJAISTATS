@@ -206,7 +206,7 @@ of rejection sampling as a viable method for inference.  The first is that the p
 in online inference problems.
 The second  is that the constant $\kappa_E$ may not be precisely known and thus $\sum_x P(E|x)P(x)$ cannot be appropriately rescaled to avoid exponentially small likelihoods.  Given that the dimension of the state
 space scales exponentially with the number of features, exponentially small probabilities are the norm rather than the exception. Our aim is to address these problems
-by using idea from particle filter methods and using approximate, rather than exact, rejection sampling.
+by using ideas from particle filter methods and using approximate, rather than exact, rejection sampling.
 
 Particle filter methods, also known as \emph{sequential Monte Carlo} (SMC) methods, proceed
 by approximating the prior distribution $\pi(x)$ at each step as a weighted
@@ -334,7 +334,7 @@ Assume that $P(E|x)\le \kappa_E$ can be computed efficiently for all hypotheses 
 evidences $E$ and $P(x)$ can be efficiently computed and sampled and an efficient sampling algorithm for $\operatorname{Uniform}(0,1)$ is provided.  \alg{crej} 
 can then efficiently compute the mean and covariance of $P(x|E)$ within error $\epsilon$ in the max--norm using $O({\rm dim}(x)^2\log({\rm dim}(x)/\epsilon))$ memory.\label{thm:crej}
 \end{theorem}
-Formal proof is given in the supplemental material, but the intuition is that by drawing a
+A formal proof is given in the supplemental material, but the intuition is that by drawing a
 sample from the prior distribution and rejecting it with probability $P(E|x)$, a sample from
 the posterior distribution can be non--deterministically drawn.  Incremental formulas are
 used in~\alg{crej} to estimate the mean and the covariance using such samples, which obviates the need
