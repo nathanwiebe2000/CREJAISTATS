@@ -127,12 +127,13 @@ Proof of~#1.}}
 
 
 \begin{abstract}
-We provide a method for approximating Bayesian inference using rejection sampling.  By introducing
-a new form of resampling we are able to not only make the process efficient but also dramatically
-reduce the memory required relative to conventional SMC methods.
+We provide a method for approximating Bayesian inference using rejection sampling.
+We not only make the process efficient, but also dramatically
+reduce the memory required relative to conventional methods
+by combining rejection sampling with particle filtering.
 We also provide an approximate form of rejection sampling that makes rejection filtering tractable
 in cases where exact rejection sampling is not efficient.
-Finally, we consider several numerical examples of rejection filtering that show its ability to track
+Finally, we present several numerical examples of rejection filtering that show its ability to track
 time dependent parameters in online settings and also benchmark its performance on MNIST classification problems.
 \end{abstract}
 
@@ -169,6 +170,9 @@ For example, \CRej~allows for inference to be embedded in novel contexts such
 as very small cryogenic controllers \cite{hornibrook_cryogenic_2015}, or for
 integration with existing memory-intensive digital signal processing systems
 \cite{casagrande_design_2014}.
+We also show that these advantages are retained in the active learning case as well,
+using well-motivated experiment design heuristics in conjunction with rejection
+filtering.
 
 We start in \sec{smc} by discussing rejection sampling and particle filter methods.
 In \sec{method}, we then detail the \CRej~algorithm and discuss applications to state-space models
@@ -583,23 +587,6 @@ P(E) \gg {L\int_V P(E|x) \mathrm{d}x }.
 \end{equation}
 Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz constant for the model is small.  In practice both of these potential failures can couple together to lead to rapidly growing errors in practice.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the variance of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm.  We deal with such instabilities with random restarts but other strategies exist.
 
-%%=============================================================================
-%\section{Variational Inference}
-%\label{sec:variational}
-%%=============================================================================
-%
-%Here we propose an alternative method of sampling from the posterior distribution.  Rather than boosting the probability of success by periodic resampling, another way that 
-%the success probability can be boosted is by starting in a distribution that is closer to the posterior distribution than the prior distribution.  In order to utilize this, one needs
-%an expedient method for estimating the posterior probability distribution.  In order for such evaluations to be practical, the likelihood function needs to have a particular form that lends itself to approximation. In fact, if an accurate and efficient method existed that could closely approximate the posterior distribution then Bayesian inference would be efficient which would imply that $\P=\NP$.  Consequently, we expect such methods to be either be inefficient or inexact.
-%
-%\begin{lemma}\label{lem:alpha}
-%Let $Q(x): x\in \mathbb{Z}^+_{2^n}$ and $P(x) : x\in \mathbb{Z}^+_{2^n}$ be probability distributions then
-%$$
-%\frac{\sum_{x\in {\rm bad}} \left(P(x) -\kappa_A Z_Q Q(x)\right)}{Z}\in O\left(\frac{ZD_2(P||Q)}{\kappa_AZ_Q}\right),
-%$$
-%where $D_2(P/Z||Q)=\frac{1}{2}\sum_x (P(x)/Z - Q(x))^2/Q(x)$ is the $\alpha=2$ divergence and we consider the asymptotic regime where $D_2(P/Z||Q)\gg 1$.
-%\end{lemma}
-
 %=============================================================================
 \section{Numerical Experiments}
 \label{sec:numerical-experiments}
@@ -618,7 +605,7 @@ advantages over either particle filtering or rejection sampling alone.
 Here, we demonstrate the effectiveness of rejection filtering using as an
 example strongly multimodal and periodic likelihood functions, such as arise
 in frequency estimation problems rising from the study of quantum mechanical
-systems \cite{ferrie_how_2013}. These likelihood functions serve as useful test cases for
+systems \cite{ferrie_how_2013,wiebe_efficient_2015}. These likelihood functions serve as useful test cases for
 Bayesian inference algorithms more generally, as the multimodality of these
 likelihoods forces a tradeoff between informative experiments and
 multimodality in the posteriors. Thus, it succeeds in these cases only
@@ -755,36 +742,6 @@ for future work.
 
 \fig{errorplot} shows that in certain parameter regimes, approximate Bayesian inference via rejection sampling can not only achieve higher classification accuracy on average for a smaller
 number of queries to the test vector, but also can achieve $25\%$ less error even if these constraints are removed.  This result is somewhat surprising given that we chose our likelihood function to correspond to nearest neighbor classification if $\sigma$ is held constant.  However, we do not hold $\sigma$ constant in our inference but rather choose it adaptively as the experiment proceeds.  This fact changes the weight of the evidence provided by each pixel query and explains why it is possible for our algorithm to outperform kNN classification despite the apparent similarities between the two approaches.
-
-
-
-
-
-%\begin{figure}
-%    \center{
-%        \includegraphics[width=0.85\columnwidth]{crej-risk-vs-m}
-%    }
-%    \caption{\label{fig:crej-risk-vs-m}
-%        Bayes risk for \CRej~after 100 updates, using inversion likelihood \eq{inversion-likelihood}
-%        with $\gamma = 5$ and PGH experiment design.
-%    }
-%\end{figure}
-%
-%\begin{figure}
-%    \center{
-%        \includegraphics[width=0.8\columnwidth]{crej-risk-vs-n_upd.pdf}
-%        \includegraphics[width=0.8\columnwidth]{crej-risk-vs-n_like.pdf}
-%    }
-%    \caption{\label{fig:crej-risk-vs-n}
-%        Median loss for \CRej~as a function of the number of Bayes updates
-%        (top) and the number of total likelihood calls used (bottom), varying over
-%        the number of rejection sampling attempts $m$ used.
-%        Simulations are performed with the inversion likelihood \eq{inversion-likelihood}
-%        with $\gamma = 10$ and PGH experiment design (\alg{pgh}). A failure recovery of $r = 0.02$
-%        is used.
-%    }
-%\end{figure}
-
 
 %=============================================================================
 \section{Conclusion}
