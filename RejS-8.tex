@@ -355,11 +355,11 @@ model used in the next step of the inference procedure.
 \subsection{Bayesian inference using Approximate Rejection Sampling}
 %=============================================================================
 
-% To avoid the memory and numerical stability costs of kernel density (Liu-West)
-% resampling, we perform Bayesian inference using rejection sampling together
-% with resampling using summary statistics.
+Having used resampling to integrate rejection sampling into particle filtering,
+we can significantly improve the complexity of the resulting rejection filtering
+algorithm by relaxing to use approximate rejection sampling.
 
-Assuming that we have a datum $E$ and the likelihood function is $P(E|x)$ then Bayesian inference
+That is, assuming that we have a datum $E$ and the likelihood function is $P(E|x)$ then Bayesian inference
 involves preparing the a distribution that is proportional to $\sum_x P(E|x) P(x)$ where $P(x)$ is the
 prior distribution.  We can therefore draw a sample from the posterior distribution by taking
 $p(x)=P(E|x)P(x)$ and $q(x)=P(x)$.  Since $0\le P(E|x)\le 1$, the rejection probability is $P(E|x)$ and
@@ -394,7 +394,6 @@ Result follows directly from~\thm{crej} and theorem 1 in~\cite{WKGS15}.
 \subsection{Filtering Distributions for Time-Dependent Models}
 \label{sec:time-dep}
 %-----------------------------------------------------------------------------
-
 
 In many particle filter applications, Bayesian inference is combined with
 time-dependent models [cite others] \cite{isard_condensationconditional_1998}
