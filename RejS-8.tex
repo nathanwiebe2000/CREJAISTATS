@@ -141,25 +141,25 @@ time dependent parameters in online settings and also benchmark its performance 
 \label{sec:intro}
 %=====================================================================
 Particle filters have become an indispensable tool for model selection, object tracking
-and statistical inference in high--dimensional problems~\cite{doucet2000sequential,del2012adaptive,van2000unscented}.  While these methods work well in conventional settings, 
+and statistical inference in high--dimensional problems~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined}.  While these methods work well in conventional settings, 
 an interesting question to ask is whether particle filter methods can be used in a setting where the
 user has access only to a constant amount of memory.  
 
 Memory restricted problems are more than just curiousities.  In control problems
 in electrical engineering and experimental physics it is common that the dynamics of
 the system can radically change over the time required to communicate between a system
-and the computer used to control its dynamics.  Such problems could be addressed by allowing the inference to performed inside
+and the computer used to control its dynamics.  The latency can be reduced to acceptable levels by allowing the inference to performed inside
 the device itself, but this often places prohibitive restrictions on the processing power and memory on processors embedded on or near the 
-device.  These restrictions can preclude the use of particle filter methods in such control problems.
+system.  These restrictions can preclude the use of traditional particle filter methods.
 
 We present an approach that we call rejection filtering that employs rejection sampling and resampling, which efficiently samples from
 an approximation to the posterior. This allows rejection filtering does to perform the inference task while storing no more
 than a constant number of samples at any one time in typical use cases.  Rejection filtering therefore can require significantly
 less memory than traditional particle filter methods. Moreover, we show that our algorithm can be
 easily parallelized at a fine-grained level, such that it can be used with an
-array of small processing cores. Thus, \CRej~allows for finding posterior
-samples using hybrid computing platforms based on GPU and FPGA computing, as
-well as memory restricted computing environments.
+array of small processing cores. Thus \CRej~is well suited for inference
+ using hybrid computing platforms based on GPU and FPGA computing and
+ memory restricted computing environments.
 For example, \CRej~allows for inference to be embedded in novel contexts such
 as very small FPGAs for low-temperature use \cite{hornibrook_cryogenic_2015} or for
 integration with existing memory-intensive FPGA configurations
@@ -174,7 +174,7 @@ integration with existing memory-intensive FPGA configurations
 %dependent and state-space models by using diffusive updates similar to
 %computer vision applications.
 
-We start in \sec{smc} by reviewing existing particle filtering methods. We
+We start in \sec{smc} by discussing rejection sampling and particle filter methods. We
 then detail the \CRej~algorithm and discuss applications to state-space models
 such as those used in computer vision. In \sec{error-analysis}, we prove the
 stability of our algorithm and provide bounds on the errors incured in
@@ -183,14 +183,14 @@ we provide experimental results on rejection filtering for tracking periodically
 also for classifying MNIST digits.
 
 %=============================================================================
-\section{Particle Filters}
+\section{Rejection Sampling and Particle Filters}
 \label{sec:smc}
 %=============================================================================
 
-As an alternative to particle filtering, rejection sampling can also
-be used to perform Bayesian inference. In particular, to draw a sample
-from a posterior distribution, begin by drawing a sample from $P(x)$.
-Then, reject that sample with
+Rejection sampling is an elegant approach to Bayesian inference. 
+It samples
+from the posterior distribution, by first sampling from the prior $P(x)$.
+The samples are then rejected with
 probability $P(E|x)$.  The probability 
 distribution of the samples that are not rejected is 
 \begin{equation}
@@ -198,10 +198,12 @@ distribution of the samples that are not rejected is
 \end{equation}
 and the probability of accepting a sample is $\sum_x P(E|x)P(x)$.
 
-There are two major drawbacks to this simple approach, which have in part prevented the adoption
+Two major drawbacks to this simple approach have prevented the adoption
 of rejection sampling as a viable method for inference.  The first is that the probability of success shrinks exponentially with the number of updates
 in online inference problems.
-The second problem is that if $P(E|x)$ is exponentially small then the algorithm will not be efficient.
+The second problem is that if $\sum_x P(E|x)P(x)$ is exponentially small then rejection sampling will not be efficient.  Given that the dimension of the state
+space scales exponentially with the number of features, exponentially small probabilities are the norm rather than the exception. Our aim is to address these problems
+by using idea from particle filter methods and using approximate, rather than exact, rejection sampling.
 
 Particle filter methods, also known as \emph{sequential Monte Carlo} (SMC) methods, proceed
 by approximating the prior distribution $\pi(x)$ at each step as a weighted
