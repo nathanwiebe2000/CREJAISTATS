@@ -256,36 +256,7 @@ storing only summary statistics of particles rather than the entire particle
 approximation~\cite{sisson_sequential_2007,del2012adaptive}.   This observation is key to
 the development of \CRej~in the next section.
 
-\begin{algorithm}[t!]
-    \caption{Update for \CRej}
-    \label{alg:crej}
-    \begin{algorithmic}
-        \Require Array of evidence $\vec{E}$, number of attempts $m$, a constant $0<\kappa_E\le 1$, a recovery factor $r \ge 0$ and the prior $P$.
-%        and a mapping $\operatorname{F}$ between $(\mu,\sigma^2)$ to a family of probability distributions that has mean $\mu$ and covariance matrix $\Sigma$. Typically $F$ will yield a Gaussian distribution but other possibilities exist.
-        \Function{RFUpdate}{$\vec{E}$, $\mu$, $\Sigma$, $m$, $\kappa_E$, $r$}
-    \State{$(M,S,N_a) \gets 0$}
-          \For{$i \in 1 \to m$}
-            \State $x \sim P$
-            \State $u \sim \operatorname{Uniform}(0, 1)$
-            \If{$\prod_{E\in \vec{E}}\min\left(P(E | x)/\kappa_E,1\right) \ge u$} %\Comment{Check if sample is accepted}
-%                \State Append $x$ to $X$.
-            \State $M \gets M+ x$
-            \State $S \gets S+ xx^T$
-    \State $N_a \gets N_a +1$.
-            \EndIf
-    \EndFor
-    \If{$N_a > 1$}
-       \State $\mu\gets M/N_a $
-       \State $\Sigma \gets \frac{1}{N_a -1}\left(S - N_a \mu\mu^T \right)$%\Comment{Use incremental formula for sample covariance}
-    \State\Return $(\mu,\Sigma,N_a)$
-   \Else
-    \State\Return $(\mu, (1+r)\Sigma),N_a)$%\Comment{Recover from failed update.}
 
-   \EndIf
-          
-        \EndFunction
-    \end{algorithmic}
-\end{algorithm}
 
 %---------------------------------------------------------------------
 \section{Rejection Filtering}\label{sec:method}
@@ -326,6 +297,37 @@ reminiscent of assumed density filtering~\cite{minka_expectation_2001}, which us
 for modeling the prior distribution but is less memory efficient than
 our method.
 
+\begin{algorithm}[t!]
+    \caption{Update for \CRej}
+    \label{alg:crej}
+    \begin{algorithmic}
+        \Require Array of evidence $\vec{E}$, number of attempts $m$, a constant $0<\kappa_E\le 1$, a recovery factor $r \ge 0$ and the prior $P$.
+%        and a mapping $\operatorname{F}$ between $(\mu,\sigma^2)$ to a family of probability distributions that has mean $\mu$ and covariance matrix $\Sigma$. Typically $F$ will yield a Gaussian distribution but other possibilities exist.
+        \Function{RFUpdate}{$\vec{E}$, $\mu$, $\Sigma$, $m$, $\kappa_E$, $r$}
+    \State{$(M,S,N_a) \gets 0$}
+          \For{$i \in 1 \to m$}
+            \State $x \sim P$
+            \State $u \sim \operatorname{Uniform}(0, 1)$
+            \If{$\prod_{E\in \vec{E}}\min\left(P(E | x)/\kappa_E,1\right) \ge u$} %\Comment{Check if sample is accepted}
+%                \State Append $x$ to $X$.
+            \State $M \gets M+ x$
+            \State $S \gets S+ xx^T$
+    \State $N_a \gets N_a +1$.
+            \EndIf
+    \EndFor
+    \If{$N_a > 1$}
+       \State $\mu\gets M/N_a $
+       \State $\Sigma \gets \frac{1}{N_a -1}\left(S - N_a \mu\mu^T \right)$%\Comment{Use incremental formula for sample covariance}
+    \State\Return $(\mu,\Sigma,N_a)$
+   \Else
+    \State\Return $(\mu, (1+r)\Sigma),N_a)$%\Comment{Recover from failed update.}
+
+   \EndIf
+          
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+
 Our method is described in detail in~\alg{crej}. We then discuss the efficiency of the algorithm in the following theorem.
 We consider an algorithm to be efficient if it runs in $O(\rm{poly}({\rm dim}(x)))$ time.
 
@@ -358,14 +360,18 @@ Having used resampling to integrate rejection sampling into particle filtering,
 we can significantly improve the complexity of the resulting rejection filtering
 algorithm by relaxing to use approximate rejection sampling.
 
-That is, assuming that we have a datum $E$ and the likelihood function is $P(E|x)$ then Bayesian inference
-involves preparing the a distribution that is proportional to $\sum_x P(E|x) P(x)$ where $P(x)$ is the
-prior distribution.  We can therefore draw a sample from the posterior distribution by taking
-$p(x)=P(E|x)P(x)$ and $q(x)=P(x)$.  Since $0\le P(E|x)\le 1$, the rejection probability is $P(E|x)$ and
-$M=1$ suffices.  However, if $P(E|x)\le 1/\kappa_E$ for the vast majority of the configurations then
-accepting the sample with probability $\min(1,P(E|x)/\kappa_E)$  can substantially reduce the 
-complexity of the algorithm.  This result is particularly useful when the likelihood function is exponentially
-small for each configuration but a tight upper bound on the likelihood is not known.
+%
+%That is, assuming that we have a datum $E$ and the likelihood function is $P(E|x)$ then Bayesian inference
+%involves preparing the a distribution that is proportional to $\sum_x P(E|x) P(x)$ where $P(x)$ is the
+%prior distribution.  We can therefore draw a sample from the posterior distribution by taking
+%$p(x)=P(E|x)P(x)$ and $q(x)=P(x)$.  Since $0\le P(E|x)\le 1$, the rejection probability is $P(E|x)$ and
+%$M=1$ suffices.  However, if $P(E|x)\le 1/\kappa_E$ for the vast majority of the configurations then
+%accepting the sample with probability $\min(1,P(E|x)/\kappa_E)$  can substantially reduce the 
+%complexity of the algorithm.  This result is particularly useful when the likelihood function is exponentially
+%small for each configuration but a tight upper bound on the likelihood is not known.
+
+
+
 
 This approximate strategy will incur errors depending on the total probability mass
 for which $P(E|x)/\kappa_E >1$.   The main question remaining is how substantial is the
