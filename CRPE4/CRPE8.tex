@@ -390,7 +390,7 @@ tradeoff experimental and computational resources differently.
 \subsection{Phase estimation with depolarizing noise}
 A criticism that has been levied lately at PE methods is that they can be impractical to execute on non--fault tolerant quantum hardware~\cite{PMS+14,MBL+14,WHT15}.  This is because phase estimation attains its quadratic advantage over statistical sampling by using exponentially long evolutions.  Decoherence causes the resultant phases to become randomized as time progresses, ultimately resulting in
 $\lim_{M\rightarrow \infty} P(0|\phi;\theta,M) = \frac{1}{2}$.
-In this limit, the measurements convey no information.  It similarly may be tempting to think that decoherence fundamentally places a lower limit on the accuracy of PE.   Bayesian inference to can, however, estimate $\phi$ using experiments with $M \approx T_2$~\cite{granade_robust_2012}.  
+In this limit, the measurements convey no information.  This does not imply that decoherence places a fundamental limit on the accuracy of PE.   Bayesian inference to can be used to learn $\phi$ to an arbitrary number of digits using $M \approx T_2$ for certain noise models~\cite{granade_robust_2012}.  
 
 We model the effect of decoherence on the system by assuming the existence of a \emph{decoherence time} $T_2$ such that
 \begin{gather}
@@ -400,7 +400,7 @@ We model the effect of decoherence on the system by assuming the existence of a 
         P(1|\phi) & = \ee^{-M/T_2}\left(\frac{1-\cos(M[\phi -\theta])}{2}\right)+\frac{1-\ee^{-M/T_2}}{2}.
     \end{aligned}
 \end{gather}
-This model is appropriate when the time required to implement the controlled operation $\Lambda(U)$ is long relative the that required to perform $H$ and an arbitrary $Z$--rotation, as is appropriate in quantum simulation.  For simplicity, in the following we assume that $T_2$ is known. 
+This model is appropriate when the time required to implement the controlled operation $\Lambda(U)$ is long relative the that required to perform $H$ and an arbitrary $Z$--rotation, as is appropriate in quantum simulation.  %For simplicity, in the following we assume that $T_2$ is known. 
  
 
 Since $T_2$ places a limitation on our ability to learn, we propose a variation to \eq{PGH},
@@ -414,15 +414,13 @@ We choose $M$ to cut off at $T_2$ in part because the locally optimized solution
 \fig{T2plot} shows that RFPE smoothly transitions between the exponential scaling expected at short times and the polynomial scaling expected when decoherence becomes significant.  The error scales roughly as $1/N^{0.6}$ in this polynomial regime, which is comparable to the $1/\sqrt{N}$ scaling expected from statistical sampling.  Decoherence therefore does not necessarily impose a fundamental limitation on the accuracy that PE can achieve.  \fig{T2plot} also shows that confining the experiments to stay in a more coherent regime also can actually hurt the algorithm's ability to infer the phase, as expected.
 
 %=============================================================================
-\section{Reset Rule}
+\section{Dealing With Noise and Non--Eigenstate Preparations}
 \label{sec:track}
 %=============================================================================
 
-\fig{T2plot} shows the performance of RFPE when the initial quantum state is an eigenstate and is discarded after each experiment.  Performing phase estimation in this way minimizes the number of experiments, but can be prohibitively expensive if preparation of the initial eigenstate is prohibitively costly.  In such cases, it makes sense to follow the standard prescription for phase estimation by keeping the quantum state until it is clear that
-a fault has occurred. In particular, we will want to re-prepare the state when it has decohered,
-projected onto an orthogonal eigenvector, or changed too much as a result of time-dependence.
-
-Such faults can cause RFPE to become confused because the new data that comes in is only consistent with hypotheses that have been ruled out.
+\fig{T2plot} shows the performance of RFPE when the initial quantum state is an eigenstate and is discarded after each experiment.  Performing phase estimation in this way minimizes the number of experiments, but can be prohibitively expensive if preparation of the initial eigenstate is prohibitively costly.  We combat this by retaining the quantum state until it is clear that
+a fault has occurred.  Such faults can either be from decoherence or from a faulty inference step and they
+ can cause RFPE to become confused because the new data that comes in is only consistent with hypotheses that have been ruled out.
 We address this by performing inexpensive experiments to assess whether the state has depolarized and then restart the learning process.
 This reset rule can be especially valuable if the input state is a superposition of eigenvectors; this is true
 even in the absence of decoherence ($T_2=\infty$) (see \app{var-reduction}).
