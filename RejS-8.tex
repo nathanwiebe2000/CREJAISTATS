@@ -534,28 +534,28 @@ it can be factored out in cases where $m$ is held constant across models and evi
 \label{sec:error-analysis}
 %=============================================================================
 
-Since our algorithms are only approximate, an important remaining question is how the error in the estimates of the posterior mean
-and covariance matrix scale with the relevant parameters of the problem.  We provide such estimates below.  For notational convenience,
-we take $\langle \cdot\!~,\cdot \rangle$ to be the inner product between two distributions.
+Since our algorithms are only approximate, an important remaining issue is that of error propagation in the estimates of the posterior mean
+and covariance matrix.  We provide bounds on how these errors can spread and provide asymptotic criteria for stability below.  For notational convenience,
+we take $\langle \cdot\!~,\cdot \rangle$ to be the inner product between two distributions and $\|\cdot\|$ to be the induced $2$--norm.
 
 \begin{lemma}
     \label{lem:errprop}
 
-    Let $P(x)$ be the prior distribution and $\tilde{P}(x)$ be an approximation to the prior such that $\tilde{P}(x) = P(x) -\Delta(x)$ and let $P(x|E)$ and $\tilde{P}(x|E)$ be the posterior distributions after event $E$ is observed for $x\in V\subset \mathbb{R}^N$ where $V$ is compact and $\|x\|\le \|x_{\rm max}\|$ for all $x\in V$.  If $|\langle P(E|x),\Delta(x) \rangle|/\langle P(E|x),P(x)\rangle \le 1/2$ then the error in the posterior mean then satisfies
+    Let $P(x)$ be the prior distribution and $\tilde{P}(x)$ be an approximation to the prior such that $\tilde{P}(x) = P(x) -\Delta(x)$ and let $P(x|E)$ and $\tilde{P}(x|E)$ be the posterior distributions after event $E$ is observed for $x\in V\subset \mathbb{R}^N$ where $V$ is compact and $\|x\|\le \|x_{\rm max}\|$ for all $x\in V$.  If $|\langle P(E|x),\Delta(x) \rangle|/P(E) \le 1/2$ then the error in the posterior mean then satisfies
     $$
-    E_1 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\|x_{\max}\|,
+    E_1 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{P(E)}\|x_{\max}\|,
     $$
-    and similarly
+    and similarly the error in the expectation of $xx^T$ is
     $$
-    E_2 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\|x_{\max}\|^2,
+    E_2 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{P(E)}\|x_{\max}\|^2,
     $$
-where $E_1:=\left|\int_V  (P(x|E) -\tilde{P}(x|E)) x \mathrm{d} x \right|$ and $E_2 \le \left|\int  (P(E|x) -\tilde{P}(E|x)) xx^T \mathrm{d} x \right|$
+where $E_1:=\left\|\int_V  (P(x|E) -\tilde{P}(x|E)) x \mathrm{d}^N x \right\|$ and $E_2 := \left\|\int  (P(E|x) -\tilde{P}(E|x)) xx^T \mathrm{d}^N x \right\|$
 \end{lemma}
 
 \lem{errprop} shows that the error in the posterior mean using an approximate prior is small given that the inner product of the likelihood function with the errors is small relative to $P(E)$. 
 
 \begin{theorem}\label{thm:meanCov}
-If the assumptions of~\lem{errprop} are met and the rejection sampling algorithm uses $m$ samples from the approximate posterior distribution to infer the posterior mean  and $x_j\sim \tilde{P}(x|E)$ and $\mu=\sum_{j=1}^m x_j/m$ then the error in the posterior mean scales as
+If the assumptions of~\lem{errprop} are met and the rejection sampling algorithm uses $m$ samples from the approximate posterior distribution to infer the posterior mean  and $x_j\sim \tilde{P}(x|E)$ then the error in the posterior mean scales as
 $$
  O\left(\left[\frac{\sqrt{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]\|x_{\max}\|\right).
 $$
@@ -567,23 +567,23 @@ $$
 \end{theorem}
 
 
-An important question to ask at this juncture is when do we expect the update process discussed in~\alg{crej} to be stable.  By stable, we mean that small initial errors do not exponentially magnify throughout the update process.  \thm{meanCov} shows that small errors in the prior distribution do not propagate into large errors in the estimates of the mean and posterior matrix given that $P(E)= \langle P(E|x),P(x)\rangle$ is sufficiently large.  In particular, an application of the Cauchy--Schwarz inequality shows that such errors are expected to be small if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$, $\int_V |\Delta(x)| \mathrm{d}x\le 1$ and 
+An important question to ask at this juncture is when do we expect the update process discussed in~\alg{crej} to be stable.  By stable, we mean that small initial errors do not exponentially magnify throughout the update process.  \thm{meanCov} shows that small errors in the prior distribution do not propagate into large errors in the estimates of the mean and posterior matrix given that $P(E)= \langle P(E|x),P(x)\rangle$ is sufficiently large.  In particular, \thm{meanCov} and an application of the Cauchy--Schwarz inequality shows that such errors are small if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and 
 $$
 \langle\Delta(x),\Delta(x)\rangle \ll \frac{P^2(E)}{{\langle P(E|x),P(E|x)\rangle}}.
 $$
-However, this does not directly address the question of stability because it does not consider the errors that are incurred in the modeling procedure for the new prior obtained from the accepted samples.
+However, this does not directly address the question of stability because it does not consider the errors that are incurred from the resampling step.
 
 We can assess the effect of these errors by assuming that, in the domain of interest, the updated model after an experiment satisfies a Lipshitz condition
 \begin{equation}
-\max_x|P_{\mu,\Sigma}(x) - P_{\mu' ,\Sigma'}(x)| \le L(|\mu- \mu'| +\|\sqrt{\Sigma}- \sqrt{\Sigma'}\|),
+\max_x|P_{\mu,\Sigma}(x) - P_{\mu' ,\Sigma'}(x)| \le L(\|\mu- \mu'\| +\|\sqrt{\Sigma}- \sqrt{\Sigma'}\|),
 \end{equation}
 for some $L\in \mathbb{R}$.  This implies that error in the approximation to the posterior distribution, $\Delta'(x)$ obeys
 \begin{equation}
-\max_x |\Delta'(x)| \in O\left( \frac{L\int_V P(E|x) \mathrm{d}x \max_x |\Delta(x)|}{P(E)}\right)
+\max_x |\Delta'(x)| \in O\left( \frac{L\int_V P(E|x) \mathrm{d}^Nx \max_x |\Delta(x)|}{P(E)}\right)
 \end{equation}
-This further suggests that, in cases where the model for the posterior is not conjugate to the prior that stability is expected if
+Stability is therefore expected if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and
 \begin{equation}
-P(E) \gg {L\int_V P(E|x) \mathrm{d}x }.
+P(E) \gg {L\int_V P(E|x) \mathrm{d}^Nx }.
 \end{equation}
 Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz constant for the model is small.  In practice both of these potential failures can couple together to lead to rapidly growing errors in practice.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the variance of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm.  We deal with such instabilities with random restarts but other strategies exist.
 
