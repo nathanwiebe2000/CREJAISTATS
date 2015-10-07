@@ -110,7 +110,7 @@ Proof of~#1.}}
 % FRONT MATTER
 %=============================================================================
 
-\newcommand{\thetitle}{Bayesian inference via Rejection Filtering}
+\newcommand{\thetitle}{Bayesian inference via rejection filtering}
 \twocolumn[
   \aistatstitle{\thetitle}
   \aistatsauthor{
@@ -189,18 +189,18 @@ also for classifying MNIST digits.
 
 Rejection sampling is an elegant approach to Bayesian inference. 
 It samples
-from the posterior distribution, by first sampling from the prior $P(x)$.
-The samples are then rejected with
-probability $P(E|x)$.  The probability 
+from the posterior distribution by first sampling $x$ from the prior $P(x)$.
+The samples are then each rejected with
+probability $1 - P(E|x)$.  The probability 
 distribution of the samples that are not rejected is 
 \begin{equation}
- \frac{P(E|x)P(x)}{\sum_x P(E|x)P(x)}= P(x|E),
+  \frac{P(E|x)P(x)}{\sum_x P(E|x)P(x)}= P(x|E),
 \end{equation}
-and the probability of accepting a sample is $\sum_x P(E|x)P(x)$.  
+and the probability of drawing a sample which is then accepted is $\sum_x P(E|x)P(x)$.  
 
 This probability
 can be boosted by instead rejecting a sample with probability $P(x|E)/\kappa_E$ where
-$\kappa_E$ is a constant that depends on the evidence $E$ such that $P(x|E) \le E \le 1$.
+$\kappa_E$ is a constant that depends on the evidence $E$ such that $P(x|E) \le \kappa_E \le 1$.
 Rescaling the likelihood does not change the posterior probability.
 It does however make the probability of acceptance $\sum_x P(E|x) P(x)/\kappa_E$, which
 can dramatically improve the performance in cases where rare events are observed.
@@ -214,7 +214,7 @@ by using ideas from particle filter methods and using approximate, rather than e
 
 Particle filter methods, also known as \emph{sequential Monte Carlo} (SMC) methods, proceed
 by approximating the prior distribution $\pi(x)$ at each step as a weighted
-mixture of $\delta$-function distributions,
+mixture of $\delta$-function distributions \cite{doucet_introduction_2001},
 \begin{equation}
     \pi(x) \approx \sum_i w_i \delta(x - x_i),
 \end{equation}
@@ -232,7 +232,7 @@ distribution over particle weights. In the case that only Bayes updates are
 performed, however, the bootstrap filter only replaces weight by multiplicity,
 such that the numerical stability is not restored.
 
-Alternatively one can draw new particles an \emph{instrumental distribution} for
+Alternatively one can draw new particles from an \emph{instrumental distribution} for
 the current posterior. For instance, using a normal distribution to resample,
 each new particle $x'$ can be drawn from $\NN(\mu, \Sigma)$, where
 $\mu = \expect{x}{x}$ and $\Sigma = \var{x}{x}$.
@@ -250,14 +250,11 @@ and covariance $\Sigma = \sqrt{1 - a^2}\,\var{x}{x}$.
 This choice of resampling distribution explicitly preserves the mean
 and the covariance of the current posterior, while increasing the
 effective sample size.
-%Choosing $a$ close to the bootstrap filter, however, can require a large
-%initial sample size in order to process highly informative evidence
-%in a numerically stable way. 
 
 When the posterior is approximately normal, $a = 0$ approximately
 preserves all of the relevant information about the posterior, but requires
 storing only summary statistics of particles rather than the entire particle
-approximation~\cite{sisson_sequential_2007,del2012adaptive}.   This observation is key to
+approximation~\cite{del2012adaptive,sisson_sequential_2007}.   This observation is key to
 the development of \CRej~in the next section.
 
 
@@ -294,7 +291,7 @@ Our resulting particle filtering algorithm does not try to
 to propagate samples through many rounds of rejection sampling, but instead
 uses these samples to inform a new model for the posterior distribution. 
 For example, if
-we assume that our prior distribution is a Gaussian then a Gaussian model for the posterior
+we assume that our prior distribution is a Gaussian, then a Gaussian model for the posterior
 distribution can be found by computing the mean and the covariance matrix for the samples
 that are accepted by the rejection sampling algorithm.  This approach is
 reminiscent of assumed density filtering~\cite{minka_expectation_2001}, which uses an analogous strategy
@@ -306,25 +303,23 @@ our method.
     \label{alg:crej}
     \begin{algorithmic}
         \Require Array of evidence $\vec{E}$, number of attempts $m$, a constant $0<\kappa_E\le 1$, a recovery factor $r \ge 0$ and the prior $P$.
-%        and a mapping $\operatorname{F}$ between $(\mu,\sigma^2)$ to a family of probability distributions that has mean $\mu$ and covariance matrix $\Sigma$. Typically $F$ will yield a Gaussian distribution but other possibilities exist.
         \Function{RFUpdate}{$\vec{E}$, $\mu$, $\Sigma$, $m$, $\kappa_E$, $r$}
     \State{$(M,S,N_a) \gets 0$}
           \For{$i \in 1 \to m$}
             \State $x \sim P$
             \State $u \sim \operatorname{Uniform}(0, 1)$
-            \If{$\prod_{E\in \vec{E}}\min\left(P(E | x)/\kappa_E,1\right) \ge u$} %\Comment{Check if sample is accepted}
-%                \State Append $x$ to $X$.
+            \If{$\prod_{E\in \vec{E}}\min\left(P(E | x)/\kappa_E,1\right) \ge u$} 
             \State $M \gets M+ x$
             \State $S \gets S+ xx^T$
     \State $N_a \gets N_a +1$.
             \EndIf
     \EndFor
-    \If{$N_a > 1$}
+    \If{$N_a \ge 1$}
        \State $\mu\gets M/N_a $
-       \State $\Sigma \gets \frac{1}{N_a -1}\left(S - N_a \mu\mu^T \right)$%\Comment{Use incremental formula for sample covariance}
+       \State $\Sigma \gets \frac{1}{N_a -1}\left(S - N_a \mu\mu^T \right)$
     \State\Return $(\mu,\Sigma,N_a)$
    \Else
-    \State\Return $(\mu, (1+r)\Sigma),N_a)$%\Comment{Recover from failed update.}
+    \State\Return $(\mu, (1+r)\Sigma),N_a)$
 
    \EndIf
           
@@ -337,7 +332,7 @@ We consider an algorithm to be efficient if it runs in $O(\rm{poly}({\rm dim}(x)
 
 \begin{theorem}
 Assume that $P(E|x)\le \kappa_E$ can be computed efficiently for all hypotheses $x$, $\sum_x P(E|x)/\kappa_E$ is at most polynomially small for all
-evidences $E$ and $P(x)$ can be efficiently computed and sampled and an efficient sampling algorithm for $\operatorname{Uniform}(0,1)$ is provided.  \alg{crej} 
+evidences $E$ and $P(x)$ can be efficiently sampled and an efficient sampling algorithm for $\operatorname{Uniform}(0,1)$ is provided.  \alg{crej} 
 can then efficiently compute the mean and covariance of $P(x|E)$ within error $\epsilon$ in the max--norm using $O({\rm dim}(x)^2\log({\rm dim}(x)/\epsilon))$ memory.\label{thm:crej}
 \end{theorem}
 A formal proof is given in the supplemental material, but the intuition is that by drawing a
@@ -346,7 +341,7 @@ the posterior distribution can be non--deterministically drawn.  Incremental for
 used in~\alg{crej} to estimate the mean and the covariance using such samples, which obviates the need
 to store $O(1/\epsilon^2)$ samples in memory in order to estimate the moments of the posterior distribution within error $\epsilon$.
 In practice, one can use the Welford algorithm \cite{welford_note_1962} to more precisely accumulate means
-and variances, but doing so does not change the asymptotic scaling of the memory with $\epsilon$ that~\alg{crej} requires.
+and variances, but doing so does not change the asymptotic scaling with $\epsilon$ of the memory required by~\alg{crej}.
 
 Width can be traded for depth by batching the data and processing each of
 these pieces of evidence separately. We discuss this batched version of the
@@ -360,26 +355,14 @@ model used in the next step of the inference procedure.
 \subsection{Bayesian inference using Approximate Rejection Sampling}
 %=============================================================================
 
-Having used resampling to integrate rejection sampling into particle filtering,
+Having used resampling to combine rejection sampling and particle filtering,
 we can significantly improve the complexity of the resulting rejection filtering
-algorithm by relaxing to use approximate rejection sampling.  Approximate rejection
-sampling takes the exact same form as traditional rejection sampling except does
-not require that $P(E|x) \le \kappa_E$.  This means that the rescaled likelihood, $P(E|x)/\kappa_E$, is greater than $1$ for some
-configurations.  This innevitably results in errors in the posterior distribution but can make the inference process much more efficient
+algorithm by relaxing from exact rejection sampling.  Approximate rejection
+sampling takes the exact same form as traditional rejection sampling except
+that it does not require that $P(E|x) \le \kappa_E$.  This means that the rescaled
+likelihood $P(E|x)/\kappa_E$ is greater than $1$ for some
+configurations.  This inevitably results in errors in the posterior distribution but can make the inference process much more efficient
 in cases where a tight bound is unknown or when the prior has little support over the region where $P(E|x)/\kappa_E >1$.
-
-%
-%That is, assuming that we have a datum $E$ and the likelihood function is $P(E|x)$ then Bayesian inference
-%involves preparing the a distribution that is proportional to $\sum_x P(E|x) P(x)$ where $P(x)$ is the
-%prior distribution.  We can therefore draw a sample from the posterior distribution by taking
-%$p(x)=P(E|x)P(x)$ and $q(x)=P(x)$.  Since $0\le P(E|x)\le 1$, the rejection probability is $P(E|x)$ and
-%$M=1$ suffices.  However, if $P(E|x)\le 1/\kappa_E$ for the vast majority of the configurations then
-%accepting the sample with probability $\min(1,P(E|x)/\kappa_E)$  can substantially reduce the 
-%complexity of the algorithm.  This result is particularly useful when the likelihood function is exponentially
-%small for each configuration but a tight upper bound on the likelihood is not known.
-
-
-
 
 The main question remaining is how substantial the
 impacts of errors due to $P(E|x) > \kappa_E$ are on the posterior distribution?  To understand this, let us define
@@ -400,7 +383,7 @@ The probability of accepting a sample is at least $\frac{\min_x P(E|x) (1-\delta
 Result follows directly from~\thm{crej} and Theorem 1 in~\cite{WKGS15}.
 \end{proof}
 
-\cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too large for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily lead to substantial errors in the posterior distribution.  This allows efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use it. % However, it is not generally efficient when  used in an online fashion.  %This is because the probability that a given sample is accepted after $L$ consecutive updates shrinks exponentially with $L$ unless $\frac{P(E)}{\kappa_E}=1-O(1/{\rm poly}(L))$.  Furthermore, even if we batch the updates together as a single update then we do not expect that $\sum_x P(E|x) P(x) /\kappa_E$ is polynomially small for the majority of these examples.  
+\cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too large for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily lead to substantial errors in the posterior distribution.  This allows for an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore, it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use our method.
 
 %-----------------------------------------------------------------------------
 \subsection{Filtering Distributions for Time-Dependent Models}
@@ -408,8 +391,8 @@ Result follows directly from~\thm{crej} and Theorem 1 in~\cite{WKGS15}.
 %-----------------------------------------------------------------------------
 
 In many particle filter applications, Bayesian inference is combined with
-time-dependent models [cite others] \cite{isard_condensationconditional_1998}
-to perform object tracking and acquisition. Here, we show that such
+time-dependent models \cite{isard_condensationconditional_1998,gustafsson_particle_2002}
+to perform object tracking and acquisition. Here, we show that
 \CRej~naturally encompasses these applications as well by convolving posterior
 distributions with Gaussian update kernels.
 
@@ -440,12 +423,12 @@ Gaussian, the width of the resultant distribution can be increased without
 affecting the prior mean. 
 In a similar way, \CRej~can be extended to include diffusion by using a resampling kernel
 that has a broader variance than that of the accepted posterior samples. Doing so
-allows \CRej~to track stochastic processes in a similar way to \CSMC, as is illustrated
-in \fig{crej-diffusion}.
+allows \CRej~to track stochastic processes in a similar way to \CSMC, as is described
+in detail in \sec{numerical-experiments}.
 
 Formally, we model our posterior distribution as
 \begin{equation}
-\tilde{P}(x|E;t) = P(x|E;t) \star \mathcal{B}(0,\eta),
+  P(x|E;t_{k+1}) = P(x|E;t_k) \star \mathcal{B}(0,\eta(t_{k+1} - t_k)),
 \end{equation}
 where $\mathcal{B}$ is a distribution with zero mean and variance
 $\eta$ and $\star$ denotes a convolution over $x$.
@@ -454,7 +437,7 @@ Gaussian model for the posterior distribution, the resulting distribution
 remains Gaussian under the convolution if $\mathcal{B}$ is also a Gaussian.
 If the variance of the prior distribution is $s$ then it is easy to see from
 the properties of the Fourier transform that the variance of
-$\tilde{P}(x|E;t)$ is $s+\eta$ and the mean remains $\bar{x}$.
+$\tilde{P}(x|E;t)$ is $s+\eta (t_{k+1} - t_k)$ and the mean remains $\bar{x}$.
 
 
 %-----------------------------------------------------------------------------
@@ -511,23 +494,8 @@ Model selection of this form has been used, for instance, to decide if
 a diffusive model is appropriate for predicting future evidence \cite{granade_characterization_2015}.
 Given the aggressiveness of the \CRej~resampling step, streaming model selection
 will be especially important in assessing whether a diffusive inference model has
-``lost'' the true value. Moreover, since the $\ln(m + 2\beta)$ term is in common,
+``lost'' the true value \cite{wiebe_efficient_2015}. Moreover, since the $\ln(m + 2\beta)$ term is in common,
 it can be factored out in cases where $m$ is held constant across models and evidence.
-
-%%-----------------------------------------------------------------------------
-%\subsection{Principal Component Analysis for High-Dimensional Models}
-%%-----------------------------------------------------------------------------
-%
-%\textbf{CG: just copied from Old Stuff as a placeholder. Also, this needs to be made more precise, sorry.}
-%Other more sophisticated
-%algorithms exist that utilize principal component analysis that may be highly effective for
-%data that lies in a low-dimensional subspace of a large vector space.
-%For a $d$-dimensional model vector, the MCJ algorithm finds $k$ principal components
-%with memory limited by $O(kp)$, such that we retain the memory advantages of \CRej~in
-%this application. This comes at the cost, however, of parallelization, as the blocks in
-%the MCJ algorithm are processed sequentially. We address this by using the MCJ algorithm within
-%each processing element, then combining the PCA estimates from each with multilevel PCA.
-
 
 %=============================================================================
 \section{Error Analysis}
@@ -549,7 +517,7 @@ we take $\langle \cdot\!~,\cdot \rangle$ to be the inner product between two dis
     $$
     E_2 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{P(E)}\|x_{\max}\|^2,
     $$
-where $E_1:=\left\|\int_V  (P(x|E) -\tilde{P}(x|E)) x \mathrm{d}^N x \right\|$ and $E_2 := \left\|\int  (P(E|x) -\tilde{P}(E|x)) xx^T \mathrm{d}^N x \right\|$
+where $E_1:=\left\|\int_V  (P(x|E) -\tilde{P}(x|E)) x \mathrm{d}^N x \right\|$ and $E_2 := \left\|\int_V  (P(E|x) -\tilde{P}(E|x)) xx^T \mathrm{d}^N x \right\|$
 \end{lemma}
 
 \lem{errprop} shows that the error in the posterior mean using an approximate prior is small given that the inner product of the likelihood function with the errors is small relative to $P(E)$. 
@@ -865,12 +833,12 @@ The theorem then follows from inserting~\eq{xxTMC} into~\eq{xxT} and applying~\l
 %=============================================================================
 \section{Batched Updating}
 \label{app:batched-updates}
-
-Although we focused in the discussion in the main body on memory restricted applications, it is also possible to exploit the fact that the
-rejection sampling procedure is inherently parallelizable.  This comes at the price of increasing the overall
-memory usage.  We describe such an algorithm above and assume in the algorithm a model where samples are sent by a server to
-individual processing nodes and the accepted samples are then returned to the server.
 %=============================================================================
+
+Although we focused in the main body on memory restricted applications, it is also possible to exploit the fact that the
+rejection sampling procedure is inherently parallelizable.
+This comes at the price of increasing the overall
+memory usage. Here, we describe a batched form of our algorithm, assuming a model in which samples are sent by a server to individual processing nodes and the accepted samples are then returned to the server.
 
 \begin{algorithm}
     \caption{Batched update for \CRej}
@@ -883,12 +851,12 @@ individual processing nodes and the accepted samples are then returned to the se
   \State{$(M,S,N_a) \gets 0$}
           \For{{\bf each} $i \in 1 \to N_{\rm batch}$}
   \State Pass $\vec{E},m,\kappa_E, \mu,\Sigma,r$ to processing node $i$.
-  \State Set local variables $(\mu^{i}, \Sigma^{i},N_a^{i})\gets \Call{\CRej Update}{\vec{E},m,\kappa_E,\mu,\Sigma,r}$.
+  \State Set local variables $(\mu^{i}, \Sigma^{i},N_a^{i})\gets \Call{RFUpdate}{\vec{E},m,\kappa_E,\mu,\Sigma,r}$.
   \If{$N_a^i >0$}
   \State $M^i \gets \mu^i N_a^i$
   \State $S^i \gets (N_a^i-1)\Sigma +N_a^i\mu\mu^T$ 
-  \State Pass $N_a^i$, $M^i$ and $S^i$ back to server.       
-  \Else \State Return $(0,0,0)$.
+  \State Pass $N_a^i$, $M^i$ and $S^i$ back to the server.       
+  \Else \State Pass $(0,0,0)$ back to the server.
   \EndIf
   \EndFor
     \If{$\sum_i N_a^i > 0$}
