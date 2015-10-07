@@ -421,14 +421,21 @@ We choose $M$ to cut off at $T_2$ in part because the locally optimized solution
 \fig{T2plot} shows that RFPE smoothly transitions between the exponential scaling expected at short times and the polynomial scaling expected when decoherence becomes significant.  The error scales roughly as $1/N^{0.6}$ in this polynomial regime, which is comparable to the $1/\sqrt{N}$ scaling expected from statistical sampling.  Decoherence therefore does not necessarily impose a fundamental limitation on the accuracy that PE can achieve.  \fig{T2plot} also shows that confining the experiments to stay in a more coherent regime also can actually hurt the algorithm's ability to infer the phase, as expected.
 
 %=============================================================================
-\section{Tracking Eigenphases}
+\section{Reset Rule}
 %=============================================================================
 
-\fig{T2plot} shows the performance of RFPE when the initial quantum state is an eigenstate and is discarded after each experiment.  Performing phase estimation in this way minimizes the number of experiments, but can be prohibitively expensive if preparation of the initial eigenstate is prohibitively costly.  In such cases, it makes sense to follow the standard prescription for phase estimation by keeping the quantum state until it is clear that the initial eigenstate has been depolarized.  These depolarizations can cause RFPE to become confused because the new data that comes in is only consistent with hypotheses that have been ruled out.  We address this by performing inexpensive experiments to assess whether the state has depolarized and then restart the learning process. Restarting can even be valuable when $T_2=0$ if the input state is a superposition of eigenvectors or to recover if the RFPE becomes stuck (see \app{var-reduction}).
+\fig{T2plot} shows the performance of RFPE when the initial quantum state is an eigenstate and is discarded after each experiment.  Performing phase estimation in this way minimizes the number of experiments, but can be prohibitively expensive if preparation of the initial eigenstate is prohibitively costly.  In such cases, it makes sense to follow the standard prescription for phase estimation by keeping the quantum state until it is clear that
+a fault has occurred. In particular, we will want to re-prepare the state when it has decohered,
+projected onto an orthogonal eigenvector, or changed too much as a result of time-dependence.
+
+Such faults can cause RFPE to become confused because the new data that comes in is only consistent with hypotheses that have been ruled out.
+We address this by performing inexpensive experiments to assess whether the state has depolarized and then restart the learning process.
+This reset rule can be especially valuable if the input state is a superposition of eigenvectors; this is true
+even in the absence of decoherence ($T_2=\infty$) (see \app{var-reduction}).
 
 The following procedure addresses this issue in cases where the spectral gaps are promised to be at least $\Delta$.
 \begin{enumerate}
-\item After each update with probability $e^{-M/T_2}$ perform an experiment with $\theta=\mu$ and $M=\tau/\sigma$ for $\tau< 1$.
+\item After each update with probability $\ee^{-M/T_2}$ perform an experiment with $\theta=\mu$ and $M=\tau/\sigma$ for $\tau< 1$.
 \item If result $=1$ then prepare initial state and reset $\sigma$.
 \item After restart, continue as normal until $\sigma<\Delta$ then set $\sigma$ and $\mu$ to those of the closest eigenvalue.
 \end{enumerate}
