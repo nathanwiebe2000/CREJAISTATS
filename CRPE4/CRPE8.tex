@@ -185,18 +185,15 @@ improved classical inference procedures.  This raises an important question:
 can these ideas be used to speed up phase estimation or make it more robust to
 experimental error?
 
-We answer this in the affirmative by providing a new classical inference
+We answer this in the affirmative by providing an efficient classical inference
 method, inspired by recent work on particle filter methods, that is tailored
 to phase estimation. Our method not only provides performance
 advantages over existing iterative methods~\cite{Kit96,kitaev2002classical}, but
 is also robust to experimental imperfections such as depolarizing noise and
 small systematic errors.
-
-Before going into detail about our algorithm we will first review the phase
-estimation circuit and Bayesian approaches to PE.  We then show that rejection
-sampling can be used to efficiently approximate Bayesian inference, thereby
-allowing PE to inherit the speed and robustness of adaptive Bayesian approaches while
-retaining the efficiency of traditional methods.
+This
+allows PE to inherit the speed and robustness of adaptive Bayesian approaches while
+retaining the computational efficiency of traditional iterative methods.
 
 Iterative PE infers the eigenvalue of a given eigenvector of a unitary matrix
 $U$ from a set of experiments that are performed on the circuit
@@ -254,11 +251,9 @@ After using~\eq{update} to update the posterior distribution we then set the pri
 Unlike conventional methods, Bayesian inference returns a posterior
 distribution over the phase. The mean and standard deviation of this
 distribution provide an estimate of the true eigenvalue and the algorithm's
-uncertainty in that value. More sophisticated estimates of uncertainty, such
-as credible regions, can also be extracted from the posterior
-distribution~\cite{granade_robust_2012,ferrie_high_2014}. Estimates of
-the uncertainty are crucial here because we use them to design highly informative experiments 
- and also because they allow the protocol to be terminated when a threshold accuracy has been reached.
+uncertainty in that value~\cite{granade_robust_2012,ferrie_high_2014}. Estimates of
+the uncertainty are not just valuable for quantifying error: they also allow us to design highly informative experiments 
+ and allow the protocol to be terminated when a threshold accuracy has been reached.
 
 \begin{figure}[t!]
     \begin{centering}
