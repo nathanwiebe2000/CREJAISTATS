@@ -172,27 +172,28 @@ Proof of~#1.}}
 %=============================================================================
 
 
-Eigenvalue estimation has been a cornerstone of physics since the dawn of spectroscopy.  Ideas from quantum information theory have revolutionized our understanding of how to best learn spectral properties.  These ideas exponentially reduce the number experiments needed to learn an eigenphase relative to statistical sampling and require total experimental time that scales optimally with the overall evolution time.  This quantum approach, known as phase estimation (PE), is crucial to acheive many of the celebrated speedups promised by quantum computing~\cite{shor_polynomial-time_1995,BHM+02,ADL+05,harrow2009quantum,lanyon2010towards}.  Optimizing these algorithms is especially important for present day experimental demonstrations of such algorithms because the number of quantum gates that can be performed is often severely limitted by decoherence.
+Eigenvalue estimation has been a cornerstone of physics since the dawn of spectroscopy.  Quantum information theory have revolutionized our understanding of how to best learn spectral properties.
+These ideas exponentially reduce the number of experiments needed to learn an eigenphase relative to statistical sampling and scale optimally with the total experimental time.
+This quantum approach, known as phase estimation (PE), is crucial to achieve many of the celebrated speedups promised by quantum computing~\cite{shor_polynomial-time_1995,BHM+02,ADL+05,harrow2009quantum,lanyon2010towards}.  Optimizing these algorithms is especially important for present-day experimental demonstrations of such algorithms because the number of quantum gates that can be performed is often severely limited by decoherence.
 
 The most popular approach to PE is known as iterative phase estimation (IPE),
 as it forgoes the use of quantum resources to infer the eigenvalues of unitary
 matrix in favor of using a classical inference algorithm to estimate the
 eigenvalues from experimental
 data~\cite{Kit96,kitaev2002classical,higgins2007entanglement,SHF14,KLY15}.  Although
-the methodologies used for inference stretch back to the nineties,
+the methodologies used for inference stretch back decades,
 the ongoing revolution in machine learning that has lead to a plethora of
-improved classical inference procedures.  This raises an important question:
-can these ideas be used to speed up phase estimation or make it more robust to
+improved classical inference procedures raises an important question.
+Can these ideas be used to speed up phase estimation or make it more robust to
 experimental error?
 
 We answer this in the affirmative by providing an efficient classical inference
-method, inspired by recent work on particle filter methods, that is tailored
+method, inspired by recent work on particle filtering, that is tailored
 to phase estimation. Our method not only provides performance
-advantages over existing iterative methods~\cite{Kit96,kitaev2002classical}, but
+advantages over iterative methods~\cite{Kit96,kitaev2002classical}, but
 is also robust to experimental imperfections such as depolarizing noise and
 small systematic errors.
-This
-allows PE to inherit the speed and robustness of adaptive Bayesian approaches while
+This allows PE to inherit the speed and robustness of adaptive Bayesian approaches while
 retaining the computational efficiency of traditional iterative methods.
 
 Iterative PE infers the eigenvalue of a given eigenvector of a unitary matrix
@@ -207,20 +208,12 @@ where $U\ket{\phi} = \ee^{\ii\phi}\ket{\phi}$ for an unknown eigenphase $\phi \i
 and where $Z(M \theta) = \ee^{\ii M \theta Z}$ is a rotation that can be used to compare the eigenphase of $U$ to
 a known reference value.
 Most PE algorithms use this circuit to infer the bits
-in a binary expansion of $\phi$.  The process is can be made near optimal (up to $\log^*$ factors~\cite{SHF14}) and
+in a binary expansion of $\phi$.  The process can be made near optimal (up to $\log^*$ factors~\cite{SHF14}) and
 affords an efficient inference method for these bits.
 
 In general, the input state need not be an eigenstate of $U$.  Even if the state is a maximally mixed state then the iterative process will eventually project it into
 a (possibly degenerate) eigenspace of the unitary.  In order to simplify the following exposition, we will assume that the input state is an eigenstate of $U$ but it can also be taken
-to be a maximally mixed state without loss of generality.  We will discuss this issue in greater detail in~\sec{track}.
-
-%Our work addresses these problems by not only providing a method for
-%performing an efficient form of Bayesian phase estimation but also giving an
-%expedient heuristic for adaptively choosing approximately optimal experiments.
-%We illustrate this by showing that our algorithm not only exhibits the same
-%Heisenberg limited scaling of phase estimation and
-%continues to learn even when decoherence or other experimental imperfections prevent traditional phase estimation
-%methods from working.
+to be a maximally mixed state without loss of generality.  We will discuss this issue further in~\sec{track}.
 
 %=============================================================================
 \section{Bayesian Phase Estimation}
@@ -242,15 +235,14 @@ function $P(0|\phi;\theta,M)$. For phase estimation,
 \begin{gather}
     \label{eq:likenodecohere}
     \begin{aligned}
-        P(0|\phi;\theta,M) & = \frac{1+\cos(M[\phi +\theta])}{2},\\
-        P(1|\phi;\theta,M) & = \frac{1-\cos(M[\phi +\theta])}{2}.
+        P(0|\phi;\theta,M) & = \frac{1+\cos(M[\phi +\theta])}{2}.
     \end{aligned}
 \end{gather}
 After using~\eq{update} to update the posterior distribution we then set the prior distribution to equal the posterior distribution.  This process is then repeated for each of the random experiments in the data set.
 
-Unlike conventional methods, Bayesian inference returns a posterior
-distribution over the phase. The mean and standard deviation of this
-distribution provide an estimate of the true eigenvalue and the algorithm's
+Bayesian inference returns a posterior
+distribution over the phase, the mean and standard deviation which
+provide estimates of the true eigenvalue and the algorithm's
 uncertainty in that value~\cite{granade_robust_2012,ferrie_high_2014}. Estimates of
 the uncertainty are not just valuable for quantifying error: they also allow us to design highly informative experiments 
  and allow the protocol to be terminated when a threshold accuracy has been reached.
