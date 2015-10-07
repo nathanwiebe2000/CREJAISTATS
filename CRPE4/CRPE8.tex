@@ -410,12 +410,14 @@ We choose $M$ to cut off at $T_2$ in part because the locally optimized solution
 \label{sec:track}
 %=============================================================================
 
-\fig{T2plot} shows the performance of RFPE when the initial quantum state is an eigenstate and is discarded after each experiment.  Performing phase estimation in this way minimizes the number of experiments, but can be prohibitively expensive if preparation of the initial eigenstate is prohibitively costly.  We combat this by retaining the quantum state until it is clear that
-a fault has occurred.  Such faults can either be from decoherence or from a faulty inference step and they
- can cause RFPE to become confused because the new data that comes in is only consistent with hypotheses that have been ruled out.
+\fig{T2plot} shows the performance of RFPE when the initial quantum state is an eigenstate and is discarded after each experiment.  Performing phase estimation in this way minimizes the number of experiments, but can be prohibitively expensive if preparation of the initial eigenstate is prohibitively costly.  
+
+We combat this by retaining the quantum state until it is clear that
+a fault has occurred.  Such faults can either be from decoherence or from a faulty inference step.  They
+ can cause RFPE to fail because the new data that comes in is only consistent with hypotheses that have been ruled out.
 We address this by performing inexpensive experiments to assess whether the state has depolarized and then restart the learning process.
-This reset rule can be especially valuable if the input state is a superposition of eigenvectors; this is true
-even in the absence of decoherence ($T_2=\infty$) (see \app{var-reduction}).
+This reset rule also stabilizes the algorithm when the input state is a superposition of eigenvectors, which underscores its value
+even when $T_2=\infty$ (see \app{var-reduction}).
 
 The following procedure addresses this issue in cases where the spectral gaps are promised to be at least $\Delta$.
 \begin{enumerate}
