@@ -284,21 +284,16 @@ then perform Bayesian inference on the discrete set of samples (often called
 ``particles'').  These particle filter methods methods are quite powerful and
 have become a mainstay in computer vision and machine
 learning~\cite{haykin2004kalman,smith2013sequential,isard_condensationconditional_1998}.
-
-
-Despite the power of these methods, they are often hard to implement and even
-harder to deploy in a memory limited environment such as on an embedded
-controller or an FPGA. With the increasing use of FPGAs in the control of
+Despite the power of particle filtering, it is often to deploy in memory-limited environments,
+such as on an embedded controller. With the prevalence of FPGAs in the control of
 quantum information experiments
 \cite{shulman_suppressing_2014,casagrande_design_2014,hornibrook_cryogenic_2015},
-overcoming this limitation presents a
-significant advantage to modern experiment design. 
+overcoming this limitation presents a significant advantage.
 
-We propose
- a much simpler approach that we call Rejection Filtering Phase
+We propose a much simpler approach that we call Rejection Filtering Phase
 Estimation (RFPE). Rather than using a set of hypotheses that implicitly
 define a model for the system, we posit a prior model and directly update it
-to find a model for our posterior distribution.  We achieve this by using a
+to find a model for our posterior.  We achieve this by using a
 Gaussian with mean $\mu$ and variance $\sigma^2$ to model our initial prior, perform a Bayesian update on samples
 drawn from the distribution and then refit the updated samples to a Gaussian.
 This strategy is used in a number of particle filter methods such as the extended Kalman filter and assumed density
@@ -360,21 +355,20 @@ functions~\cite{wiebe_hamiltonian_2014},
     \theta \sim P(\phi).\label{eq:PGH}
 \end{align}
 The factor of $1.25$ comes from optimizing the cost of RFPE.   Non-integer $M$
-are appropriate if $U=\ee^{-i H M}$.
+are appropriate if $U=\ee^{-\ii H M}$.
 
 \fig{PEerror} shows the error incurred using RFPE.  The most obvious feature is that the error shrinks exponentially with the number of experiments (which is proportional to the evolution time under the PGH) for $m>100$.  Roughly $150$ experiments are needed for the method to provide $32$ bits of accuracy in the median case.
-We discuss the scaling in the mean in \app{var-reduction}.
+We discuss the scaling of the mean in \app{var-reduction}.
 
-The number of experiments needed to reach error $\epsilon$ scales as $O(\log(1/\epsilon))$ rather than $O(\log(1/\epsilon)\log\log(1/\epsilon))$ in Kitaev's method~\cite{Kit96,kitaev2002classical}.  Concretely, after $150$ experiments the median error for Kitaev's PE algorithm (with $s=10$) is roughly $10$ million times that of RFPE.
+The number of experiments needed to reach error $\epsilon$ empirically scales as $O(\log(1/\epsilon))$ rather than $O(\log(1/\epsilon)\log\log(1/\epsilon))$ in Kitaev's method~\cite{Kit96,kitaev2002classical}.  Concretely, after $150$ experiments the median error for Kitaev's PE algorithm (with $s=10$) is roughly $10$ million times that of RFPE.
 
 Although the number of experiments needed is small, the experimental time need
 not be.  If the error shrinks as $\epsilon\in \Theta(\ee^{-\lambda N})$ where
 $N$ is the experiment number then $T_{\exp}\in O(\sum_{N=1}^{N_{\max}} \ee^{\lambda N})\in O(\ee^{\lambda N_{\rm max}})\in O(1/\epsilon)$.  The
-time required saturates the Heisenberg limit, up to a multiplicative constant.
+time required saturates the Cram\'er-Rao bound, up to a multiplicative constant.
 Specifically, $\lambda\approx 0.17$ for RFPE.
 
-\fig{ITPEcmp} compares RFPE to the information-theory PE (ITPE) method of Svore~\etal.  Although ITPE is inefficient and is non--adaptive, it is exact and so it is a natural benchmark to compare RFPE against.  We find  ITPE requires nearly five times the applications of $U$ if $\phi=2\pi k/t$ for integer $k<t$ and $t=10~000$.  
-
+\fig{ITPEcmp} compares RFPE to information-theory PE (ITPE).  Although ITPE not adaptive, it is exact and so it is a natural benchmark to compare RFPE against.  We find  ITPE requires nearly five times the applications of $U$ if $\phi=2\pi k/t$ for integer $k<t$ and $t=10~000$.  
 
 Conversely,
 ITPE requires only $25$ measurements to identify the phase with $50\%$
@@ -385,8 +379,7 @@ contradictory possibilities which causes ITPE to become confused.  We correct
 this by choosing $M\rightarrow \lceil M/2\rceil$ in such cases, which increases the number
 of experiments to $35$ but also reduces the experimental time below that of
 unmodified ITPE.  This shows that all three methods
-tradeoff experimental and computational resources differently.  The latter point
-is especially salient because ITPE is inefficient unlike RFPE.
+tradeoff experimental and computational resources differently.
 
 \begin{figure*}
     \begin{centering}
