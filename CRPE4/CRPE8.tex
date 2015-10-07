@@ -171,7 +171,8 @@ Proof of~#1.}}
 \label{sec:intro}
 %=============================================================================
 
-Eigenvalue estimation has been a cornerstone of physics since the dawn of spectroscopy.  In recent years, ideas from quantum information have revolutionized the ways that we estimate these values by providing methods that require exponentially fewer experiments than statistical sampling and total experimental time that saturates the Heisenberg limit, which is the best possible scaling allowed by quantum mechanics.  This quantum approach, known as phase estimation (PE), is crucial to acheive many of the celebrated speedups promised by quantum computing~\cite{shor_polynomial-time_1995,BHM+02,ADL+05,harrow2009quantum,lanyon2010towards} and as such optimizing these algorithms is especially important for present day experimental demonstrations of such algorithms because the number of quantum gates that can be performed is often severely limitted by decoherence.
+
+Eigenvalue estimation has been a cornerstone of physics since the dawn of spectroscopy.  Ideas from quantum information theory have revolutionized our understanding of how to best learn spectral properties.  These ideas exponentially reduce the number experiments needed to learn an eigenphase relative to statistical sampling and require total experimental time that scales optimally with the overall evolution time.  This quantum approach, known as phase estimation (PE), is crucial to acheive many of the celebrated speedups promised by quantum computing~\cite{shor_polynomial-time_1995,BHM+02,ADL+05,harrow2009quantum,lanyon2010towards}.  Optimizing these algorithms is especially important for present day experimental demonstrations of such algorithms because the number of quantum gates that can be performed is often severely limitted by decoherence.
 
 The most popular approach to PE is known as iterative phase estimation (IPE),
 as it forgoes the use of quantum resources to infer the eigenvalues of unitary
@@ -194,7 +195,7 @@ small systematic errors.
 Before going into detail about our algorithm we will first review the phase
 estimation circuit and Bayesian approaches to PE.  We then show that rejection
 sampling can be used to efficiently approximate Bayesian inference, thereby
-allowing PE to inherit the speed and robustness of Bayesian approaches while
+allowing PE to inherit the speed and robustness of adaptive Bayesian approaches while
 retaining the efficiency of traditional methods.
 
 Iterative PE infers the eigenvalue of a given eigenvector of a unitary matrix
@@ -211,6 +212,10 @@ a known reference value.
 Most PE algorithms use this circuit to infer the bits
 in a binary expansion of $\phi$ in order from least significant to most significant.  The process is can be made near optimal (up to $\log^*$ factors~\cite{SHF14}) and
 affords an efficient inference method for these bits.
+
+In general, the input state need not be an eigenstate of $U$.  Even if the state is a maximally mixed state then the iterative process will eventually project it into
+a (possibly degenerate) eigenspace of the unitary.  In order to simplify the following exposition, we will that the input state is an eigenstate of $U$ but it can also be taken
+to be a maximally mixed state without loss of generality.  We will discuss this issue in greater detail in~\sec{track}.
 
 %Our work addresses these problems by not only providing a method for
 %performing an efficient form of Bayesian phase estimation but also giving an
