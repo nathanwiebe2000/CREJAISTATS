@@ -178,7 +178,7 @@ The most popular approach to PE is known as iterative phase estimation (IPE),
 as it forgoes the use of quantum resources to infer the eigenvalues of unitary
 matrix in favor of using a classical inference algorithm to estimate the
 eigenvalues from experimental
-data~\cite{Kit96,kitaev2002classical,higgins2007entanglement,SHF14}.  Although
+data~\cite{Kit96,kitaev2002classical,higgins2007entanglement,SHF14,KLY15}.  Although
 the methodologies used for inference stretch back to the nineties,
 the ongoing revolution in machine learning that has lead to a plethora of
 improved classical inference procedures.  This raises an important question:
@@ -210,11 +210,11 @@ where $U\ket{\phi} = \ee^{\ii\phi}\ket{\phi}$ for an unknown eigenphase $\phi \i
 and where $Z(M \theta) = \ee^{\ii M \theta Z}$ is a rotation that can be used to compare the eigenphase of $U$ to
 a known reference value.
 Most PE algorithms use this circuit to infer the bits
-in a binary expansion of $\phi$ in order from least significant to most significant.  The process is can be made near optimal (up to $\log^*$ factors~\cite{SHF14}) and
+in a binary expansion of $\phi$.  The process is can be made near optimal (up to $\log^*$ factors~\cite{SHF14}) and
 affords an efficient inference method for these bits.
 
 In general, the input state need not be an eigenstate of $U$.  Even if the state is a maximally mixed state then the iterative process will eventually project it into
-a (possibly degenerate) eigenspace of the unitary.  In order to simplify the following exposition, we will that the input state is an eigenstate of $U$ but it can also be taken
+a (possibly degenerate) eigenspace of the unitary.  In order to simplify the following exposition, we will assume that the input state is an eigenstate of $U$ but it can also be taken
 to be a maximally mixed state without loss of generality.  We will discuss this issue in greater detail in~\sec{track}.
 
 %Our work addresses these problems by not only providing a method for
@@ -332,7 +332,7 @@ Median errors for phase estimation in decohering systems for experiments constra
 
 
 \begin{enumerate}
-\item Perform experiment for given $\theta$, $M$ and observe outcome $E\in \{0,1\}$.
+\item Perform an experiment for given $\theta$, $M$ and observe outcome $E\in \{0,1\}$.
 \item Draw $m$ samples from $\mathcal{N}(\phi|\mu,\sigma^2)$.
 \item For each sample, $\phi_j$, assign $\phi_j$ to $\Phi_{\rm accept}$ with probability $P(E|\phi_j;\theta,M)/\kappa_E$, where $\kappa_E\in (0,1]$ is a constant s.t. $P(E|\phi_j;\theta,M)/\kappa_E\le 1$ for all $\phi_j,E$.
 \item Return $\mu = \mathbb{E}(\Phi_{\rm accept})$ and $\sigma =\sqrt{\mathbb{V}(\Phi_{\rm accept})}$.
