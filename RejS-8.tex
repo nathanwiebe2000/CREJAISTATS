@@ -190,26 +190,26 @@ also for classifying MNIST digits.
 Rejection sampling is an elegant approach to Bayesian inference. 
 It samples
 from the posterior distribution by first sampling $x$ from the prior $P(x)$.
-The samples are then each rejected with
-probability $1 - P(E|x)$.  The probability 
+The samples are then each accepted with
+probability $P(E|x)$.  The probability 
 distribution of the samples that are not rejected is 
 \begin{equation}
   \frac{P(E|x)P(x)}{\sum_x P(E|x)P(x)}= P(x|E),
 \end{equation}
-and the probability of drawing a sample which is then accepted is $\sum_x P(E|x)P(x)$.  
+and the probability of drawing a sample which is then accepted is $\sum_x P(E|x)P(x)=P(E)$.  
 
 This probability
-can be increased by instead rejecting a sample with probability $P(x|E)/\kappa_E$ where
+can be increased by instead accepting a sample with probability $P(x|E)/\kappa_E$ where
 $\kappa_E$ is a constant that depends on the evidence $E$ such that $P(x|E) \le \kappa_E \le 1$.
 Rescaling the likelihood does not change the posterior probability.
-It does however make the probability of acceptance $\sum_x P(E|x) P(x)/\kappa_E = P(E) / \kappa_E$, which
+It does however make the probability of acceptance $P(E)/\kappa_E$, which
 can dramatically improve the performance in cases where rare events are observed.
 
 Two major drawbacks to this simple approach have prevented the adoption
 of rejection sampling as a viable method for inference.  The first is that the probability of success shrinks exponentially with the number of updates
 in online inference problems.
-The second  is that the constant $\kappa_E$ may not be precisely known and thus $\sum_x P(E|x)P(x)$ cannot be appropriately rescaled to avoid exponentially small likelihoods.  Given that the dimension of the state
-space scales exponentially with the number of features, exponentially small probabilities are the norm rather than the exception.
+The second  is that the constant $\kappa_E$ may not be precisely known and thus $P(E|x)$ cannot be appropriately rescaled to avoid exponentially small likelihoods.  Given that the dimension of the state
+space scales exponentially with the number of features, exponentially small probabilities are the norm rather than the exception. 
 Our aim is to address these problems
 by using approximate, rather than exact, rejection sampling, and
 by combining rejection sampling with other modern statistical methods.
@@ -360,41 +360,41 @@ model used in the next step of the inference procedure.
 Having used resampling to combine rejection sampling and particle filtering,
 we can significantly improve the complexity of the resulting rejection filtering
 algorithm by relaxing from exact rejection sampling.  Approximate rejection
-sampling takes the exact same form as traditional rejection sampling except
+sampling similar to rejection sampling except
 that it does not require that $P(E|x) \le \kappa_E$.  This means that the rescaled
 likelihood $P(E|x)/\kappa_E$ is greater than $1$ for some
 configurations.  This inevitably results in errors in the posterior distribution but can make the inference process much more efficient
 in cases where a tight bound is unknown or when the prior has little support over the region where $P(E|x)/\kappa_E >1$.
 
-The main question remaining is how substantial the
-impacts of errors due to $P(E|x) > \kappa_E$ are on the posterior distribution?  To understand this, let us define
+The main question remaining is how  the
+errors incurred from $P(E|x) > \kappa_E$ impact the posterior distribution?  To understand this, let us define
 \begin{equation}
 {\rm bad} := \left\{x: {P(E|x)} >{\kappa_E}\right\}.
 \end{equation}
 If the set of bad configurations is non--empty then it naturally leads to errors in the posterior and
-can degrade the success probability for rejection filtering.  Bounds on these effects are
+can degrade the success probability in rejection filtering.  Bounds on these effects are
 provided below.
 
 \begin{corollary}\label{cor:badalgorithm}
 If the assumptions of~\thm{crej} are met, except for the requirement that $P(x|E) \le \kappa_E$, and
 $$\sum_{x\in {\rm bad}}  \left([P(E|x)-\kappa_E] P(x)\right) \le \delta P(E),$$
   then approximate rejection sampling is  efficient and samples from a distribution $\rho(x|E)$ such that ${\sum_x \sqrt{\rho(x|E) P(x|E)}} \ge 1-\delta$.
-The probability of accepting a sample is at least $\frac{\min_x P(E|x) (1-\delta)}{\kappa_E}$.\label{thm:kappa}
+The probability of accepting a sample is at least ${P(E) (1-\delta)}/{\kappa_E}$.\label{thm:kappa}
 \end{corollary}
 \begin{proof}
 Result follows directly from~\thm{crej} and Theorem 1 in~\cite{WKGS15}.
 \end{proof}
 
-\cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too large for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily lead to substantial errors in the posterior distribution.  This allows for an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore, it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use our method.
+\cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too small for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily result in substantial errors in the posterior distribution.  This leads to an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore, it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use rejection filtering.
 
 %-----------------------------------------------------------------------------
 \subsection{Filtering Distributions for Time-Dependent Models}
 \label{sec:time-dep}
 %-----------------------------------------------------------------------------
 
-In many particle filter applications, Bayesian inference is combined with
-time-dependent models \cite{isard_condensationconditional_1998,gustafsson_particle_2002}
-to perform object tracking and acquisition. Here, we show that
+Bayesian inference has been combined with
+time-dependent models 
+to perform object tracking and acquisition in many particle filter applications~\cite{isard_condensationconditional_1998,gustafsson_particle_2002}. Here, we show that
 \CRej~naturally encompasses these applications as well by convolving posterior
 distributions with Gaussian update kernels.
 
@@ -411,7 +411,7 @@ the overlap between the likelihood and the prior is given by
 \begin{equation}
     \sum_x P(0|x; \bar{x}, \sigma(x)) P(x) \le e^{-|x_{\rm true} - \bar{x}| \gamma/\sigma}.
 \end{equation}
-If $\sigma$ is small then the small deviations of $x_{\rm true}$ away from $\bar{x}$ introduced by neglecting the time-dependence of $x$ can cause the inner product to become exponentially small.
+If $\sigma$ is small then the small deviations of $x_{\rm true}$ away from $\bar{x}$ introduced by neglecting the time-dependence of $x_{\rm true}$ can cause the inner product to become exponentially small.
 This in turn causes the complexity of resampling to be exponentially large, thereby removing guarantees of efficient learning.
 
 Such failures in \CRej~are heralded by tracking the total number
@@ -528,12 +528,12 @@ where $E_1:=\left\|\int_V  (P(x|E) -\tilde{P}(x|E)) x \mathrm{d}^N x \right\|$ a
 \begin{theorem}\label{thm:meanCov}
 If the assumptions of~\lem{errprop} are met and the rejection sampling algorithm uses $m$ samples from the approximate posterior distribution to infer the posterior mean  and $x_j\sim \tilde{P}(x|E)$ then the error in the posterior mean scales as
 $$
- O\left(\left[\frac{\sqrt{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]\|x_{\max}\|\right).
+ O\left(\left[\frac{{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{P(E)}\right]\|x_{\max}\|\right).
 $$
 and the error in the estimate of $\Sigma$ is
 
 $$
- O\left(\left[\frac{{N} }{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]\|x_{\max}\|^2\right).
+ O\left(\left[\frac{{N} }{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{P(E)}\right]\|x_{\max}\|^2\right).
 $$
 \end{theorem}
 
@@ -794,15 +794,15 @@ What does change the scaling is the truncation error incurred in the matrix mult
 \begin{proofof}{\lem{errprop}}
 Using the definition of $\tilde{P}(x)$ and Bayes' rule it is easy to see that the error in the posterior mean is
 \begin{align}
-\Biggr| \int_V \frac{P(E|x)P(x)x}{\langle P(E|x),P(x) \rangle}\left( 1 - \frac{1}{1+\frac{\langle P(E|x),\Delta(x)\rangle }{\langle P(E|x),P(x) \rangle}}\right) - \frac{P(E|x) \Delta(x)x}{\langle P(E|x),P(x)\rangle}\left(\frac{1}{1+\frac{\langle P(E|x),\Delta(x)\rangle }{\langle P(E|x),P(x) \rangle}} \right)\mathrm{d}x \Biggr|.\label{eq:intbd}
+\Biggr| \int_V \frac{P(E|x)P(x)x}{\langle P(E|x),P(x) \rangle}\left( 1 - \frac{1}{1+\frac{\langle P(E|x),\Delta(x)\rangle }{\langle P(E|x),P(x) \rangle}}\right) - \frac{P(E|x) \Delta(x)x}{P(E)}\left(\frac{1}{1+\frac{\langle P(E|x),\Delta(x)\rangle }{\langle P(E|x),P(x) \rangle}} \right)\mathrm{d}^Nx \Biggr|.\label{eq:intbd}
 \end{align}
 Using the fact that $|1-1/(1-y)| \le 2|y|$ for all $y\in [-1/2,1/2]$ it follows from the assumptions of the theorem and the triangle inequality that~\eq{intbd} is bounded above by
 \begin{align}
- \int_V \frac{2P(E|x)P(x)\|x\| |\langle P(E|x),\Delta(x) \rangle|}{\langle P(E|x),P(x) \rangle^2}\mathrm{d}x+ \int_V\frac{2P(E|x) |\Delta(x)|\|x\|}{\langle P(E|x),P(x)\rangle}\mathrm{d}x.\label{eq:intbd2}
+ \int_V \frac{2P(E|x)P(x)\|x\| |\langle P(E|x),\Delta(x) \rangle|}{P(E)^2}\mathrm{d}^Nx+ \int_V\frac{2P(E|x) |\Delta(x)|\|x\|}{P(E)}\mathrm{d}^Nx.\label{eq:intbd2}
 \end{align}
 Now using the fact that $\|x\|\le \|x_{\max}\|$ and the definition of the inner product, we find that~\eq{intbd2} is bounded above by
 \begin{equation}
-\frac{2 (|\langle P(E|x),\Delta(x) \rangle| + \langle P(E|x), |\Delta(x)| \rangle))\|x_{\max}\|}{\langle P(E|x),P(x)\rangle}.
+\frac{2 (|\langle P(E|x),\Delta(x) \rangle| + \langle P(E|x), |\Delta(x)| \rangle))\|x_{\max}\|}{P(E)}.
 \end{equation}
 The  result then follows from a final application of the triangle inequality.
 
@@ -810,17 +810,25 @@ The analogous proof for the error in the posterior expectation of $xx^T$ follows
 \end{proofof}
 
 \begin{proofof}{\thm{meanCov}}
-\lem{errprop} provides an upper bound on the error in the mean of the posterior distribution that propagates from errors in the components of our prior distribution.  We then have that if we sample from this distribution then the sample standard deviation of each of the $N$ components of $x$ is $O(\sigma_{\max}/\sqrt{m})$.  Thus the sample standard deviation of $\sum_{i=1}^N (x_i-\tilde{\mu}_i)^2$ is at most $O(\sqrt{N}\sigma_{\max}/\sqrt{m})$.  The triangle inequality shows that the sampling error and the error that propagates from having an incorrect prior are at most additive. 
+\lem{errprop} provides an upper bound on the error in the mean of the posterior distribution that propagates from errors in the components of our prior distribution.  We then have that if we sample from this distribution then the sample standard deviation of each of the $N$ components of $x$ is $O(\sigma_{\max}/\sqrt{m})$.  Thus from the triangle inequality the sample error in the sum is at most 
+\begin{equation}
+O\left(\frac{{N}\sigma_{\max}}{\sqrt{m}}\right)\in O\left( \frac{N\|x_{\max}\|}{\sqrt{m}}\right).
+\end{equation}  
+The triangle inequality shows that the sampling error and the error that propagates from having an incorrect prior are at most additive.  Consequently the total error in the mean is at most the the sum of this error and that of \lem{errprop}.  Thus the error in the mean is
+\begin{equation}
+O\left(\left[\frac{N}{\sqrt{m}}+ \frac{\langle P(E|x),|\Delta(x)|\rangle}{P(E)}\right]\|x_{\max}\| \right)\label{eq:mnerr}
+\end{equation}
 
- The calculation for the error in the estimate of the covariance matrix is similar.  First, note that $1/(m-1)= 1/m +O(1/m^2)$ so we can asymptotically ignore $m/(m-1)$.  Let $\mu = \int_V P(x|E) x\mathrm{d}x +\epsilon v$, where $|v|=1$.  We then have from our error bounds on the estimate of the posterior mean that
+ The calculation for the error in the estimate of the covariance matrix is similar.  First, note that $1/(m-1)= 1/m +O(1/m^2)$ so we can asymptotically ignore $m/(m-1)$.  Let $\mu = \int_V P(x|E) x\mathrm{d}x +\epsilon v$, where $\|v\|\le 1$.  We then have from our error bounds on the estimate of the posterior mean that
 \begin{eqnarray}
-\| \mu\mu^T - \int_V P(x|E) x\mathrm{d}x \int_V P(x|E) x^T\mathrm{d}x \|&\le& \epsilon \left\|\int_V P(x|E) x\mathrm{d}x v^T\right\|+\epsilon\left\|v\int_V  P(x|E) x^T\mathrm{d}x\right\| + \epsilon^2.\nonumber\\
-&\in&  O\left(\left[\frac{\sqrt{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{\langle P(E|x),P(x)\rangle}\right]\|x_{\max}\|^2\right).
+\| \mu\mu^T - \int_V P(x|E) x\mathrm{d}x \int_V P(x|E) x^T\mathrm{d}x \|&\le& \epsilon \left\|\int_V P(x|E) x\mathrm{d}^Nx v^T\right\|+\epsilon\left\|v\int_V  P(x|E) x^T\mathrm{d}^Nx\right\| + O(\epsilon^2).\nonumber\\
+&\in&  O\left(\left[\frac{{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{P(E)}\right]\|x_{\max}\|^2\right),\label{eq:garbage}
 \end{eqnarray}
+where we substitute~\eq{mnerr} for $\epsilon$ and use $\int_V P(x|E) x\mathrm{d}^Nx\le \|x_{\rm max}\|$.
 
 Now let us focus on bounding the error in our calculation of $\int_V P(E|x) xx^T \mathrm{d}x$. Using the triangle inequality, the error in the estimate of the expectation value of $x x^T$ is, to within error $O(1/m^{3/2})$, at most
 \begin{equation}
-\Biggr\|\frac{1}{m} \sum_{j=1}^m x_j x_j^T - \int_V \tilde{P}(x|E) x x^T\mathrm{d}x\Biggr\|+\Biggr\| \int_V \tilde{P}(x|E) x x^T\mathrm{d}x-\int_V {P}(x|E) x x^T\mathrm{d}x\Biggr\|.\label{eq:xxT}
+\Biggr\|\frac{1}{m} \sum_{j=1}^m x_j x_j^T - \int_V \tilde{P}(x|E) x x^T\mathrm{d}^Nx\Biggr\|+\Biggr\| \int_V \tilde{P}(x|E) x x^T\mathrm{d}^Nx-\int_V {P}(x|E) x x^T\mathrm{d}^Nx\Biggr\|.\label{eq:xxT}
 \end{equation}
 The first term in \eq{xxT} can be bounded by bounding the sample error in each of the components of the matrix.  For any component $[xx^T]_{k,\ell}$ the Monte--Carlo error in its estimate is
 \begin{equation}
@@ -828,10 +836,12 @@ O\left(\frac{\sigma({[x]_k[x]_\ell})}{\sqrt{m}}\right)\in O\left(\frac{\|x_{\max
 \end{equation}
 The $2$--Norm of an $N\times N$ matrix is at most $N$ times its max--norm, which means that
 \begin{equation}
-\Biggr\|\frac{1}{m} \sum_{j=1}^m x_j x_j^T - \int_V \tilde{P}(x|E) x x^T\mathrm{d}x\Biggr\|\in O\left(\frac{N\|x_{\max}\|^2}{\sqrt{m}}\right).\label{eq:xxTMC}
+\Biggr\|\frac{1}{m} \sum_{j=1}^m x_j x_j^T - \int_V \tilde{P}(x|E) x x^T\mathrm{d}^Nx\Biggr\|\in O\left(\frac{N\|x_{\max}\|^2}{\sqrt{m}}\right).\label{eq:xxTMC}
 \end{equation}
-The theorem then follows from inserting~\eq{xxTMC} into~\eq{xxT} and applying~\lem{errprop}.
+The theorem then follows from inserting~\eq{xxTMC} into~\eq{xxT} and applying~\lem{errprop}, and combining the result with~\eq{garbage} to bound the error in the covariance matrix.
 \end{proofof}
+
+Note that in the previous theorem that we do not make assumptions that the components of $x$ are iid.  If such assumptions are made then tighter bounds can be proven.
 
 %=============================================================================
 \section{Batched Updating}
