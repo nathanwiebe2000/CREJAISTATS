@@ -289,7 +289,7 @@ overcoming this limitation presents a significant advantage.
 We propose a much simpler approach that we call Rejection Filtering Phase
 Estimation (RFPE). RFPE works by positing a prior model and directly updates it
 to find a model for our posterior, rather than using a set of hypotheses that implicitly
-define a model for the system.  It achieve this by using a
+define a model for the system.  It achieves this by using a
 Gaussian with mean $\mu$ and variance $\sigma^2$ to model our initial prior, perform a Bayesian update on samples
 drawn from the distribution and then refit the updated samples to a Gaussian.
 This strategy is used in a number of particle filter methods such as the extended Kalman filter and assumed density
@@ -354,7 +354,7 @@ are appropriate if $U=\ee^{-\ii H M}$.
         \includegraphics[width=0.45\linewidth]{T2plot.pdf}
     \end{centering}
     \caption{\label{fig:T2plot}
-Median errors for phase estimation in decohering systems for experiments constrained to use $M\le T_2$ (left) and $M\le T_2/10$ (right).  We take $m=12~000$ and use $1~000$ random samples to generate the data above.  The initial state is taken to be a randomly chosen eigenstate in all cases.
+Median errors for phase estimation in decohering systems for experiments constrained to use $M\le T_2$ (left) and $M\le T_2/10$ (right).  We take $m=12~000$, use $1~000$ random samples and take the initial state  to be a random eigenstate.
     }
 \end{figure*}
 
@@ -400,9 +400,8 @@ A recent criticism of PE methods is that they can be impractical to execute on n
 $\lim_{M\rightarrow \infty} P(0|\phi;\theta,M) = \frac{1}{2}$.
 In this limit, the experiments convey no information. 
 
-Decoherence does not place a fundamental limit on the accuracy of PE.   Bayesian inference to can be used to learn $\phi$ to an arbitrary number of digits using $M \approx T_2$ for certain noise models~\cite{granade_robust_2012}.  
-
-We model the effect of decoherence on the system by assuming the existence of a \emph{decoherence time} $T_2$ such that
+Decoherence does not place a fundamental limit on the accuracy of PE.   In fact, it has already been observed that Bayesian inference to can be used to learn $\phi$ to an arbitrary number of digits using $M \approx T_2$ for certain noise models~\cite{granade_robust_2012} (at the price of degrading the scaling with the number of experiments).
+We investigate this by assuming the following noise model which is parameterized by the \emph{decoherence time} $T_2$ such that
 \begin{gather}
     \label{eq:likedecohere}
     \begin{aligned}
@@ -454,7 +453,7 @@ If the prior probability distribution is correct then the probability of measuri
 If $\tau=0.1$, the probability of measuring $0$ is approximately $0.998$ and hence measuring $1$ implies that the hypothesis that the prior is correct can be rejected at $p \le 0.002$. A Bayesian analysis of our reset rule
 is given in \app{bf}.
 
-Step 3 restarts the learning process if a fault is detected. It is however important retain the spectral information that has been learned prior to the restart.  Step 3 reflects this by checking to see if the current estimate of the eigenphase corresponds to a known eigenspace and then sets $\mu$ to be the estimate of the eigenphase and $\sigma$ to be its uncertainty if such an identification is made.  This allows the algorithm to resume learning once the depolarized state is projected onto a known eigenspace.
+Step 3 restarts the learning process if a fault is detected. It is however important to retain the spectral information that has been learned prior to the restart.  Step 3 reflects this by checking to see if the current estimate of the eigenphase corresponds to a known eigenspace and then sets $\mu$ to be the estimate of the eigenphase and $\sigma$ to be its uncertainty if such an identification is made.  This allows the algorithm to resume learning once the depolarized state is projected onto a known eigenspace.
 
 The test process also permits the eigenvalue of an eigenstate in a decohering system to be estimated in real time. \fig{Errplot} shows that the restarting algorithm can rapidly detect a transition away from an instantaneous eigenstate and then begin inferring the eigenvalue of the system's new instantaneous eigenstate.  This illustrates the stability of RFPE even in the presence of substantial depolarizing noise, thereby addressing many of the critiques of phase estimation.
 
@@ -463,7 +462,7 @@ The test process also permits the eigenvalue of an eigenstate in a decohering sy
 %=============================================================================
 
 Our work makes phase estimation more
-experimentally relevant by substantially reducing the
+experimentally relevant by reducing the
 experimental time required and by the process resilient
 to decoherence. This is especially critical as current experiments push past the classical
 regime and IPE becomes increasingly impractical in lieu of fault-tolerance.
