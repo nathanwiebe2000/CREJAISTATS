@@ -295,8 +295,8 @@ drawn from the distribution and then refit the updated samples to a Gaussian.
 This strategy is used in a number of particle filter methods such as the extended Kalman filter and assumed density
 filtering~\cite{haykin2004kalman,opper1998bayesian}.  
 
-We further optimize
-the inference step by approximating Bayesian inference using rejection
+%We further optimize
+The inference step is further optimized by approximating Bayesian inference using rejection
 sampling.  This can reduce the memory required by a factor of $1~000$ or more,
 as rejection sampling only needs only consider a single particle at a time to compute the incremental statistics required
 to update the prior model. Our algorithm is described
@@ -318,9 +318,9 @@ $P(\phi|E;M,\theta)$.  To see this, note that the probability density of a sampl
 \begin{equation}
     P(E | \phi; \theta, M) \mathcal{N}(\phi|\mu,\sigma^2) \propto P(\phi | E; \theta, M),
 \end{equation}
-which implies that the accepted samples are drawn from the posterior distribution.  
+which implies that the accepted samples are drawn from the posterior distribution.  Dividing the likelihood by $\kappa_E\le P(E|\phi;\theta,M)\le 1$ does not alter the posterior probability, but can compensate for small expected likelihoods decimating the probability of acceptance.
 
-Although it is difficult to concretely predict the value of $m$ needed to make the error in the inference small, we show in \app{stability} that $m$ must scale at least as the inverse square of the relative fluctuations in the likelihood function.  Similarly, Markov's inequality shows that $m$ must scale at least as $\kappa_E/\int P(E|\phi;\theta,M)P(\phi) \mathrm{d}\phi$ to ensure that, with high probability, the mean can be accurately estimated from the accepted samples.  We introduce $\kappa_E$ to compensate for small expected likelihoods.
+Although it is difficult to concretely predict the value of $m$ needed to make the error in the inference small, we show in \app{stability} that $m$ must scale at least as the inverse square of the relative fluctuations in the likelihood function.  Similarly, Markov's inequality shows that $m$ must scale at least as $\kappa_E/\int P(E|\phi;\theta,M)P(\phi) \mathrm{d}\phi$ to ensure that, with high probability, the mean can be accurately estimated from the accepted samples.  
 
 The main issue that remains is how to optimally choose the parameters $\theta$
 and $M$. One approach is to locally optimize the Bayes
@@ -397,9 +397,11 @@ tradeoff experimental and computational resources differently.
 % \subsection{Phase estimation with depolarizing noise}
 %-----------------------------------------------------------------------------
 
-A recent criticism of PE methods is that they can be impractical to execute on non--fault tolerant quantum hardware~\cite{PMS+14,MBL+14,WHT15}.  This is because phase estimation attains its quadratic advantage over statistical sampling by using exponentially long evolutions.  Decoherence causes the resultant phases to become randomized as time progresses, ultimately resulting in
+A recent criticism of PE methods is that they can be impractical to execute on non--fault tolerant quantum hardware~\cite{PMS+14,MBL+14,WHT15}.  This is because phase estimation attains its quadratic advantage over statistical sampling by using exponentially long evolutions.  Decoherence poses a challenge for these long evolutions because it causes the state to become randomized as time progresses, ultimately resulting in
 $\lim_{M\rightarrow \infty} P(0|\phi;\theta,M) = \frac{1}{2}$.
-In this limit, the measurements convey no information.  This does not imply that decoherence places a fundamental limit on the accuracy of PE.   Bayesian inference to can be used to learn $\phi$ to an arbitrary number of digits using $M \approx T_2$ for certain noise models~\cite{granade_robust_2012}.  
+In this limit, the experiments convey no information. 
+
+Decoherence does not place a fundamental limit on the accuracy of PE.   Bayesian inference to can be used to learn $\phi$ to an arbitrary number of digits using $M \approx T_2$ for certain noise models~\cite{granade_robust_2012}.  
 
 We model the effect of decoherence on the system by assuming the existence of a \emph{decoherence time} $T_2$ such that
 \begin{gather}
@@ -408,7 +410,9 @@ We model the effect of decoherence on the system by assuming the existence of a 
         P(0|\phi) & = \ee^{-M/T_2}\left(\frac{1+\cos(M[\phi -\theta])}{2}\right)+\frac{1-\ee^{-M/T_2}}{2}.
     \end{aligned}
 \end{gather}
-This model is appropriate when the time required to implement the controlled operation $\Lambda(U)$ is long relative to that required to perform $H$ and an arbitrary $Z$--rotation, as is appropriate in quantum simulation.
+This model is appropriate when the time required to implement the controlled operation $\Lambda(U)$ is long relative to that required to perform $H$ and an arbitrary $Z$--rotation,
+which is in quantum simulation experiments~\cite{hastings2015improving,wecker2015solving,mcclean2014exploiting}.
+
  
 
 Since $T_2$ places a limitation on our ability to learn, we propose a variation to \eq{PGH},
