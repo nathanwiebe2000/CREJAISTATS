@@ -187,12 +187,12 @@ also for classifying MNIST digits.
 \label{sec:smc}
 %=============================================================================
 
-Rejection sampling is an elegant approach to Bayesian inference. 
-It samples
+Rejection sampling provides a simple and elegant approach to Bayesian inference. 
+It draws samples
 from the posterior distribution by first sampling $x$ from the prior $P(x)$.
 The samples are then each accepted with
 probability $P(E|x)$.  The probability 
-distribution of the samples that are not rejected is 
+distribution of the accepted samples is 
 \begin{equation}
   \frac{P(E|x)P(x)}{\sum_x P(E|x)P(x)}= P(x|E),
 \end{equation}
@@ -205,8 +205,7 @@ Rescaling the likelihood does not change the posterior probability.
 It does however make the probability of acceptance $P(E)/\kappa_E$, which
 can dramatically improve the performance in cases where rare events are observed.
 
-Two major drawbacks to this simple approach have prevented the adoption
-of rejection sampling as a viable method for inference.  The first is that the probability of success shrinks exponentially with the number of updates
+Two major drawbacks to this approach have prevented its widescale adoption.  The first is that the probability of success shrinks exponentially with the number of updates
 in online inference problems.
 The second  is that the constant $\kappa_E$ may not be precisely known and thus $P(E|x)$ cannot be appropriately rescaled to avoid exponentially small likelihoods.  Given that the dimension of the state
 space scales exponentially with the number of features, exponentially small probabilities are the norm rather than the exception. Our aim is to address these problems
@@ -228,9 +227,9 @@ As updates are performed, the effective sample size $n_\ess \defeq
 1 / \|w\|_2^2$ tends towards zero, such that the approximation must be
 \emph{resampled} to preserve numerical stability. The bootstrap filter,
 commonly used in state-space methods, draws each new particle from the categorical
-distribution over particle weights. In the case that only Bayes updates are
-performed, however, the bootstrap filter only replaces weight by multiplicity,
-such that the numerical stability is not restored.
+distribution over particle weights. 
+Since the bootstrap filter only replaces weight by multiplicity,
+such that the numerical stability is not restored in cases where $n_\ess$ is small.
 
 Alternatively one can draw new particles from an \emph{instrumental distribution} for
 the current posterior. For instance, using a normal distribution to resample,
@@ -252,8 +251,8 @@ and the covariance of the current posterior, while increasing the
 effective sample size.
 
 When the posterior is approximately normal, $a = 0$ approximately
-preserves all of the relevant information about the posterior, but requires
-storing only summary statistics of particles rather than the entire particle
+preserves all of the relevant information about the posterior, and  only requires
+storing summary statistics of particles rather than the entire particle
 approximation~\cite{del2012adaptive,sisson_sequential_2007}.   This observation is key to
 the development of \CRej~in the next section.
 
@@ -335,9 +334,9 @@ Assume that $P(E|x)\le \kappa_E$ can be computed efficiently for all hypotheses 
 evidences $E$ and $P(x)$ can be efficiently sampled and an efficient sampling algorithm for $\operatorname{Uniform}(0,1)$ is provided.  \alg{crej} 
 can then efficiently compute the mean and covariance of $P(x|E)$ within error $\epsilon$ in the max--norm using $O({\rm dim}(x)^2\log({\rm dim}(x)/\epsilon))$ memory.\label{thm:crej}
 \end{theorem}
-A formal proof is given in the supplemental material, but the intuition is that by drawing a
-sample from the prior distribution and rejecting it with probability $P(E|x)$, a sample from
-the posterior distribution can be non--deterministically drawn.  Incremental formulas are
+A formal proof is given in the supplemental material.  The intuition behind it is that a sample can be non--deterministically drawn from
+the posterior distribution by drawing a
+sample from the prior distribution and rejecting it with probability $P(E|x)$.  Incremental formulas are
 used in~\alg{crej} to estimate the mean and the covariance using such samples, which obviates the need
 to store $O(1/\epsilon^2)$ samples in memory in order to estimate the moments of the posterior distribution within error $\epsilon$.
 In practice, one can use the Welford algorithm \cite{welford_note_1962} to more precisely accumulate means
