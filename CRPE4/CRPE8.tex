@@ -167,8 +167,8 @@ Proof of~#1.}}
 \maketitle
 
 %=============================================================================
-\section{Introduction}
-\label{sec:intro}
+% \section{Introduction}
+% \label{sec:intro}
 %=============================================================================
 
 
@@ -176,16 +176,24 @@ Eigenvalue estimation has been a cornerstone of physics since the dawn of spectr
 These ideas exponentially reduce the number of experiments needed to learn an eigenphase and scale optimally with the total experimental time.
 This quantum approach, known as phase estimation (PE), is crucial to achieve many of the celebrated speedups promised by quantum computing~\cite{shor_polynomial-time_1995,BHM+02,ADL+05,harrow2009quantum,lanyon2010towards}.  Optimizing these algorithms is especially important for present-day experimental demonstrations of such algorithms because the number of quantum gates that can be performed is often severely limited by decoherence.
 
-The most popular approach to PE is known as iterative phase estimation (IPE),
-as it forgoes the use of quantum resources to infer the eigenvalues of unitary
-matrix in favor of using a classical inference algorithm to estimate the
-eigenvalues from experimental
-data~\cite{Kit96,kitaev2002classical,higgins2007entanglement,SHF14,KLY15}.  Although
-the methodologies used for inference stretch back decades,
-the ongoing revolution in machine learning has lead to a plethora of
-improved classical inference procedures, and raises an important question:
-can these ideas be used to speed up phase estimation or make it more robust to
-experimental error?
+The most popular approach to PE forgoes the use of quantum resources
+in favor of using classical algorithms to infer the eigenvalues of a unitary
+from experimental data
+\cite{Kit96,kitaev2002classical,higgins2007entanglement,SHF14,KLY15}.
+Given the rapid advance of machine learning methods, this this raises the question
+of whether we can speed up phase estimation or make it more robust to errors
+by using modern statistical methods.
+
+% The most popular approach to PE is known as iterative phase estimation (IPE),
+% as it forgoes the use of quantum resources to infer the eigenvalues of unitary
+% matrix in favor of using a classical inference algorithm to estimate the
+% eigenvalues from experimental
+% data~\cite{Kit96,kitaev2002classical,higgins2007entanglement,SHF14,KLY15}.  Although
+% the methodologies used for inference stretch back decades,
+% the ongoing revolution in machine learning has lead to a plethora of
+% improved classical inference procedures, and raises an important question:
+% can these ideas be used to speed up phase estimation or make it more robust to
+% experimental error?
 
 We answer this in the affirmative by providing an efficient classical inference
 method, inspired by recent work on particle filtering, that is tailored
@@ -196,7 +204,7 @@ small systematic errors.
 This allows PE to inherit the speed and robustness of adaptive Bayesian approaches while
 retaining the computational efficiency of traditional iterative methods.
 
-Iterative PE infers the eigenvalue of a given eigenvector of a unitary matrix
+In particular, iterative PE infers the eigenvalue of a given eigenvector of a unitary matrix
 $U$ from a set of experiments that are performed on the circuit
 \begin{equation*}
     \Qcircuit @C=1em @R=1em {
@@ -213,11 +221,11 @@ affords an efficient inference method for these bits.
 
 In general, the input state need not be an eigenstate of $U$.  Even if the state is a maximally mixed state then the iterative process will eventually project it into
 a (possibly degenerate) eigenspace of the unitary.  In order to simplify the following exposition, we will assume that the input state is an eigenstate of $U$ but it can also be taken
-to be a maximally mixed state without loss of generality.  We will discuss this issue further in~\sec{track}.
+to be a maximally mixed state without loss of generality.  We will discuss this issue further below.
 
 %=============================================================================
-\section{Bayesian Phase Estimation}
-\label{sec:bayesian-phase-est}
+% \section{Bayesian Phase Estimation}
+% \label{sec:bayesian-phase-est}
 %=============================================================================
 
 
@@ -260,7 +268,7 @@ the uncertainty are not just valuable for quantifying error: they also allow us 
 
 
 %=============================================================================
-\section{Approximate Bayesian Phase Estimation}
+% \section{Approximate Bayesian Phase Estimation}
 %=============================================================================
 
 Exact Bayesian inference is impossible if the eigenphases are
@@ -380,7 +388,7 @@ tradeoff experimental and computational resources differently.
 \end{figure*}
 
 %-----------------------------------------------------------------------------
-\subsection{Phase estimation with depolarizing noise}
+% \subsection{Phase estimation with depolarizing noise}
 %-----------------------------------------------------------------------------
 
 A recent criticism of PE methods is that they can be impractical to execute on non--fault tolerant quantum hardware~\cite{PMS+14,MBL+14,WHT15}.  This is because phase estimation attains its quadratic advantage over statistical sampling by using exponentially long evolutions.  Decoherence causes the resultant phases to become randomized as time progresses, ultimately resulting in
@@ -408,8 +416,8 @@ We choose $M$ to cut off at $T_2$ in part because the locally optimized solution
 \fig{T2plot} shows that RFPE smoothly transitions between the exponential scaling expected at short times and the polynomial scaling expected when decoherence becomes significant.  The error scales roughly as $1/N^{0.6}$ in this polynomial regime, which is comparable to the $1/\sqrt{N}$ scaling expected from statistical sampling.  Decoherence therefore does not necessarily fundamentally limit the accuracy that PE can achieve.  \fig{T2plot} also shows that confining the experiments to stay in a more coherent regime also can actually hurt the algorithm's ability to infer the phase, as expected.
 
 %=============================================================================
-\section{Dealing With Noise and Non--Eigenstate Preparations}
-\label{sec:track}
+% \section{Dealing With Noise and Non--Eigenstate Preparations}
+% \label{sec:track}
 %=============================================================================
 
 \fig{T2plot} shows the performance of RFPE when the initial quantum state is an eigenstate and is discarded after each experiment.  Performing phase estimation in this way minimizes the number of experiments, but can be prohibitively expensive if preparation of the initial eigenstate is prohibitively costly.  
@@ -442,7 +450,7 @@ Step 3 restarts the learning process if a fault is detected. It is however impor
 The test process also permits the eigenvalue of an eigenstate in a decohering system to be estimated in real time. \fig{Errplot} shows that the restarting algorithm can rapidly detect a transition away from an instantaneous eigenstate and then begin inferring the eigenvalue of the system's new instantaneous eigenstate.  This illustrates the stability of RFPE even in the presence of substantial depolarizing noise, thereby addressing many of the critiques of phase estimation.
 
 %=============================================================================
-\section{Conclusion}
+% \section{Conclusion}
 %=============================================================================
 
 Our work makes phase estimation more
