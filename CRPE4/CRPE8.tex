@@ -172,8 +172,8 @@ Proof of~#1.}}
 %=============================================================================
 
 
-Eigenvalue estimation has been a cornerstone of physics since the dawn of spectroscopy.  Quantum information theory have revolutionized our understanding of how to best learn spectral properties.
-These ideas exponentially reduce the number of experiments needed to learn an eigenphase relative to statistical sampling and scale optimally with the total experimental time.
+Eigenvalue estimation has been a cornerstone of physics since the dawn of spectroscopy.  Quantum information theory has revolutionized our understanding of how to best learn spectral properties.
+These ideas exponentially reduce the number of experiments needed to learn an eigenphase and scale optimally with the total experimental time.
 This quantum approach, known as phase estimation (PE), is crucial to achieve many of the celebrated speedups promised by quantum computing~\cite{shor_polynomial-time_1995,BHM+02,ADL+05,harrow2009quantum,lanyon2010towards}.  Optimizing these algorithms is especially important for present-day experimental demonstrations of such algorithms because the number of quantum gates that can be performed is often severely limited by decoherence.
 
 The most popular approach to PE is known as iterative phase estimation (IPE),
@@ -182,9 +182,9 @@ matrix in favor of using a classical inference algorithm to estimate the
 eigenvalues from experimental
 data~\cite{Kit96,kitaev2002classical,higgins2007entanglement,SHF14,KLY15}.  Although
 the methodologies used for inference stretch back decades,
-the ongoing revolution in machine learning that has lead to a plethora of
-improved classical inference procedures raises an important question.
-Can these ideas be used to speed up phase estimation or make it more robust to
+the ongoing revolution in machine learning has lead to a plethora of
+improved classical inference procedures, and raises an important question:
+can these ideas be used to speed up phase estimation or make it more robust to
 experimental error?
 
 We answer this in the affirmative by providing an efficient classical inference
@@ -264,11 +264,11 @@ the uncertainty are not just valuable for quantifying error: they also allow us 
 %=============================================================================
 
 Exact Bayesian inference is impossible if the eigenphases are
-continuous so approximations are needed to
+continuous, so approximations are needed to
 make the procedure tractable.  Rather than na\"ively discritizing the prior
 distribution, modern methods discretize by sampling from the prior and
 then perform Bayesian inference on the discrete set of samples (often called
-``particles'').  These particle filter methods methods are quite powerful and
+``particles'').  These particle filter methods methods are powerful and
 have become a mainstay in computer vision and machine
 learning~\cite{haykin2004kalman,smith2013sequential,isard_condensationconditional_1998}.
 Despite the power of particle filtering, it is often to deploy in memory-limited environments,
@@ -379,8 +379,11 @@ tradeoff experimental and computational resources differently.
     }
 \end{figure*}
 
+%-----------------------------------------------------------------------------
 \subsection{Phase estimation with depolarizing noise}
-A criticism that has been levied lately at PE methods is that they can be impractical to execute on non--fault tolerant quantum hardware~\cite{PMS+14,MBL+14,WHT15}.  This is because phase estimation attains its quadratic advantage over statistical sampling by using exponentially long evolutions.  Decoherence causes the resultant phases to become randomized as time progresses, ultimately resulting in
+%-----------------------------------------------------------------------------
+
+A recent criticism of PE methods is that they can be impractical to execute on non--fault tolerant quantum hardware~\cite{PMS+14,MBL+14,WHT15}.  This is because phase estimation attains its quadratic advantage over statistical sampling by using exponentially long evolutions.  Decoherence causes the resultant phases to become randomized as time progresses, ultimately resulting in
 $\lim_{M\rightarrow \infty} P(0|\phi;\theta,M) = \frac{1}{2}$.
 In this limit, the measurements convey no information.  This does not imply that decoherence places a fundamental limit on the accuracy of PE.   Bayesian inference to can be used to learn $\phi$ to an arbitrary number of digits using $M \approx T_2$ for certain noise models~\cite{granade_robust_2012}.  
 
@@ -388,11 +391,10 @@ We model the effect of decoherence on the system by assuming the existence of a 
 \begin{gather}
     \label{eq:likedecohere}
     \begin{aligned}
-        P(0|\phi) & = \ee^{-M/T_2}\left(\frac{1+\cos(M[\phi -\theta])}{2}\right)+\frac{1-\ee^{-M/T_2}}{2},\\
-        P(1|\phi) & = \ee^{-M/T_2}\left(\frac{1-\cos(M[\phi -\theta])}{2}\right)+\frac{1-\ee^{-M/T_2}}{2}.
+        P(0|\phi) & = \ee^{-M/T_2}\left(\frac{1+\cos(M[\phi -\theta])}{2}\right)+\frac{1-\ee^{-M/T_2}}{2}.
     \end{aligned}
 \end{gather}
-This model is appropriate when the time required to implement the controlled operation $\Lambda(U)$ is long relative the that required to perform $H$ and an arbitrary $Z$--rotation, as is appropriate in quantum simulation.  %For simplicity, in the following we assume that $T_2$ is known. 
+This model is appropriate when the time required to implement the controlled operation $\Lambda(U)$ is long relative to that required to perform $H$ and an arbitrary $Z$--rotation, as is appropriate in quantum simulation.
  
 
 Since $T_2$ places a limitation on our ability to learn, we propose a variation to \eq{PGH},
@@ -401,9 +403,9 @@ Since $T_2$ places a limitation on our ability to learn, we propose a variation 
     M = \min\left\{\left\lceil\frac{1.25}{\sigma}\right\rceil, T_2 \right\}.
 \end{equation}
 The experiments yielded by~\eq{pgh2} are qualitatively similar to locally optimized experiments for frequency estimation which are chosen to saturate the Cram\'er-Rao bound \cite{ferrie_how_2013}; however,~\eq{pgh2} requires nearly 100 fold less computing time to select an experiment.
-We choose $M$ to cut off at $T_2$ in part because the locally optimized solutions choose to saturate at this value which can be understood using the following argument.  The Cram\'er-Rao bound for frequency estimation scales as $O(M^{-2})$~\cite{WGC15} in the absence of decoherence.  Eqn.~\eq{likedecohere} suggests that decoherence causes the posterior variance to increase as $O(\exp(2M/T_2))$. { As in the frequency estimation case \cite{ferrie_how_2013},} calculus reveals that $M=T_2$ optimally trades off these tendencies, which justifies~\eq{pgh2}.
+We choose $M$ to cut off at $T_2$ in part because the locally optimized solutions choose to saturate at this value. Indeed, the Cram\'er-Rao bound for frequency estimation scales as $O(M^{-2})$~\cite{WGC15} in the absence of decoherence.  Eqn.~\eq{likedecohere} suggests that decoherence causes the posterior variance to increase as $O(\exp(2M/T_2))$.  As in the frequency estimation case \cite{ferrie_how_2013}, $M=T_2$ optimally trades off these tendencies, justifying~\eq{pgh2}.
 
-\fig{T2plot} shows that RFPE smoothly transitions between the exponential scaling expected at short times and the polynomial scaling expected when decoherence becomes significant.  The error scales roughly as $1/N^{0.6}$ in this polynomial regime, which is comparable to the $1/\sqrt{N}$ scaling expected from statistical sampling.  Decoherence therefore does not necessarily impose a fundamental limitation on the accuracy that PE can achieve.  \fig{T2plot} also shows that confining the experiments to stay in a more coherent regime also can actually hurt the algorithm's ability to infer the phase, as expected.
+\fig{T2plot} shows that RFPE smoothly transitions between the exponential scaling expected at short times and the polynomial scaling expected when decoherence becomes significant.  The error scales roughly as $1/N^{0.6}$ in this polynomial regime, which is comparable to the $1/\sqrt{N}$ scaling expected from statistical sampling.  Decoherence therefore does not necessarily fundamentally limit the accuracy that PE can achieve.  \fig{T2plot} also shows that confining the experiments to stay in a more coherent regime also can actually hurt the algorithm's ability to infer the phase, as expected.
 
 %=============================================================================
 \section{Dealing With Noise and Non--Eigenstate Preparations}
@@ -445,10 +447,10 @@ The test process also permits the eigenvalue of an eigenstate in a decohering sy
 
 Our work makes phase estimation more
 experimentally relevant by substantially reducing the
-experimental time required and also by making the process resilient
+experimental time required and by the process resilient
 to decoherence. This is especially critical as current experiments push past the classical
 regime and IPE becomes increasingly impractical in lieu of fault-tolerance.
-In particular, the ability of our algorithm to learn in the presence of decoherence provides an efficient alternative to the
+In particular, of our algorithm learns in the presence of decoherence, providing an efficient alternative to the
 variational eigensolvers used in present day experiments~\cite{PMS+14,MBL+14,WHT15}.  
 
 Looking at the problem of phase estimation more generally, it is clear that it is in essence an inference problem.
