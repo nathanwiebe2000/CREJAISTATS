@@ -413,9 +413,10 @@ We choose $M$ to cut off at $T_2$ in part because the locally optimized solution
 \fig{T2plot} shows the performance of RFPE when the initial quantum state is an eigenstate and is discarded after each experiment.  Performing phase estimation in this way minimizes the number of experiments, but can be prohibitively expensive if preparation of the initial eigenstate is prohibitively costly.  
 
 We combat this by retaining the quantum state until it is clear that
-a fault has occurred.  Such faults can either be from decoherence or from a faulty inference step.  They
+a fault has occurred.  Such faults can either be from decoherence or from stochastic errors introduced by rejection filtering.  They
  can cause RFPE to fail because the new data that comes in is only consistent with hypotheses that have been ruled out.
-We address this by performing inexpensive experiments to assess whether the state has depolarized and then restart the learning process.
+We address this by performing inexpensive experiments to assess whether the state has depolarized or the inference method has failed
+and then restart the learning process accordingly.
 This reset rule also stabilizes the algorithm when the input state is a superposition of eigenvectors, which underscores its value
 even when $T_2=\infty$ (see \app{var-reduction}).
 
@@ -434,9 +435,9 @@ If the prior probability distribution is correct then the probability of measuri
 If $\tau=0.1$, the probability of measuring $0$ is approximately $0.998$ and hence measuring $1$ implies that the hypothesis that the prior is correct can be rejected at $p \le 0.002$. A Bayesian analysis of our reset rule
 is given in \app{bf}.
 
-Step 3 restarts the learning process if the learning process fails. It is important, however, to not throw away the spectral information that has been learned prior to the restart.  Step 3 reflects this by checking to see if the current estimate of the eigenphase corresponds to a known eigenstate and then sets $\mu$ to be the estimate of the eigenvalue and $\sigma$ to be its uncertainty if such an identification is made.  This allows the algorithm to resume learning once the depolarized state is projected onto a known eigenstate.
+Step 3 restarts the learning process if a fault is detected. It is however important retain the spectral information that has been learned prior to the restart.  Step 3 reflects this by checking to see if the current estimate of the eigenphase corresponds to a known eigenspace and then sets $\mu$ to be the estimate of the eigenphase and $\sigma$ to be its uncertainty if such an identification is made.  This allows the algorithm to resume learning once the depolarized state is projected onto a known eigenspace.
 
-The test process also permits the eigenvalue of an eigenstate in a decohering system to be estimated in real time. \fig{Errplot} shows that the restarting algorithm can rapidly detect a transition away from the instantaneous eigenstate and then begin inferring the eigenvalue of the system's new instantaneous eigenstate.  
+The test process also permits the eigenvalue of an eigenstate in a decohering system to be estimated in real time. \fig{Errplot} shows that the restarting algorithm can rapidly detect a transition away from an instantaneous eigenstate and then begin inferring the eigenvalue of the system's new instantaneous eigenstate.  This illustrates the stability of RFPE even in the presence of substantial depolarizing noise.
 
 %=============================================================================
 \section{Conclusion}
