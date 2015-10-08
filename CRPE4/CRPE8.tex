@@ -220,7 +220,7 @@ in a binary expansion of $\phi$.  The process can be made near optimal (up to $\
 affords an efficient inference method for these bits.
 
 In general, the input state need not be an eigenstate of $U$.  Even if the state is a maximally mixed state then the iterative process will eventually project it into
-a (possibly degenerate) eigenspace of the unitary.  In order to simplify the following exposition, we will assume that the input state is an eigenstate of $U$ but it can also be taken
+a (possibly degenerate) eigenspace of the unitary~\cite{kitaev2002classical}.  In order to simplify the following exposition, we will assume that the input state is an eigenstate of $U$ but it can also be taken
 to be a maximally mixed state without loss of generality.  We will discuss this issue further below.
 
 %=============================================================================
@@ -400,8 +400,8 @@ A recent criticism of PE methods is that they can be impractical to execute on n
 $\lim_{M\rightarrow \infty} P(0|\phi;\theta,M) = \frac{1}{2}$.
 In this limit, the experiments convey no information. 
 
-Decoherence does not place a fundamental limit on the accuracy of PE.   In fact, it has already been observed that Bayesian inference to can be used to learn $\phi$ to an arbitrary number of digits using $M \approx T_2$ for certain noise models~\cite{granade_robust_2012} (at the price of degrading the scaling with the number of experiments).
-We investigate this by assuming the following noise model which is parameterized by the \emph{decoherence time} $T_2$ such that
+Decoherence does not place a fundamental limit on the accuracy of PE.   In fact, it has already been observed that Bayesian inference to can be used to learn $\phi$ to an arbitrary number of digits using $M \approx T_2$ for certain noise models~\cite{granade_robust_2012} (at the price of degrading the algorithm's performance).
+We investigate the effects of decoherence by assuming the following noise model which is parameterized by the \emph{decoherence time} $T_2$ such that
 \begin{gather}
     \label{eq:likedecohere}
     \begin{aligned}
@@ -413,13 +413,13 @@ which is in quantum simulation experiments~\cite{hastings2015improving,wecker201
 
  
 
-Since $T_2$ places a limitation on our ability to learn, we propose a variation to \eq{PGH},
+Since $T_2$ constrains the informativeness of long experiments, we propose a variation to \eq{PGH},
 \begin{equation}
     \label{eq:pgh2}
     M = \min\left\{\left\lceil\frac{1.25}{\sigma}\right\rceil, T_2 \right\}.
 \end{equation}
 The experiments yielded by~\eq{pgh2} are qualitatively similar to locally optimized experiments for frequency estimation which are chosen to saturate the Cram\'er-Rao bound \cite{ferrie_how_2013}; however,~\eq{pgh2} requires nearly 100 fold less computing time to select an experiment.
-We choose $M$ to cut off at $T_2$ in part because the locally optimized solutions choose to saturate at this value. Indeed, the Cram\'er-Rao bound for frequency estimation scales as $O(M^{-2})$~\cite{WGC15} in the absence of decoherence.  Eqn.~\eq{likedecohere} suggests that decoherence causes the posterior variance to increase as $O(\exp(2M/T_2))$.  As in the frequency estimation case \cite{ferrie_how_2013}, $M=T_2$ optimally trades off these tendencies, justifying~\eq{pgh2}.
+We choose $M$ to cut off at $T_2$ in part because the locally optimized solutions choose to saturate at this value. Indeed, the Cram\'er-Rao bound for frequency estimation scales as $O(M^{-2})$~\cite{WGC15} in the absence of decoherence.  Eqn.~\eq{likedecohere} suggests that decoherence causes the posterior variance to increase as $O(\exp(2M/T_2))$.  Similar to the frequency estimation case \cite{ferrie_how_2013}, $M=T_2$ optimally trades off these tendencies, justifying~\eq{pgh2}.
 
 \fig{T2plot} shows that RFPE smoothly transitions between the exponential scaling expected at short times and the polynomial scaling expected when decoherence becomes significant.  The error scales roughly as $1/N^{0.6}$ in this polynomial regime, which is comparable to the $1/\sqrt{N}$ scaling expected from statistical sampling.  Decoherence therefore does not necessarily fundamentally limit the accuracy that PE can achieve.  \fig{T2plot} also shows that confining the experiments to stay in a more coherent regime also can actually hurt the algorithm's ability to infer the phase, as expected.
 
@@ -463,7 +463,7 @@ The test process also permits the eigenvalue of an eigenstate in a decohering sy
 
 Our work makes phase estimation more
 experimentally relevant by reducing the
-experimental time required and by the process resilient
+experimental time required and by making the process resilient
 to decoherence. This is especially critical as current experiments push past the classical
 regime and IPE becomes increasingly impractical in lieu of fault-tolerance.
 In particular, of our algorithm learns in the presence of decoherence, providing an efficient alternative to the
@@ -494,16 +494,16 @@ further improvements can be seen not only in phase estimation but also quantum m
 An important drawback of RFPE is  the tails for the distribution of errors in phase estimation can be quite fat in typical applications, meaning that there is significant probability that the error in the inferred eigenphase is orders of magnitude greater than the median.  Such a distribution can be seen in~\fig{PEerrorhist} where we see that although the median error is roughly $10^{-10}$ radians after $100$ updates for $m>50$  a non--negligible fraction of the experiments have error on the order of $1$.    
 
 Fortunately, the need to always repeat the algorithm and use a majority voting scheme to reduce the variance of the estimate is mitigated by the fact that the algorithm outputs $\sigma$ which estimates the uncertainty in the resultant eigenphase. 
-Alternatively, less aggressive experiments can be chosen in the guess heuristic or multi--modal models for the prior distribution (such as Gaussian mixture models) can be used.  The later approach can be quite valuable in computer vision and machine learning, however here we have an additional freedom not typically enjoyed in those fields: we can perform adaptive experiments to test to see if our current hypothesis is correct.
+Alternatively, less aggressive experiments can be chosen in the guess heuristic or multi--modal models for the prior distribution (such as Gaussian mixture models) can be used.  The later approach can be quite valuable in computer vision and machine learning, however here we have an additional freedom not typically enjoyed in those fields: we can perform inexpensive experiments to test to see if our current hypothesis is correct.
 
 The central idea behind our restarting strategy is to examine the decay of $\sigma$ with the number of experiments.  In ideal cases, the error decays exponentially which means that it is easy to see when the algorithm fails by plotting $\sigma$ on a semi--log plot.  Such intuition can be easily automated.  The idea behind our restarting algorithm is to first estimate the derivative of $\log(\sigma)$ with respect to the experiment number and determine whether it is less than a threshold.  If it is less than the threshold, perform an experiment to test to see if the value of $\mu$ that has been learned so far is accurate (as per our incoherent phase estimation algorithm).  If it is found to be innacurate then restart the algorithm and abandon the information learned so far.  The restarting portion of this algorithm is given in~\alg{restart}.
 
 When a restarting strategy like this is employed, we need to modify the model selection criteria.  Previously, we used the value of $\mu$ yielded by the most recent experiment as our estimate.   Given that a restart late in the algorithm can reset all information learned about a model, it makes sense in this context to use the value of $\mu$ corresponding to the smallest $\sigma$ observed.  This corresponds to the model that the inference algorithm has the greatest certainty.
 
-We see in~\fig{restart} that this strategy of restarting substantially reduces the weights of the tails.  In fact, the mean error in the inference falls from $0.0513$ radians to $1.08\times 10^{-6}$ radians.  This shows that this resetting strategy substantially reduce the probability of a large error occuring in the estimate of the eigenphase.  To our knowledge, this data represents the first time that a heuristic method has been successful in reducing the mean error in frequency estimation to an acceptable level of uncertainty~\cite{granade_robust_2012}.  Previous approaches that succeeded in making the mean--error small used costly numerically optimized experiments, which render such approaches impractical for online phase estimation~\cite{granade_robust_2012,ferrie_how_2013, wiebe_hamiltonian_2014,wiebe_quantum_2014-1,WGC15}.
+We see in~\fig{restart} that this strategy of restarting substantially reduces the weights of the tails.  In fact, the mean error in the inference falls from $0.0513$ radians to $1.08\times 10^{-6}$ radians.  This shows that this resetting strategy substantially reduce the probability of a large error occuring in the estimate of the eigenphase.  To our knowledge, this data represents the first time that a heuristic method has been successful in reducing the mean error in frequency estimation to an acceptable level of uncertainty.
+Conversely,  the mean--error has been made comparably small using costly numerically optimized experiments~\cite{granade_robust_2012,ferrie_how_2013}.  The cost of these approaches renders them impractical for online phase estimation~\cite{granade_robust_2012,ferrie_how_2013, wiebe_hamiltonian_2014,wiebe_quantum_2014-1,WGC15}.
 
-Note that Kitaev's phase estimation algorithm also can have a high probability of failure throughout the algorithm, so one might wonder if these restarting strategies might also be of value for traditional phase estimation algoirthms.  Unfortunately, these strategies cannot be easily translated to Kitaev's PE algorithm because the most expensive experiments are performed first.  Thus, restarting does not allow the algorithm to combat decoherence, nor can it be used to inexpensively fix situations where one of the bits is inferred improperly.
-
+Note that Kitaev's phase estimation algorithm also can have a high probability of failure throughout the algorithm, so these restarting strategies might also be of value for traditional phase estimation algoirthms.  
 
 
 \begin{figure*}
@@ -556,7 +556,7 @@ One way in which the rejection sampling algorithm can break down is if the likel
 
 In practice, the flatness of the distribution can be reduced by batching several experiments together and processing them.  This process is in general inefficient, but can be made efficient if an appropriate value of $\kappa_E$ is known for each datum recoreded.
 
-The question remaining is: how flat is too flat?  We show in the theorem below that if the number of samples taken from the true posterior distribution does not scale at least inverse quadratically with the scale of relative fluctuations in the likelihood function then we expect the posterior variance to be much greater than the shift in the means.  
+The question remaining is: how flat is too flat?  We show in the theorem below that if the number of samples taken from the true posterior distribution does not scale at least inverse quadratically with the scale of relative fluctuations in the likelihood function then the posterior standard deviation to be much greater than the sample errors in the means.  
 \begin{theorem}
 Assume that for all $j$ $P(E|x_j) =\alpha+\delta_j$ where $|\delta_j|\le \delta$ and $\alpha \ge 10\delta$ and assume that $x_j\sim P(x_j)$.  If we then define $\mu_0 := \sum_{j} P(x_j) x_j$, $\mu_1:= \sum_j P(x_j|E) x_j$ and $\sigma_1^2$ to be the posterior variance then $|\mu_1 - \mu_0| \in \Omega(\sigma_1/\sqrt{m})$ only if
 $
@@ -608,7 +608,7 @@ which is only true if $m\in \Omega(\alpha^2/\delta^2)$.
 \end{proof}
 We therefore see that the number of samples needed to track the small changes in a posterior distribution that happens when the likelihood function becomes extremely flat.  This condition is not sufficient because the actual components of the posterior mean may be shifted by a much smaller amount than the upper bounds used in the proof of~\thm{stability}.
 
-In contrast, exact Bayesian inference requires a number of bits that scales as $O(\log(1/\delta))$ (assuming a fixed and discrete number of hypotheses).  Thus exact Bayesian inference (or to a lesser extent particle filter methods) can be preferable in cases where the likelihood function is extremely flat.  Such concerns can be somewhat be either be avoided entirely or batches of such experiments should be combined to produce a likelihood function that is much less flat and choosing an appropriate instrumental distribution to ensure that the success probability remains high.
+In contrast, exact Bayesian inference requires a number of bits that scales as $O(\log(1/\delta))$ (assuming a fixed and discrete number of hypotheses).  Thus exact Bayesian inference (or to a lesser extent particle filter methods) can be preferable in cases where the likelihood function is extremely flat.  Such concerns can be somewhat  avoided by using batches of such experiments to produce a likelihood function that is much less flat and choosing an appropriate instrumental distribution to ensure that the success probability remains high.
 
 %=============================================================================
 \section{Bayes Factors for Reset Rule}
@@ -620,7 +620,7 @@ $p$-values for familiarity, we note that $p$-values are difficult to correctly
 interpret and can lead to misunderstandings \cite{goodman_dirty_2008,hoekstra_robust_2014}. As an
 alternative, one may prefer to use the Bayes factor to test whether the rejection
 filter has failed. For example, the rejection filter could fail due to
-a failure of the numerical approximation or because the eigenstate has
+breakdowns in the numerical approximations or because the eigenstate has
 been lost, as described in the main body. For a uniform prior over
 whether the rejection filter has failed, this reduces to the likelihood
 ratio test
@@ -666,7 +666,7 @@ prior in this example.
     }
 \end{figure}
 
-Importantly, this example rests on the assumption that one take a uniform
+Importantly, this example rests on the assumption that one takes a uniform
 prior over whether the current prior is valid. This assumption corresponds to
 that which an impartial observer might take in evaluating whether the numerical
 approximations made by our rejection filter algorithm have failed for the
