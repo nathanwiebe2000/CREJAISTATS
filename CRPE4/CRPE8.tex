@@ -369,14 +369,13 @@ $N$ is the experiment number then $T_{\exp}\in O(\sum_{N=1}^{N_{\max}} \ee^{\lam
 time required saturates the Cram\'er-Rao bound, up to a multiplicative constant.
 Specifically, $\lambda\approx 0.17$ for RFPE.
 
-\fig{ITPEcmp} compares RFPE to information-theory PE (ITPE).  Although ITPE not adaptive, it is exact and so it is a natural benchmark to compare RFPE against.  We find  ITPE requires nearly five times the applications of $U$ if $\phi=2\pi k/t$ for integer $k<t$ and $t=10~000$.  
+\fig{ITPEcmp} compares our method to information-theory PE (ITPE).  Although it is not adaptive, it is exact and so it is a natural benchmark for comparison.  We find ITPE requires nearly five times the applications of $U$ if $\phi=2\pi k/t$ for integer $k<t$ and $t=10~000$.  
 
-Conversely,
-ITPE requires only $25$ measurements to identify the phase with $50\%$
+Conversely, ITPE requires only $25$ measurements to identify the phase with $50\%$
 probability whereas RFPE requires $51$ experiments if $k$ is an integer.  If
-the true value of $k$ is real-valued and ITPE is left unmodified, then  ITPE
+the true value of $k$ is real-valued, then ITPE as stated
 fails to learn in the median because the long evolution times chosen lead to
-contradictory possibilities which causes ITPE to become confused.  We correct
+contradictory possibilities that cause ITPE to fail.  We correct
 this by choosing $M\rightarrow \lceil M/2\rceil$ in such cases, which increases the number
 of experiments to $35$ but also reduces the experimental time below that of
 unmodified ITPE.  This shows that all three methods
