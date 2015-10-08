@@ -1,0 +1,511 @@
+\documentclass[aps,pra,amsmath,onecolumn,amssymb,superscriptaddress,notitlepage]{revtex4-1}
+%=============================================================================
+% BEGIN UNFORGIVABLE HACKS
+%=============================================================================
+
+
+
+%=============================================================================
+% END UNFORGIVABLE HACKS
+%=============================================================================
+
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{amsfonts}
+\usepackage{complexity}
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+\usepackage{hyperref}
+\usepackage{enumerate}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+    \renewcommand{\algorithmicrequire}{\textbf{Input:}}
+    \renewcommand{\algorithmicensure}{\textbf{Output:}}
+    \newcommand{\inlinecomment}[1]{\Comment {\footnotesize #1} \normalsize}
+    \newcommand{\linecomment}[1]{\State \(\triangleright\) {\footnotesize #1} \normalsize}
+    %\renewcommand{\algorithmiccomment}[1]{\State\(\triangleright\) #1}
+    
+\usepackage{multirow}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{definition}{Definition}
+\newtheorem{corollary}{Corollary}
+
+\input{Qcircuit.tex}
+
+
+\def\ket#1{\left|#1\right\rangle}
+\def\bra#1{\langle#1|}
+\newcommand{\ketbra}[2]{|#1\rangle\!\langle#2|}
+\newcommand{\braket}[2]{\langle#1|#2\rangle}
+% \newcommand{\note}[1]{({\bf note: #1})}
+\newcommand{\prob}[1]{{\rm Pr}\left(#1 \right)}
+% \newcommand{\Tr}[1]{{\rm Tr}\!\left[#1 \right]}
+\newcommand{\expect}[2]{{\mathbb{E}_{#2}}\!\left\{#1 \right\}}
+\newcommand{\var}[2]{{\mathbb{V}_{#2}}\!\left\{#1 \right\}}
+\newcommand{\CRej}{\text{RejF }}
+
+\newcommand{\sinc}{\operatorname{sinc}}
+\newcommand{\reset}{\mathrm{reset}}
+
+
+% fix: supported only for revtex
+%\newcommand{\openone}{\mathbb{I}}
+% fix: unsupported with iopart
+%\newcommand{\eqref}[1]{(\ref{#1})}
+
+\newcommand{\sde}{\mathrm{sde}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\w}{\omega}
+\newcommand{\Kap}{\kappa}
+
+\newcommand{\Tchar}{$T$}
+\newcommand{\T}{\Tchar~}
+\newcommand{\TT}{\mathrm{T}}
+\newcommand{\ClT}{\{{\rm Clifford}, \Tchar\}~}
+\newcommand{\Tcount}{\Tchar--count~}
+\newcommand{\Tcountper}{\Tchar--count}
+\newcommand{\Tcounts}{\Tchar--counts~}
+\newcommand{\Tdepth}{\Tchar--depth~}
+\newcommand{\Zr}{\Z[i,1/\sqrt{2}]}
+\newcommand{\ve}{\varepsilon}
+
+\newcommand{\eq}[1]{\hyperref[eq:#1]{(\ref*{eq:#1})}}
+\renewcommand{\sec}[1]{\hyperref[sec:#1]{Section~\ref*{sec:#1}}}
+\newcommand{\app}[1]{\hyperref[app:#1]{Appendix~\ref*{app:#1}}}
+\newcommand{\fig}[1]{\hyperref[fig:#1]{Figure~\ref*{fig:#1}}}
+\newcommand{\thm}[1]{\hyperref[thm:#1]{Theorem~\ref*{thm:#1}}}
+\newcommand{\lem}[1]{\hyperref[lem:#1]{Lemma~\ref*{lem:#1}}}
+\newcommand{\tab}[1]{\hyperref[tab:#1]{Table~\ref*{tab:#1}}}
+\newcommand{\cor}[1]{\hyperref[cor:#1]{Corollary~\ref*{cor:#1}}}
+\newcommand{\alg}[1]{\hyperref[alg:#1]{Algorithm~\ref*{alg:#1}}}
+\newcommand{\defn}[1]{\hyperref[def:#1]{Definition~\ref*{def:#1}}}
+
+
+\newcommand{\targfix}{\qw {\xy {<0em,0em> \ar @{ - } +<.39em,0em>
+\ar @{ - } -<.39em,0em> \ar @{ - } +
+<0em,.39em> \ar @{ - }
+-<0em,.39em>},<0em,0em>*{\rule{.01em}{.01em}}*+<.8em>\frm{o}
+\endxy}}
+
+\newenvironment{proofof}[1]{\begin{trivlist}\item[]{\flushleft\it
+Proof of~#1.}}
+{\qed\end{trivlist}}
+
+
+\newcommand{\cu}[1]{{\textcolor{red}{#1}}}
+\newcommand{\tout}[1]{{}}
+% \newcommand{\beq}{\begin{equation}}
+% \newcommand{\eeq}{\end{equation}}
+% \newcommand{\beqa}{\begin{eqnarray}}
+\newcommand{\good}{{\rm good}}
+\newcommand{\bad}{{\rm bad}}
+% \newcommand{\eeqa}{\end{eqnarray}}
+
+\newcommand{\id}{\openone}
+%\newcommand{\id}{\mathbb{I}}
+
+\newcommand{\etal}{\emph{et al.}}
+\newcommand{\ii}{\mathrm{i}}
+\newcommand{\ee}{\mathrm{e}}
+
+\hyphenation{FPGA}
+\hyphenation{FPGAs}
+\hyphenation{RFPE}
+
+%%%%%%%%%%%%%%%%%%%%%%% a bit nicer hypelinks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage[usenames,dvipsnames]{xcolor}
+\hypersetup{
+    colorlinks=true,       % false: boxed links; true: colored links
+    linkcolor=Maroon,          % color of internal links (change box color with linkbordercolor)
+    citecolor=OliveGreen,        % color of links to bibliography
+    filecolor=magenta,      % color of file links
+    urlcolor=Blue           % color of external links
+}
+
+%%%%%%%%%%%%%%%%%%%%%%% a bit nicer hypelinks %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+%=============================================================================
+% FRONT MATTER
+%=============================================================================
+
+\title{Supplemental Material Efficient Bayesian Phase Estimation}
+\author{Nathan Wiebe}
+\affiliation{Quantum Architectures and Computation Group, Microsoft Research, Redmond, WA (USA)}
+
+\author{Chris Granade}
+\affiliation{Centre for Engineered Quantum Systems, Sydney, NSW (Australia)}
+\affiliation{School of Physics, University of Sydney, Sydney, NSW (Australia)}
+
+
+
+\maketitle
+
+
+
+
+
+
+%=============================================================================
+\section{Variance Reduction Strategies}
+\label{app:var-reduction}
+%=============================================================================
+
+An important drawback of RFPE is  the tails for the distribution of errors in phase estimation can be quite fat in typical applications, meaning that there is significant probability that the error in the inferred eigenphase is orders of magnitude greater than the median.  Such a distribution can be seen in~\fig{PEerrorhist} where we see that although the median error is roughly $10^{-10}$ radians after $100$ updates for $m>50$  a non--negligible fraction of the experiments have error on the order of $1$.    
+
+Fortunately, the need to always repeat the algorithm and use a majority voting scheme to reduce the variance of the estimate is mitigated by the fact that the algorithm outputs $\sigma$ which estimates the uncertainty in the resultant eigenphase. 
+Alternatively, less aggressive experiments can be chosen in the guess heuristic or multi--modal models for the prior distribution (such as Gaussian mixture models) can be used.  The later approach can be quite valuable in computer vision and machine learning, however here we have an additional freedom not typically enjoyed in those fields: we can perform inexpensive experiments to test to see if our current hypothesis is correct.
+
+The central idea behind our restarting strategy is to examine the decay of $\sigma$ with the number of experiments.  In ideal cases, the error decays exponentially which means that it is easy to see when the algorithm fails by plotting $\sigma$ on a semi--log plot.  Such intuition can be easily automated.  The idea behind our restarting algorithm is to first estimate the derivative of $\log(\sigma)$ with respect to the experiment number and determine whether it is less than a threshold.  If it is less than the threshold, perform an experiment to test to see if the value of $\mu$ that has been learned so far is accurate (as per our incoherent phase estimation algorithm).  If it is found to be innacurate then restart the algorithm and abandon the information learned so far.  The restarting portion of this algorithm is given in~\alg{restart}.
+
+When a restarting strategy like this is employed, we need to modify the model selection criteria.  Previously, we used the value of $\mu$ yielded by the most recent experiment as our estimate.   Given that a restart late in the algorithm can reset all information learned about a model, it makes sense in this context to use the value of $\mu$ corresponding to the smallest $\sigma$ observed.  This corresponds to the model that the inference algorithm has the greatest certainty.
+
+We see in~\fig{restart} that this strategy of restarting substantially reduces the weights of the tails.  In fact, the mean error in the inference falls from $0.0513$ radians to $1.08\times 10^{-6}$ radians.  This shows that this resetting strategy substantially reduce the probability of a large error occuring in the estimate of the eigenphase.  To our knowledge, this data represents the first time that a heuristic method has been successful in reducing the mean error in frequency estimation to an acceptable level of uncertainty.
+Conversely,  the mean--error has been made comparably small using costly numerically optimized experiments~\cite{granade_robust_2012,ferrie_how_2013}.  The cost of these approaches renders them impractical for online phase estimation~\cite{granade_robust_2012,ferrie_how_2013, wiebe_hamiltonian_2014,wiebe_quantum_2014-1,WGC15}.
+
+Note that Kitaev's phase estimation algorithm also can have a high probability of failure throughout the algorithm, so these restarting strategies might also be of value for traditional phase estimation algoirthms.  
+
+
+\begin{figure*}
+    \begin{centering}
+        \includegraphics[width=0.3\linewidth]{CProb50.pdf}
+        \includegraphics[width=0.3\linewidth]{CProb100.pdf}
+        \includegraphics[width=0.3\linewidth]{CProb200.pdf}
+    \end{centering}
+    \caption{\label{fig:PEerrorhist}
+     Cumulative distribution function of probability that PE error is less than $x$ after $150$ updates for $m=50$ (left) $m=100$ (middle) $m=200$ (right).
+    }
+\end{figure*}
+
+\begin{figure*}
+    \begin{centering}
+        \includegraphics[width=0.35\linewidth]{restartNone.pdf}
+        \includegraphics[width=0.35\linewidth]{restartp10.pdf}
+    \end{centering}
+    \caption{\label{fig:restart}
+     Cumulative distribution function of probability that PE error is less than $x$ after $200$ updates for $m=2000$ for $\Gamma=\infty$ (left) $\Gamma=0.1$ (right) and $\tau=0.1$.  Estimate of CDF consists of $1000$ random eigenphase inference problems with $T_2=\infty$.
+    }
+\end{figure*}
+
+%=============================================================================
+\section{Stability Against Errors in the Likelihood Function}
+%=============================================================================
+
+
+Our algorithm is not only robust against well known depolarizing noise but is robust against~\emph{uncharacterized noise sources} as well.  We demonstrate this in~\fig{gamma} wherein we introduce depolarizing noise of strength $\gamma$ to our experimental system, but do not include such noise in the likelihood function.  For example, with $\gamma=0.4$, the measurement outcome of phase estimation is replaced with a random bit with probability $40\%$.  Although this may seem qualitatively similar to the numerical examples for depolarizing noise considered in the main body of the paper, this case is much more pathological because it is only used to generate the experimental data and is not permitted in the model of the system used in the likelihood function.  This raises the possibility that the algorithm could become confused due to experimental results that are fundamentally inconsistent with the assumed likelihood function for the system.
+
+\fig{gamma} shows that the inclusion of uncharacterized depolarizing noise does not actually prevent the eigenvalue from being estimated.  Rather it reduces the number of bits per experiment that the algorithm can infer.  We see this by fitting the exponential part of the data in~\fig{gamma} (along with similar data for $\gamma=0.1$, $\gamma=0.3$, $\gamma=0.5$) and find that the error decay exponent, $\lambda$, to shrink as roughly $\lambda \approx 0.17e^{-3.1\gamma}$ it does not prevent our algorithm from learning at an exponential rate (until depolarizing noise becomes significant).  Thus RFPE continue to work even in the presence of depolarizing noise sources that are both strong and uncharacterized.
+
+
+
+%=============================================================================
+\section{Stability of Rejection Filtering PE}
+\label{app:stability}
+%=============================================================================
+
+\begin{figure}
+    \begin{centering}
+\includegraphics[width=0.45\linewidth]{Gammascale.pdf}
+    \end{centering}
+    \caption{\label{fig:gamma}
+Errors in inference for phase estimation with different levels of un-modeled noise, $\gamma$, for $T_2=1000$.  In each instance the initial state was taken to be a fixed, but unknown, eigenstate of the Hamiltonian.  The median was found for $100$ randomly chosen values of the eigenphase of this fixed initial eigenstate.
+    }
+\end{figure}
+
+One way in which the rejection sampling algorithm can break down is if the likelihood function becomes too flat relative to the number of discrete samples, $m$, drawn from the prior distribution.  This breakdown occurs because the sample variance in the posterior mean is much greater than the difference between the prior mean and posterior means, which are not expected to be approximately the same if the likelihood function has little variation.  This in effect implies that the dynamics of the mean will essentially be a random walk and as a result we do not expect that our rejection sampling method to perform well if the likelihood function is too flat.  
+
+In practice, the flatness of the distribution can be reduced by batching several experiments together and processing them.  This process is in general inefficient, but can be made efficient if an appropriate value of $\kappa_E$ is known for each datum recoreded.
+
+The question remaining is: how flat is too flat?  We show in the theorem below that if the number of samples taken from the true posterior distribution does not scale at least inverse quadratically with the scale of relative fluctuations in the likelihood function then the posterior standard deviation to be much greater than the sample errors in the means.  
+\begin{theorem}
+Assume that for all $j$ $P(E|x_j) =\alpha+\delta_j$ where $|\delta_j|\le \delta$ and $\alpha \ge 10\delta$ and assume that $x_j\sim P(x_j)$.  If we then define $\mu_0 := \sum_{j} P(x_j) x_j$, $\mu_1:= \sum_j P(x_j|E) x_j$ and $\sigma_1^2$ to be the posterior variance then $|\mu_1 - \mu_0| \in \Omega(\sigma_1/\sqrt{m})$ only if
+$
+\frac{\alpha^2}{\delta^2}\in O(m) .
+$\label{thm:stability}
+\end{theorem}
+\begin{proof}
+Bayes' rule gives us
+\begin{equation}
+\left|\sum_j P(x_j|E) x_j -\mu_0\right|= \left|\frac{\sum_j P(E|x_j)P(x_j) (x_j -\mu_0)}{\sum_j P(E|x_j)P(x_j)}\right|=\left|\frac{\sum_j \delta_j P(x_j)(x_j -\mu_0)}{\sum_j P(E|x_j)P(x_j)}\right|.\label{eq:A1}
+\end{equation}
+Then using the Cauchy--Schwarz innequality, the triangle inequality and $\alpha\ge 2\delta$.
+\begin{equation}
+\left|\frac{\sum_j \delta_jP(x_j )( x_j -\mu_0)}{\sum_j P(E|x_j)P(x_j)}\right| \le \left|\frac{\delta \sqrt{\sum_j P(x_j) |x_j -\mu_0|^2}}{\alpha-\delta}\right|\le \frac{\delta  \sigma}{\alpha-\delta}\le \frac{2\delta{\sigma}}{\alpha}.\label{eq:A2}
+\end{equation}
+Thus the maximum shift in the posterior mean shrinks as the the likelihood function becomes increasingly flat, as expected.
+
+Next we need to lower bound the posterior variance in order ensure that the value of $m$ chosen suffices to make the error small in the best possible case.
+To do so we use the reverse triangle inequality:
+\begin{equation}
+\sigma_1^2 = |\sigma_1^2 -\sigma^2 +\sigma^2| \ge \sigma^2 - |\sigma_1^2-\sigma^2|.
+\end{equation}
+Thus it suffices to upper bound $|\sigma_1^2-\sigma^2|$ to lower bound $\sigma_1^2$.  To do so, note that $\alpha \ge 2\delta$ and hence
+
+\begin{align}
+|P(x_j|E)-P(x_j)| = \left|\frac{P(x_j)(\delta_j-\sum_jP(x_j)\delta_j)}{\alpha+\sum_j P(x_j)\delta_j}\right|\le \frac{P(x_j) 2\delta}{\alpha-\delta}\le \frac{P(x_j) 4\delta}{\alpha}.
+\end{align}
+Now the difference between the two variances can be written as
+\begin{align}
+|\sigma_1^2-\sigma^2| &= \left|\sum_j  P(x_j|E)(x_j-\mu_1)^2-P(x_j)(x_j-\mu_0)^2\right|\nonumber\\
+ &\le \left|\sum_j  (P(x_j|E)-P(x_j))(x_j-\mu_1)^2\right|+\left|\sum_j P(x_j)\left((x_j-\mu_0)^2-(x_j-\mu_1)^2\right)\right|\nonumber\\
+ &\le  \frac{4\delta}{\alpha}\left|\sum_j  P(x_j)(x_j-\mu_1)^2\right|+(\mu_1-\mu_0)^2\nonumber\\
+&\le \frac{4\delta\sigma^2}{\alpha}+\frac{4\delta}{\alpha}\left|\sum_j P(x_j)[(x_j-\mu_1)^2-(x_j-\mu_0)^2]  \right|+(\mu_1-\mu_0)^2\nonumber\\
+&\le \frac{4\delta\sigma^2}{\alpha}+(1+\frac{4\delta}{\alpha})(\mu_1-\mu_0)^2\le \frac{4\delta\sigma^2}{\alpha}+ \frac{12\delta^2\sigma^2}{\alpha^2}\le \frac{10\delta\sigma^2}{\alpha}.
+\end{align}
+Thus we have that
+\begin{equation}
+\sigma_1^2 \ge \sigma^2(1-10\delta/\alpha).
+\end{equation}
+Now assuming $\delta\le \alpha/10$ we have 
+\begin{equation}
+\sigma_1^2\in \Omega(\sigma^2).
+\end{equation}
+Finally, we note that
+\begin{equation}
+|\mu_1-\mu_0| \in \Omega(\sigma_1/\sqrt{m}) \Rightarrow \frac{\delta \sigma}{\alpha} \in \Omega(\sigma/\sqrt{m}),
+\end{equation}
+which is only true if $m\in \Omega(\alpha^2/\delta^2)$.
+\end{proof}
+We therefore see that the number of samples needed to track the small changes in a posterior distribution that happens when the likelihood function becomes extremely flat.  This condition is not sufficient because the actual components of the posterior mean may be shifted by a much smaller amount than the upper bounds used in the proof of~\thm{stability}.
+
+In contrast, exact Bayesian inference requires a number of bits that scales as $O(\log(1/\delta))$ (assuming a fixed and discrete number of hypotheses).  Thus exact Bayesian inference (or to a lesser extent particle filter methods) can be preferable in cases where the likelihood function is extremely flat.  Such concerns can be somewhat  avoided by using batches of such experiments to produce a likelihood function that is much less flat and choosing an appropriate instrumental distribution to ensure that the success probability remains high.
+
+%=============================================================================
+\section{Bayes Factors for Reset Rule}
+\label{app:bf}
+%=============================================================================
+
+Though in the main body, we have chosen to present the reset step in terms of
+$p$-values for familiarity, we note that $p$-values are difficult to correctly
+interpret and can lead to misunderstandings \cite{goodman_dirty_2008,hoekstra_robust_2014}. As an
+alternative, one may prefer to use the Bayes factor to test whether the rejection
+filter has failed. For example, the rejection filter could fail due to
+breakdowns in the numerical approximations or because the eigenstate has
+been lost, as described in the main body. For a uniform prior over
+whether the rejection filter has failed, this reduces to the likelihood
+ratio test
+\begin{subequations}
+    \begin{align}
+        L & = \frac{\Pr(\text{result} = 1 | \text{prior wrong})}{\Pr(\text{result} = 1 | \text{prior correct})} \\
+          & = \frac{                  
+                  1 - \ee^{
+                          - (\tau^2 \sigma_\reset^2 / 2 \sigma^2 + \sigma \tau / T_2)
+                      }
+                      \cos \left(
+                        \tau \left(\mu -\mu _\reset \right) / \sigma
+                      \right)
+              }{
+                  1-\ee^{-\tau^2 / 2}
+              }
+    \end{align}
+\end{subequations}
+where $\mu_\reset$ and $\sigma_\reset$ are the values of $\mu$ and $\sigma$
+immediately following a reset. Using this test, the degree by which $L > 1$
+informs as to the degree to which we should prefer the model proposed by the
+reset rule. Again under the assumption of a uniform prior over the
+validity of the reset rule,
+\begin{equation}
+    \Pr(\text{prior wrong} | \text{result} = 1) = L \Pr(\text{prior right} | \text{result} = 1).
+\end{equation}
+For instance, if the variance has been reduced by a factor of 100 from
+its initial value ($\sigma = \sigma_\reset / 100$) and the current mean is
+correct ($\mu = \mu_\reset$), then assuming $T_2 = 100$ and an initial standard
+deviation of $\sigma_\reset = \pi / \sqrt{3}$, $L\approx8000$ for a result of
+1. That is, the initial prior is 8,000 times as probably correct as the current
+prior in this example.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{reset-bf-thresholds.pdf}
+    \end{center}
+    \caption{
+        \label{fig:reset-bf-thresholds}
+        Likelihood ratio test values for various settings of the parameter
+        $\tau$, and for various prior variances $\sigma / \sigma_\reset$.
+        In this example, we suppose that $\mu = \mu_\reset$ and that $T_2 = 100$.
+    }
+\end{figure}
+
+Importantly, this example rests on the assumption that one takes a uniform
+prior over whether the current prior is valid. This assumption corresponds to
+that which an impartial observer might take in evaluating whether the numerical
+approximations made by our rejection filter algorithm have failed for the
+observed data. That is, the reset rule proposed corresponds performing an intervention
+without relying on the full experimental data record. Choosing a threshold
+other than $L = 1$ represents placing a different prior, as could be informed by observing
+the failure modalities of many runs of the rejection filter method. As
+demonstrated in \fig{reset-bf-thresholds}, because our reset rule resets with
+probability 1 if a 1 is observed, choosing $\tau$ effectively sets the threshold
+for $L$.
+In practice,
+however, because $\Pr(\text{result} = 1 | \text{prior correct}) \approx 0$, the reset
+rule is only weakly dependent on the specific threshold one places on $L$.
+
+
+%=============================================================================
+\section{Pseudocode for Algorithms}
+\label{app:pseudocode}
+%=============================================================================
+
+In the main body we sketched the details of our phase estimation algorithm.  Here we elaborate on this algorithm and discuss some of the
+subtle details needed to make the algorithm work.  The first such subtlety stems from the fact that eigenphases are equivalent modulo $2\pi$.  
+To see this problem, consider a Gaussian distribution centered at $0$.  If we take the outputs of the distribution in the branch $[0,2\pi]$ then we find that the mean of the distribution is $\pi$ rather than $0$.  Since the support of the initial Gaussian may be small at $\phi=\pi$, such errors can be catastrophic during the inference procedure.  This can be dealt by using the circular mean and by working with a wrapped normal distribution.  This approach is discussed in~\alg{crej2}.  For expedience, we eschew this approach and instead use a heuristic approach that does  not require a large number of trigonometric calls, which can be expensive if the device performing the inference does not have native trigonometric calls.
+
+The heuristic approach, described in~\alg{crej}, uses rejection sampling and incremental methods to estimate the mean and standard deviation of the posterior distribution.  If $\sigma\ll 2\pi$ then the probability distribution is narrow and does not suffer from significant wrap around unless $\mu \mod 2\pi \approx 0$.  We address this by keeping track of each of the accepted $\phi_j$ as well as $\phi_j+\pi$.  If $\sigma\ll 1$ than it is impossible that both distributions suffer from substantial wrap around.  The arithmetic, rather than circular, mean and standard deviation are then computed for both using an incremental formula and the branch with the smallest variance is kept.  If the branch that was shifted by $\pi$ is chosen, then $\pi$ is subtracted from the reported mean.  The standard deviation does not need to be modified because it is invariant with respect to displacements of the mean.
+
+While this approach is correct if $\sigma\ll 1$, it is only approximate if $\sigma$ is on the order of $1$.  In such cases, computation of the circular mean is much better justified, however we find that using our heuristic approach continues to provide acceptable results while avoiding trigonometric calls that can be expensive in some contexts.  An alternative approach to solving this problem is to begin each phase estimation run with a batch of random experiments, as per~\cite{SHF14}, before continuing to ensure that the posterior variance is small enough to neglect the wrap around effect.
+
+
+
+The choice of the evolution time and the inversion angle strongly impacts the efficiency of the learning algorithm.  We provide below code for a modified version of the
+particle guess heuristic of~\cite{wiebe_hamiltonian_2014}.  As discussed in the main body, we expect that choosing $M> T_2$ will typically lead to worse estimates of the eigenphase because the effects of decoherence overwhelm the information that can be gleaned from these long experiments.  As a result, we modify the particle guess heuristic  to never choose $M> T_2$.  We formally state this procedure in~\alg{pghT2}.
+
+
+\begin{figure}[h]
+\begin{algorithm}[H]
+    \caption{Bayes Update for \CRej using Directional Statistics}
+    \label{alg:crej2}
+    \begin{algorithmic}
+
+        \Require Prior mean and variance $\mu,\sigma$, measurement $E$,
+            settings $M,\theta$, number of attempts $m$, scale $\kappa_E$
+
+        \linecomment{Initialize accumulators to 0.}
+	\State $(x_{\rm inc},y_{\rm inc},N_a) \gets 0$.
+%        \State{$(\mu_{\rm inc},V_{\rm inc},N_a) \gets 0$}
+        \linecomment{Attempt each sample.}
+
+        \For{$i \in 1 \to m$}
+            \State $x \sim\frac{e^{-(\phi-\mu)^2/2 \sigma^2}}{\sigma\sqrt{2 \pi }},$
+          
+            \linecomment{Accept or reject the new sample.}
+            \State $u \sim \operatorname{Uniform}(0, 1)$
+            \If{$P(E | x) \ge \kappa_Eu$}% \Comment{Check if sample is accepted}
+    %                \State Append $x$ to $X$.
+                \linecomment{Accumulate using the accepted sample using Cartesian coordinates.}
+                \State $x_{\rm inc} \gets x_{\rm inc}+ \cos(x)$
+                \State $y_{\rm inc} \gets y_{\rm inc}+ \sin(x)$
+                \State $N_a \gets N_a +1$.
+            \EndIf
+        \EndFor
+
+        \State $x_{\rm inc}\gets x_{\rm inc}/N_a $
+        \State $y_{\rm inc}\gets y_{\rm inc}/N_a $
+
+        \linecomment{Return mean, variance of the posterior using accumulators.}
+	\State $\mu\gets {\rm Arg}(x_{\rm inc}+iy_{\rm inc})$.
+\linecomment{Use circular standard deviation to estimate SD for wrapped Gaussian}
+	\State $\sigma = \sqrt{\ln\left(\frac{1}{\sqrt{x_{\rm inc}^2 + y_{\rm inc}^2}}\right)}$
+        \State\Return $(\mu,\sigma)$
+
+    \end{algorithmic}
+\end{algorithm}
+\end{figure}
+
+% See http://tex.stackexchange.com/questions/231191/algorithm-in-revtex4-1
+% for details as to why this is in a {figure} and has [H].
+\begin{figure}[h]
+\begin{algorithm}[H]
+    \caption{Bayes Update for \CRej}
+    \label{alg:crej}
+    \begin{algorithmic}
+
+        \Require Prior mean and variance $\mu,\sigma$, measurement $E$,
+            settings $M,\theta$, number of attempts $m$, scale $\kappa_E$
+
+        \linecomment{Initialize accumulators to 0.}
+        \State{$(\mu_{\rm inc},\mu_{\rm inc}',V_{\rm inc},V_{\rm inc}',N_a) \gets 0$}
+        \linecomment{Attempt each sample.}
+        \For{$i \in 1 \to m$}
+            \linecomment{Draw a sample using each ``cut'' of the prior.}
+            \State $x \sim\frac{e^{-(\phi-\mu)^2/2 \sigma^2}}{\sigma\sqrt{2 \pi }},$
+            \State $x\gets x \mod 2 \pi$.
+            \State $x'\gets x+\pi \mod 2 \pi$.
+
+            \linecomment{Accept or reject the new sample.}
+            \State $u \sim \operatorname{Uniform}(0, 1)$
+            \If{$P(E | x) \ge \kappa_Eu$}% \Comment{Check if sample is accepted}
+    %                \State Append $x$ to $X$.
+                \linecomment{Accumulate using the accepted sample w/ each ``cut.''}
+                \State $\mu_{\rm inc} \gets \mu_{\rm inc}+ x$
+                \State $V_{\rm inc} \gets V_{\rm inc}+ x^2$
+                \State $V_{\rm inc}' \gets V_{\rm inc}'+ x'^2$
+                \State $N_a \gets N_a +1$.
+            \EndIf
+        \EndFor
+        \linecomment{Return mean, variance of the posterior using accumulators.}
+        \State $\mu'\gets \mu_{\rm inc}/N_a $
+        \State $\sigma' \gets \min\left(\sqrt{\frac{1}{N_a -1}\left(V_{\rm inc} - \mu_{\rm inc}^2 \right)},\sqrt{\frac{1}{N_a -1}\left(V_{\rm inc}' - \mu_{\rm inc}'^2 \right)}\right)$%\Comment{Use incremental formula for sample covariance}
+        \State\Return $(\mu',\sigma')$
+
+    \end{algorithmic}
+\end{algorithm}
+\end{figure}
+
+
+
+
+
+\begin{figure}
+\begin{algorithm}[H]
+    \caption{Restarting algorithm}
+    \label{alg:restart}
+\begin{algorithmic}
+        \Require Prior \CRej state, records of all previous models found in the phase estimation algorithm $\mu$, $\vec{\sigma}$, initial standard deviation $\sigma_{\rm init}$, $M$, $T_2$, a counter $\text{CNT}$, $\Gamma$ and $\tau$.
+	\Ensure $\text{CNT}$, $\sigma$ 
+        \Function{$\text{Restart}$}{${\mu}$, $\vec \sigma$,$\sigma_{\rm init}$, $M$, $T_2$, $\text{CNT}$, $\Gamma$, $\tau$}
+	\State $D \gets$ derivative of $\log{\sigma}$.
+	\If {$D\ge \Gamma$ and $\text{CNT}<5$ or rand()$>\exp(-M/T_2)$}\Comment{Checks to see if the eigenstate is suspect.}
+		\State Perform experiment with $M=\tau/\sigma$ and $\theta=\mu$.
+		\If{Outcome is 0}\Comment{Test concludes state estimate is valid}
+\State ${\rm CNT} \gets {\rm CNT}+1$.
+			\State \Return $\text{CNT},\sigma$.
+\Else\Comment{Test concludes state estimate is invalid}
+
+		
+
+\State $\text{CNT}\gets 0$
+	\State $\sigma \gets \sigma_{\rm init}$
+	\State \Return $\text{CNT}, \sigma$
+\EndIf
+\Else\Comment{Does not restart if state is not suspect}
+	\State $\text{CNT}\gets \text{CNT}+1$
+		\State \Return $\text{CNT},\sigma$.
+	\EndIf
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+\end{figure}
+
+
+\begin{figure}
+\begin{algorithm}[H]
+    \caption{PGH for decoherent phase estimation using \CRej}
+    \label{alg:pghT2}
+\begin{algorithmic}
+        \Require Prior \CRej state $\mu$, $\Sigma$. Resampling kernel $\operatorname{F}$.
+        \Ensure  An experiment $(M, \theta)$.
+        \Function{$\text{PGH}_\text{\CRej}$}{$\mu$, $\Sigma$, $T_2$}
+            \State $M \gets 1.25 / \sqrt{{\rm Tr}(\Sigma)}$
+    \If {$M\ge T_2$}
+        \State $M\sim f(x;1/T_2)$\Comment{Draw $M$ from an exponential distribution with mean $T_2$}.
+    \EndIf
+            \State $(-\theta/M) \sim \operatorname{F}(\mu, \Sigma)$
+            \State \Return $(M, \theta)$.
+        \EndFunction
+    \end{algorithmic}
+\end{algorithm}
+\end{figure}
+%=====================================================================
+% \bibliographystyle{apsrev}
+\bibliography{CRPE}
+%=====================================================================
+
+
+\end{document}
