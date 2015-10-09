@@ -146,23 +146,23 @@ Particle filters have become an indispensable tool for model selection, object t
 and statistical inference in
 high--dimensional problems~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined}. 
 While particle filtering works well in many conventional settings, 
-the method is less well-suited to settings where the
-user has access only to a constant amount of memory.  
+the method is less well-suited to when the
+user faces severe memory restrictions.  
 
 Memory restricted problems are more than just curiosities. In control problems
 in electrical engineering and experimental physics, for instance,
 it is common that the dynamics of
 a system can radically change over the time required to communicate between a system
 and the computer used to control its dynamics \cite{halloin_long_2013,shulman_suppressing_2014}.  This latency can be reduced to acceptable levels by allowing the inference to performed inside
-the device itself \cite{lavalle_sensor_2013}, but this often places prohibitive restrictions on the processing power and memory on processors embedded on or near the system.
+the device itself \cite{lavalle_sensor_2013}, but this often places prohibitive restrictions on the processing power and memory of the embedded processors.
 These restrictions can preclude the use of traditional particle filter methods.
 
-We present an approach that we call \emph{rejection filtering} that efficiently samples from
+We present an approach that we call \emph{rejection filtering} (RF) that efficiently samples from
 an approximation to the posterior by using rejection sampling and resampling together.
 This allows rejection filtering to perform the inference task while storing no more
-than a constant number of samples at any one time in typical use cases.
+than a constant number of samples at a time in typical use cases.
 Rejection filtering therefore can require significantly
-less memory than traditional particle filter methods. Moreover, we show that our algorithm can be
+less memory than traditional particle filter methods. Moreover, RF can be
 easily parallelized at a fine-grained level, such that it can be used with an
 array of small processing cores. Thus, \CRej~is well suited for inference
  using hybrid computing and memory-restricted platforms.
@@ -172,19 +172,17 @@ integration with existing memory-intensive digital signal processing systems
 \cite{casagrande_design_2014}.
 
 We also show that the advantages of rejection filtering are retained in the \emph{active learning} case as well,
-wherein samples correspond to experiments that can be used to optimize the inference procedure.
+wherein samples correspond to experiments that can be selected and used to optimize the inference procedure.
 In particular, our approach uses well-motivated experiment design heuristics in conjunction with rejection
 filtering.
-\textbf{KMS: Then elaborate on this case and why it is compelling
-to use your approach over other existing approaches.  Worth citing a few of
-the competing approaches for the active learning domain here.}
+This amounts to a form of selective sampling that is computationally inexpensive, easy to parallelize, simple to program and can operate in a much more memory restricted environment than existing approaches~\cite{sivaraman2010general,kapoor2007active}.
 
 We start in \sec{smc} by discussing rejection sampling and particle filter methods.
 In \sec{method}, we then detail the \CRej~algorithm and discuss applications to state-space models
 such as those used in computer vision. In \sec{error-analysis}, we prove the
 stability of our algorithm and provide bounds on the errors incured in
 computing Bayesian mean estimators using \CRej. Finally, in \sec{numerical-experiments},
-we provide experimental results on rejection filtering for tracking periodically drifting frequencies and
+we provide experimental results on rejection filtering for tracking frequency drift and
 also for classifying MNIST digits.
 
 %=============================================================================
@@ -355,8 +353,8 @@ We use a computational model wherein $N_{\rm batch}$ processing
 nodes send a stream of the incremental means and
 covariance sums to a server that combines them to produce the
 model used in the next step of the inference procedure.
-We discuss this batched version of the
-inference algorithm in~\alg{batchcrej} (Supplemental Material).
+A batched version of the
+RF algorithm is given in~\alg{batchcrej} (Supplemental Material).
 
 %=============================================================================
 \subsection{Bayesian inference using Approximate Rejection Sampling}
@@ -502,8 +500,7 @@ Model selection of this form has been used, for instance, to decide if
 a diffusive model is appropriate for predicting future evidence \cite{granade_characterization_2015}.
 Given the aggressiveness of the \CRej~resampling step, streaming model selection
 will be especially important in assessing whether a diffusive inference model has
-``lost'' the true value \cite{wiebe_efficient_2015}. Moreover, since the $\ln(m + 2\beta)$ term is in common,
-it can be factored out in cases where $m$ is held constant across models and evidence.
+``lost'' the true value \cite{wiebe_efficient_2015}. The $\ln(m + 2\beta)$ term can be factored out in cases where $m$ is constant across models and evidence.
 
 %=============================================================================
 \section{Error Analysis}
@@ -561,7 +558,7 @@ Stability is therefore expected if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and
 \begin{equation}
 P(E) \gg {L\int_V P(E|x) \mathrm{d}^Nx }.
 \end{equation}
-Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz constant for the model is small.  In practice, both of these potential failures can couple together to lead to rapid growth of errors.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the variance of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm. 
+Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz constant for the model is small.  In practice, both of these potential failures can couple together to lead to rapid growth of errors.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm. 
 We overcome such instabilities through by invoking random restarts, as outlined in the next section,
 though other strategies exist~\cite{wiebe_efficient_2015}.
 
@@ -631,7 +628,7 @@ achievable error $(\pi / 120)^2$ with as few as $m = 100$ sampling attempts.
 Thus, our \CRej~algorithm continues to be useful in the case of time-dependent
 and other state-space models.  Although this demonstration is quite simple, it
 is important to emphasize the minuscule memory requirements for this task
-mean that this tracking problem can be solved using a small processor in
+mean that this tracking problem can be solved using a memory limited processor in
 a different device that is physically close to the system in question.
 Close proximity is necessary in many applications (such as in control problems) to make the latency
 low relative to the dynamical timescale of the object or system that is being tracked.
@@ -672,7 +669,7 @@ Unlike the previous experiment, we do not implement this in a memory--restricted
 setting because of the size of the MNIST training set.
 Our goal instead is to view the image classification problem through the lens of active feature learning.  
 We assume that the user has access to the entire training set, but wishes to classify a digit by reading as few of the training vectors features (pixels) to the training
-image as possible.  Although such a lookup is not typically expensive for MNIST, in more general tasks, features may be very expensive to compute, and our experiment shows that our approach enables identification of the most salient features.  This reduces the computational requirements of the classification task, and also serves to identify salient features for future 
+image as possible.  Although such a lookup is not typically expensive for MNIST, in more general tasks, features may be very expensive to compute, and our experiment shows that our approach enables identification of important features.  This reduces the computational requirements of the classification task, and also serves to identify salient features for future 
 classification problems.
 
 Such advantages are especially relevant to search wherein features, such as term occurences and phrase matches across terms, can be expensive to compute on the fly.  It also can
@@ -683,27 +680,26 @@ far fewer queries than other methods, such as kNN, would require.  We also show 
 be used to \emph{extract} the relevant important features (i.e. pixels) from the data set.
 
 We perform these experiments using an adaptive guess heuristic, similar to that employed in the frequency estimation example.
-The heuristic works by choosing the pixel label, $i$, to query that has the largest variance of intensity
+The heuristic chooses the pixel label, $i$, that has the largest variance of intensity
 over the $m$ training vectors that compose the particle cloud.  We then pick $\sigma$ to be the standard
-deviation of the intensity of that pixel.  This method has the advantage that once the set of particles
-considered becomes small then the variance shrinks and allowing $\sigma$ to shrink proportionally dramatically
-speeds up the inference process.  
+deviation of the intensity of that pixel.  As learning progresses the diversity in the set of particles
+considered shrinks, which causes the variance to decrease.  Allowing $\sigma$ to shrink proportionally accelerates the inference process by amplifying the effect of small differences in $P(E|x)$.  
 
 \begin{figure}
 \includegraphics[width=\columnwidth]{ErrorPlot.pdf}
 \caption{Classification errors for odd/even MNIST digits for rejection filtering with 784 maximum experiments distributed over 1,3,5 restarts and stopping condition $\mathcal{P}=0.1,0.01,0.001$.}\label{fig:errorplot}
 \end{figure}
 
-We repeat this process of querying pixels until the sample probability distribution has converged to a distribution that
+We repeat this process until the sample probability distribution has converged to a distribution that
 assigns probability at most $\mathcal{P}$ to one of the two classes in the problem.  This process is restarted a total of
-$1,3$ or $5$ times subject to the constraint that at most $784$ queries are made in the inference process (divided equally over each of the restarts).
-The label assigned to the test vector is then the most frequently appearing label out of these tests.  This choice ensures that our method will at most
-incurr the same cost as na\i ve kNN, but is pessimistic we do not allow the algorithm to store the results of prior queries which could reduce the 
+$1,3$ or $5$ times subject to the constraint that at most $784$ queries are made (divided equally over each of the restarts).
+The label assigned to the test vector is then the most frequently appearing label out of these tests.  This ensures that our method
+incurs at most the same cost as na\i ve kNN, but is pessimistic as we do not allow the algorithm to store the results of prior queries which could reduce the 
 complexity of the inference.
 
-We make one further modification of the rejection filtering algorithm in order to fit it to this problem.  Since our classification problem has only two classes, we cannot directly apply the resampling step as described in~\alg{crej}.  Instead, we use a method similar to the bootstrap filter.  Specifically, when resampling we draw a number of particles from both
+We make one further modification of the rejection filtering algorithm in order to fit it to this problem.  The resampling step as described in~\alg{crej} is unnatural here because there are only two classes rather than a continuum.  Instead, we use a method similar to the bootstrap filter.  Specifically, when resampling we draw a number of particles from both
 classes proportional to the sample frequency in the posterior distribution.  For each of these classes we then replicate the surviving particles until $95\%$ of the total population is replenished
-by copies from the posterior cloud of samples.  The remaining $5\%$ are drawn uniformly from the training vectors with the corresponding class labels.
+by copies from the posterior cloud of samples.  The remaining $5\%$ are drawn uniformly from the training vectors in the corresponding class.
 
 \fig{HM} illustrates the differences between maximum variance experiment design and the adaptive method we use in rejection filtering.  These differences
 are perhaps most clearly seen in the problem of classifying one vs zero digits from MNIST.  Our adaptive approach most frequently queries the middle pixel, which is the 
@@ -712,24 +708,25 @@ over the training set.  In contrast, many of the high-variance pixels near the m
 This illustrates that they carry redundant information and can be removed from the training set.  Thus this adaptive learning algorithm can also be used to provide a type of model compression, similar to feature selection
 or PCA.
 
-The case for odd vs even is more complicated.  This is because the hand written examples have much less structure in them and so it is perhaps unsurprising that less dramatic compression is possible when examining that class. However, the data still reveals qualitatively that even here there is a disconnect between the variance of the features over the training set and their importance in classification.
+The case for odd vs even is more complicated.  This is because the handwritten examples have much less structure in them and so it is perhaps unsurprising that less dramatic compression is possible when examining that class. However, the data still reveals qualitatively that even here there is a disconnect between the variance of the features over the training set and their importance in classification.
 That rejection filtering can separate between the variance of a feature and
 its importance suggests that our method may be of use in feature selection.
 In particular, an interesting open question is how well rejection filtering
 can work to select features for other classification methods.
 
-We will now go beyond these qualitative discussions to quantitatively compare rejection filtering to kNN classification.  kNN is known to perform well for digit classification but it can be prohibitively slow for
+We will now compare rejection filtering to kNN classification.  kNN is a standard approach for digit classification that performs well but it can be prohibitively slow for
 large training sets \cite{yu2010high} (indexing strategies can be used to combat this problem~\cite{yu2001indexing}).  In order to make the comparison as fair as possible between the two, we compare kNN to rejection filtering by truncating the 
 MNIST examples by removing pixels that have low variance over the training set.  This removes some of the advantage our method has by culling pixels near
 the boundary of the image that contain very little signal  (see~\fig{HM}) and yet substantially contribute to the cost of kNN in an active learning setting.
 
-Further optimizations can be used to improve the performance of kNN such as feature extraction~\cite{zhang2006svm,weinberger2008fast,min2009deep} or the use of 
-deformation models~\cite{keysers2007deformation};
-however we suspect that they will only serve to improve the performance of both methods. We leave investigation of the performance of rejection filtering under such optimization
-for future work.
+Feature extraction~\cite{zhang2006svm,weinberger2008fast,min2009deep} or the use of 
+deformation models~\cite{keysers2007deformation} can also be used to improve the performance of kNN.
+We ignore them here for simplicity because they will also likely improve rejection filtering.
+%this will likely only improve the performance of both methods. We leave investigation of this
+%for future work.
 
 \fig{errorplot} shows that in certain parameter regimes, approximate Bayesian inference via rejection sampling can not only achieve higher classification accuracy on average for a smaller
-number of queries to the test vector, but also can achieve $25\%$ less error even if these constraints are removed.  This result is somewhat surprising given that we chose our likelihood function to correspond to nearest neighbor classification if $\sigma$ is held constant.  However, we do not hold $\sigma$ constant in our inference but rather choose it adaptively as the experiment proceeds.  This fact changes the weight of the evidence provided by each pixel query and explains why it is possible for our algorithm to outperform kNN classification despite the apparent similarities between the two approaches.
+number of queries to the test vector, but also can achieve $25\%$ less error even if these constraints are removed.  This result is somewhat surprising given that we chose our likelihood function to correspond to nearest neighbor classification if $\sigma$ is held constant.  However, we do not hold $\sigma$ constant in our inference but rather choose it adaptively as the experiment proceeds.  This changes the weight of the evidence provided by each pixel query and allows our algorithm to outperform kNN classification despite the apparent similarities between them.
 
 %=============================================================================
 \section{Conclusion}
