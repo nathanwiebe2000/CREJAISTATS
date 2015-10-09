@@ -614,7 +614,7 @@ We design experiments $(x_-, t)$ using a heuristic that picks $x_-$ to be a rand
 vector sampled from the prior and $t=1/\sqrt{{\rm Tr}~ \Sigma}$ \cite{wiebe_efficient_2015}.
 We use this heuristic here because it is known
 to saturate the Bayesian Cramer--Rao bound for this problem and is
-much faster than adaptively choosing $(t,x_-)$ to minimize the Bayes risk, which
+much faster than adaptively choosing $(x_-, t)$ to minimize the Bayes risk, which
 we take to be the expected quadratic loss after performing an experiment given
 the current prior.
 
