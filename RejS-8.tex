@@ -620,7 +620,7 @@ against the drift.
 We design experiments $(x_-, t)$ using a heuristic that picks $x_-$ to be a random
 vector sampled from the prior and $t=1/\sqrt{{\rm Tr}~ \Sigma}$ \cite{wiebe_efficient_2015}.
 We use this heuristic because it is known
-to saturate the Bayesian Cramer--Rao bound for this problem~\cite{wiebe_hamiltonian_2014} and is
+to saturate the Bayesian Cramer--Rao bound for this problem~\cite{dauwels_computing_2005,wiebe_hamiltonian_2014} and is
 much faster than adaptively choosing $(x_-, t)$ to minimize the Bayes risk, which
 we take to be the expected quadratic loss after performing an experiment given
 the current prior.
@@ -664,8 +664,8 @@ familiar to kernel learning \cite{scholkopf_learning_2001}.
 \includegraphics[width=0.49\columnwidth]{01HM.pdf}
 \includegraphics[width=0.49\columnwidth]{OEexpHM.pdf}
 \includegraphics[width=0.49\columnwidth]{OEHM.pdf}
-\caption{(top left) Heat map of frequency pixel is queried in zero vs one data set.  (top right) Heat map of variance of pixel data over data set.
-Bottom plots are the corresponding plots for the odd/even digits.}\label{fig:HM}
+\caption{(top left) Heat map of frequency pixel is queried in 1 vs 0 data set.  (top right) Heat map of variance of pixel data over data set.
+Bottom plots are the corresponding plots for the odd vs even data set.}\label{fig:HM}
 \end{figure}
 
 Unlike the previous experiment, we do not implement this in a memory--restricted
@@ -706,12 +706,17 @@ by copies from the posterior cloud of samples.  The remaining $5\%$ are drawn un
 are perhaps most clearly seen in the problem of classifying one vs zero digits from MNIST.  Our adaptive approach most frequently queries the middle pixel, which is the 
 highest variance feature over the training set.  This is unsurprising, but the interesting fact is that the second most frequently queried pixel is one that has relatively low variance
 over the training set.  In contrast, many of the high-variance pixels near the maximum variance pixel are never queried despite the fact that they have large variance over the set.
-This illustrates that they carry redundant information and can be removed from the training set.  Thus this adaptive learning algorithm can also be used to provide a type of model compression, similar to PCA.
+This illustrates that they carry redundant information and can be removed from the training set.  Thus this adaptive learning algorithm can also be used to provide a type of model compression, similar to feature selection
+or PCA.
 
 The case for odd vs even is more complicated.  This is because the hand written examples have much less structure in them and so it is perhaps unsurprising that less dramatic compression is possible when examining that class. However, the data still reveals qualitatively that even here there is a disconnect between the variance of the features over the training set and their importance in classification.
+That rejection filtering can separate between the variance of a feature and
+its importance suggests that our method may be of use in feature selection.
+In particular, an interesting open question is how well rejection filtering
+can work to select features for other classification methods.
 
 We will now go beyond these qualitative discussions to quantitatively compare rejection filtering to kNN classification.  kNN is known to perform well for digit classification but it can be prohibitively slow for
-large training sets (indexing strategies can be used to combat this problem~\cite{yu2001indexing}).  In order to make the comparison as fair as possible between the two, we compare kNN to rejection filtering by truncating the 
+large training sets \cite{yu2010high} (indexing strategies can be used to combat this problem~\cite{yu2001indexing}).  In order to make the comparison as fair as possible between the two, we compare kNN to rejection filtering by truncating the 
 MNIST examples by removing pixels that have low variance over the training set.  This removes some of the advantage our method has by culling pixels near
 the boundary of the image that contain very little signal  (see~\fig{HM}) and yet substantially contribute to the cost of kNN in an active learning setting.
 
