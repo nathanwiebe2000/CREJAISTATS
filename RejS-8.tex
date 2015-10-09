@@ -639,7 +639,7 @@ low relative to the dynamical timescale of the object or system that is being tr
 
 A more common task is handwriting recognition.  Our goal in this task is to use
 Bayesian inference to classify an unknown digit taken from the MNIST repository~\cite{lecun1998mnist} in
-one of two classes.  Here we consider two cases: the restricted case of classifying only $1$ digits and $0$ digits and classifying digits as even or odd.
+one of two classes.  We consider two cases: the restricted case of classifying only $1$ digits and $0$ digits (zero vs one) and classifying digits as either even or odd (even vs odd).
 
 We cast the problem in the language of Bayesian inference by assuming the likelihood
 function
@@ -661,8 +661,8 @@ familiar to kernel learning \cite{scholkopf_learning_2001}.
 \includegraphics[width=0.49\columnwidth]{01HM.pdf}
 \includegraphics[width=0.49\columnwidth]{OEexpHM.pdf}
 \includegraphics[width=0.49\columnwidth]{OEHM.pdf}
-\caption{(top left) Heat map of frequency pixel is queried in 1 vs 0 data set.  (top right) Heat map of variance of pixel data over data set.
-Bottom plots are the corresponding plots for the odd vs even data set.}\label{fig:HM}
+\caption{(top left) Heat map of frequency pixel is queried in zero vs one data set.  (top right) Heat map of variance of the pixels over data set.
+Bottom plots are the corresponding to the even vs odd data set.}\label{fig:HM}
 \end{figure}
 
 Unlike the previous experiment, we do not implement this in a memory--restricted
@@ -697,7 +697,7 @@ The label assigned to the test vector is then the most frequently appearing labe
 incurs at most the same cost as na\i ve kNN, but is pessimistic as we do not allow the algorithm to store the results of prior queries which could reduce the 
 complexity of the inference.
 
-We make one further modification of the rejection filtering algorithm in order to fit it to this problem.  The resampling step as described in~\alg{crej} is unnatural here because there are only two classes rather than a continuum.  Instead, we use a method similar to the bootstrap filter.  Specifically, when resampling we draw a number of particles from both
+ The resampling step as described in~\alg{crej} is unnatural here because there are only two classes rather than a continuum.  Instead, we use a method similar to the bootstrap filter.  Specifically, when resampling we draw a number of particles from both
 classes proportional to the sample frequency in the posterior distribution.  For each of these classes we then replicate the surviving particles until $95\%$ of the total population is replenished
 by copies from the posterior cloud of samples.  The remaining $5\%$ are drawn uniformly from the training vectors in the corresponding class.
 
