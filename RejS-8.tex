@@ -262,8 +262,9 @@ This choice of resampling distribution explicitly preserves the mean
 and the covariance of the current posterior, while increasing the
 effective sample size.
 
-When the posterior is approximately normal, $a = 0$ approximately
-preserves all of the relevant information about the posterior, and  only requires
+When the posterior is approximately normal, $a = 0$
+preserves all of the relevant information about the posterior up to sampling error,
+and  only requires
 storing summary statistics of particles rather than the entire particle
 approximation~\cite{del2012adaptive,sisson_sequential_2007}.   This observation is key to
 the development of \CRej~in the next section.
@@ -297,8 +298,8 @@ the development of \CRej~in the next section.
 %---------------------------------------------------------------------
 
 We make rejection sampling efficient by combining it with particle
-filtering methods using \emph{resampling}.
-Our resulting particle filtering algorithm does not try to
+filtering methods through \emph{resampling}.
+Rejection filtering does not try to
 to propagate samples through many rounds of rejection sampling, but instead
 uses these samples to inform a new model for the posterior distribution. 
 For example, if
@@ -361,14 +362,14 @@ nodes send a stream of the incremental means and
 covariance sums to a server that combines them to produce the
 model used in the next step of the inference procedure.
 Pseudocode for this version of the
-RF algorithm is given in~\autoref{supp-alg:batchcrej} (Supplemental Material).
+RF algorithm is given in the supplemental material.
 
 %=============================================================================
 \subsection{Bayesian Inference using Approximate Rejection Sampling}
 \label{sec:approx-rej}
 %=============================================================================
 
-Having used resampling to combine rejection sampling and particle filtering,
+Having used resampling to unify rejection sampling and particle filtering,
 we can significantly improve the complexity of the resulting rejection filtering
 algorithm by relaxing from exact rejection sampling.  Approximate rejection
 sampling is similar to rejection sampling except
@@ -398,7 +399,7 @@ Result follows directly from~\thm{crej} and Theorem 1 in~\cite{WKGS15}.
 \end{proof}
 
 \cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too small for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily result in substantial errors in the posterior distribution.
-We further elaborate in \autoref{supp-app:sensitivity-kappa} with a numerical example.
+We further elaborate in the supplemental material with a numerical example.
 This leads to an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore, it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use rejection filtering.
 
 %-----------------------------------------------------------------------------
@@ -484,8 +485,7 @@ If $K > 1$, then model $A$ is to be preferred as an explanation
 of the evidence seen thus far. In particular, the expectation over model parameters
 penalizes overfitting, such that a model preferred by $K$ must justify the dimensionality
 of $x$. This is made concrete by noting that $K$ is well-approximated by the Bayesian information
-criterion when the prior is a multivariate normal distributon.
-% CITE for that: https://www.stat.washington.edu/raftery/Research/PDF/weakliem1999.pdf
+criterion when the prior is a multivariate normal distributon \cite{akaike_likelihood_1980,raftery1999bayes}.
 
 Using \CRej~to perform model selection, then, consists of accumulating
 subsequent values of $N_a$ in a log-likelihood register $\ell$,
@@ -546,11 +546,11 @@ $$
 $$
 \end{theorem}
 
-This theorem addresses the question of when we can reasonably expect the update process discussed in~\alg{crej} to be stable.  By stable, we mean that small initial errors do not exponentially magnify throughout the update process.  \thm{meanCov} shows that small errors in the prior distribution do not propagate into large errors in the estimates of the mean and posterior matrix given that $P(E)= \langle P(E|x),P(x)\rangle$ is sufficiently large.  In particular, \thm{meanCov} and an application of the Cauchy--Schwarz inequality shows that such errors are small if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and 
+This theorem addresses the question of when we can reasonably expect the update process discussed in~\alg{crej} to be stable.  By stable, we mean that small initial errors do not exponentially magnify throughout the update process.  \thm{meanCov} shows that small errors in the prior distribution do not propagate into large errors in the estimates of the mean and posterior matrix given that $P(E)= \langle P(E|x),P(x)\rangle$ is sufficiently large.  In particular, \thm{meanCov} and an application of the Cauchy--Schwarz inequality show that such errors are small if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and 
 $$
 \langle\Delta(x),\Delta(x)\rangle \ll \frac{P^2(E)}{{\langle P(E|x),P(E|x)\rangle}}.
 $$
-However, this does not directly address the question of stability because it does not consider the errors that are incurred from the resampling step.
+However, this does not fully address the question of stability because it does not consider the errors that are incurred from the resampling step.
 
 We can assess the effect of these errors by assuming that, in the domain of interest, the updated model after an experiment satisfies a Lipshitz condition
 \begin{equation}
@@ -564,7 +564,7 @@ Stability is therefore expected if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and
 \begin{equation}
 P(E) \gg {L\int_V P(E|x) \mathrm{d}^Nx }.
 \end{equation}
-Thus we expect stability if (a) low likelihood events are rare, and (b) the Lipshitz constant for the model is small.  In practice, both of these potential failures can couple together to lead to rapid growth of errors.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm. 
+Thus we expect stability if (a) low likelihood events are rare, and (b) the Lipshitz constant for the model is small.  In practice, both of these potential failures can couple together to lead to rapid growth of errors.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the distribution which causes the Lipshitz constant to become large.  This in turn could coincide with an unexpected outcome to destabilize the learning algorithm. 
 We overcome this problem by invoking random restarts, as outlined in the next section,
 though other strategies exist~\cite{wiebe_efficient_2015}.
 
@@ -577,7 +577,7 @@ In this section, we demonstrate rejection filtering both in the context of
 learning simple functions in a memory-restricted and time-dependent fashion,
 and in the context of learning more involved models such as handwriting
 recognition. In both cases, we see that rejection filtering provides significant
-advantages over either particle filtering or rejection sampling alone.
+advantages.
 
 %-----------------------------------------------------------------------------
 \subsection{Multimodal Frequency Estimation}
@@ -645,7 +645,7 @@ low relative to the dynamical timescale of the object or system that is being tr
 %-----------------------------------------------------------------------------
 
 A more common task is handwriting recognition.  Our goal in this task is to use
-Bayesian inference to classify an unknown digit taken from the MNIST repository~\cite{lecun1998mnist} in
+Bayesian inference to classify an unknown digit taken from the MNIST repository~\cite{lecun1998mnist} into
 one of two classes.  We consider two cases: the restricted case of classifying only $1$ digits and $0$ digits (zero vs one) and classifying digits as either even or odd (even vs odd).
 
 We cast the problem in the language of Bayesian inference by assuming the likelihood
@@ -681,7 +681,7 @@ classification problems.
 
 Such advantages are especially relevant to search wherein features, such as term occurences and phrase matches across terms, can be expensive to compute on the fly.  It also can
 occur in experimental sciences where each data point may take minutes or hours to either measure
-or compute accurately.  In these cases it is vital to minimize the number of queries made to the training
+or process.  In these cases it is vital to minimize the number of queries made to the training
 data.  We will show that our Bayesian inference approach to this problem allows this to be solved using
 far fewer queries than other methods, such as kNN, would require.  We also show that our method can
 be used to \emph{extract} the relevant important features (i.e. pixels) from the data set.
@@ -716,9 +716,7 @@ This illustrates that they carry redundant information and can be removed from t
 or PCA.
 
 The case for odd vs even is more complicated.  This is because the handwritten examples have much less structure in them and so it is perhaps unsurprising that less dramatic compression is possible when examining that class. However, the data still reveals qualitatively that even here there is a disconnect between the variance of the features over the training set and their importance in classification.
-That rejection filtering can separate between the variance of a feature and
-its importance suggests that our method may be of use in feature selection.
-In particular, an interesting open question is how well rejection filtering
+An interesting open question is how well rejection filtering
 can work to select features for other classification methods.
 
 We will now compare rejection filtering to kNN classification.  kNN is a standard approach for digit classification that performs well but it can be prohibitively slow for
