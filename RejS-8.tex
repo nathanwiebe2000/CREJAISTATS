@@ -157,7 +157,7 @@ and the computer used to control its dynamics \cite{halloin_long_2013,shulman_su
 the device itself \cite{lavalle_sensor_2013}, but this often places prohibitive restrictions on the processing power and memory on processors embedded on or near the system.
 These restrictions can preclude the use of traditional particle filter methods.
 
-We present an approach that we call rejection filtering that efficiently samples from
+We present an approach that we call \emph{rejection filtering} that efficiently samples from
 an approximation to the posterior by using rejection sampling and resampling together.
 This allows rejection filtering to perform the inference task while storing no more
 than a constant number of samples at any one time in typical use cases.
@@ -170,9 +170,14 @@ For example, \CRej~allows for inference to be embedded in novel contexts such
 as very small cryogenic controllers \cite{hornibrook_cryogenic_2015}, or for
 integration with existing memory-intensive digital signal processing systems
 \cite{casagrande_design_2014}.
-We also show that these advantages are retained in the active learning case as well,
-using well-motivated experiment design heuristics in conjunction with rejection
+
+We also show that the advantages of rejection filtering are retained in the \emph{active learning} case as well,
+wherein samples correspond to experiments that can be used to optimize the inference procedure.
+In particular, our approach uses well-motivated experiment design heuristics in conjunction with rejection
 filtering.
+\textbf{KMS: Then elaborate on this case and why it is compelling
+to use your approach over other existing approaches.  Worth citing a few of
+the competing approaches for the active learning domain here.}
 
 We start in \sec{smc} by discussing rejection sampling and particle filter methods.
 In \sec{method}, we then detail the \CRej~algorithm and discuss applications to state-space models
@@ -329,7 +334,7 @@ our method.
 \end{algorithm}
 
 Our method is described in detail in~\alg{crej}. We then discuss the efficiency of the algorithm in the following theorem.
-We consider an algorithm to be efficient if it runs in $O(\rm{poly}({\rm dim}(x)))$ time.
+We consider an algorithm to be efficient if it runs in $O(\operatorname{dim}(x)))$ time.
 
 \begin{theorem}
 Assume that $P(E|x)\le \kappa_E$ can be computed efficiently for all hypotheses $x$, $\sum_x P(E|x)/\kappa_E$ is at most polynomially small for all
@@ -345,12 +350,13 @@ In practice, one can use the Welford algorithm \cite{welford_note_1962} to more 
 and variances, but doing so does not change the asymptotic scaling with $\epsilon$ of the memory required by~\alg{crej}.
 
 Width can be traded for depth by batching the data and processing each of
-these pieces of evidence separately. We discuss this batched version of the
-inference algorithm in~\alg{batchcrej} (Supplemental Material) wherein we
-assume that a computational model is used with $N_{\rm batch}$ processing
-nodes and a server that accepts a stream of the incremental means and
-covariance sums from the processing nodes and combines them to produce the
+these pieces of evidence separately. 
+We use a computational model wherein $N_{\rm batch}$ processing
+nodes send a stream of the incremental means and
+covariance sums to a server that combines them to produce the
 model used in the next step of the inference procedure.
+We discuss this batched version of the
+inference algorithm in~\alg{batchcrej} (Supplemental Material).
 
 %=============================================================================
 \subsection{Bayesian inference using Approximate Rejection Sampling}
@@ -417,7 +423,7 @@ Such failures in \CRej~are heralded by tracking the total number
 of accepted particles $N_a$ in each update.  This is because $N_a$ estimates
 $P(E) = \sum_x P(E | x) P(x)$.
 Alternatively, we can do better by
-instead incorporating a prediction step that diffuses the mode parameters
+instead incorporating a prediction step that diffuses the model parameters
 of each particle \cite{isard_condensationconditional_1998}.
 In particular, by convolving the prior with a filter function such as a
 Gaussian, the width of the resultant distribution can be increased without
@@ -555,7 +561,8 @@ Stability is therefore expected if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and
 \begin{equation}
 P(E) \gg {L\int_V P(E|x) \mathrm{d}^Nx }.
 \end{equation}
-Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz constant for the model is small.  In practice both of these potential failures can couple together to lead to rapidly growing errors in practice.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the variance of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm.  We deal with such instabilities with random restarts but other strategies exist.
+Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz constant for the model is small.  In practice both of these potential failures can couple together to lead to rapidly growing errors in practice.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the variance of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm.  
+We overcome such instabilities through by invoking random restarts, as outlined in the next section.
 
 %=============================================================================
 \section{Numerical Experiments}
