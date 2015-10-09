@@ -331,21 +331,21 @@ our method.
     \end{algorithmic}
 \end{algorithm}
 
-Our method is described in detail in~\alg{crej}. We then discuss the efficiency of the algorithm in the following theorem.
-We consider an algorithm to be efficient if it runs in $O(\operatorname{dim}(x)))$ time.
+Our method is described in detail in~\alg{crej}. We discuss the efficiency of the algorithm in the following theorem.
+We consider an algorithm to be efficient if it runs in $O(\operatorname{poly}(\operatorname{dim}(x)))$ time, where ${\rm dim}(x)$ is the number of features in the training vectors.
 
 \begin{theorem}
 Assume that $P(E|x)\le \kappa_E$ can be computed efficiently for all hypotheses $x$, $\sum_x P(E|x)/\kappa_E$ is at most polynomially small for all
-evidences $E$ and $P(x)$ can be efficiently sampled and an efficient sampling algorithm for $\operatorname{Uniform}(0,1)$ is provided.  \alg{crej} 
+evidences $E$, $P(x)$ can be efficiently sampled and an efficient sampling algorithm for $\operatorname{Uniform}(0,1)$ is provided.  \alg{crej} 
 can then efficiently compute the mean and covariance of $P(x|E)$ within error $\epsilon$ in the max--norm using $O({\rm dim}(x)^2\log({\rm dim}(x)/\epsilon))$ memory.\label{thm:crej}
 \end{theorem}
-A formal proof is given in the supplemental material.  The intuition behind it is that a sample can be non--deterministically drawn from
+A formal proof is given in the supplemental material.  The intuition is that a sample can be non--deterministically drawn from
 the posterior distribution by drawing a
 sample from the prior distribution and rejecting it with probability $P(E|x)$.  Incremental formulas are
 used in~\alg{crej} to estimate the mean and the covariance using such samples, which obviates the need
 to store $O(1/\epsilon^2)$ samples in memory in order to estimate the moments of the posterior distribution within error $\epsilon$.
-In practice, one can use the Welford algorithm \cite{welford_note_1962} to more precisely accumulate means
-and variances, but doing so does not change the asymptotic scaling with $\epsilon$ of the memory required by~\alg{crej}.
+In practice, one can use the Welford algorithm \cite{welford_note_1962} to  accumulate means
+and variances more precisely, but doing so does not change the asymptotic scaling with $\epsilon$ of the memory required by~\alg{crej}.
 
 Width can be traded for depth by batching the data and processing each of
 these pieces of evidence separately. 
@@ -353,11 +353,11 @@ We use a computational model wherein $N_{\rm batch}$ processing
 nodes send a stream of the incremental means and
 covariance sums to a server that combines them to produce the
 model used in the next step of the inference procedure.
-A batched version of the
+Pseudocode for this version of the
 RF algorithm is given in~\alg{batchcrej} (Supplemental Material).
 
 %=============================================================================
-\subsection{Bayesian inference using Approximate Rejection Sampling}
+\subsection{Bayesian Inference using Approximate Rejection Sampling}
 %=============================================================================
 
 Having used resampling to combine rejection sampling and particle filtering,
@@ -398,7 +398,7 @@ Result follows directly from~\thm{crej} and Theorem 1 in~\cite{WKGS15}.
 Bayesian inference has been combined with
 time-dependent models 
 to perform object tracking and acquisition in many particle filter applications~\cite{isard_condensationconditional_1998,gustafsson_particle_2002}. Here, we show that
-\CRej~naturally encompasses these applications as well by convolving posterior
+\CRej~naturally encompasses these applications by convolving posterior
 distributions with Gaussian update kernels.
 
 In time-dependent applications the true model is not
@@ -428,8 +428,8 @@ Gaussian, the width of the resultant distribution can be increased without
 affecting the prior mean. 
 In a similar way, \CRej~can be extended to include diffusion by using a resampling kernel
 that has a broader variance than that of the accepted posterior samples. Doing so
-allows \CRej~to track stochastic processes in a similar way to \CSMC, as is described
-in detail in \sec{numerical-experiments}.
+allows \CRej~to track stochastic processes in a similar way to \CSMC, as described
+ in \sec{numerical-experiments}.
 
 Formally, we model our posterior distribution as
 \begin{equation}
@@ -450,7 +450,7 @@ $\tilde{P}(x|E;t)$ is $s+\eta (t_{k+1} - t_k)$ and the mean remains $\bar{x}$.
 \label{sec:model-sel}
 %-----------------------------------------------------------------------------
 
-We also note that the ability of \CRej~to include time-dependence
+The ability of \CRej~to include time-dependence
 is especially useful when combined with Bayesian model selection.
 That is, model selection can inform us as to when including time-dependence
 in our particle filtering provides an advantage in terms of explanatory power.
@@ -559,7 +559,7 @@ Stability is therefore expected if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and
 P(E) \gg {L\int_V P(E|x) \mathrm{d}^Nx }.
 \end{equation}
 Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz constant for the model is small.  In practice, both of these potential failures can couple together to lead to rapid growth of errors.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm. 
-We overcome such instabilities through by invoking random restarts, as outlined in the next section,
+We overcome this problem by invoking random restarts, as outlined in the next section,
 though other strategies exist~\cite{wiebe_efficient_2015}.
 
 %=============================================================================
@@ -587,9 +587,9 @@ multimodality in the posteriors. Thus, rejection filtering succeeds in these cas
 if our method correctly models intermediate distributions so that appropriate
 experiments can be designed.
 
-Concretely, we will consider evidence $E\in\{0, 1\}$ drawn from a two-outcome
-experiment with controls $x_-$ and $t$, and with a single model parameter $x$.
-The likelihood is then
+Concretely, we consider evidence $E\in\{0, 1\}$ drawn from a two-outcome
+experiment with controls $x_-$ and $t$ with a single model parameter $x$.
+The likelihood is
 \begin{equation}
  \Pr(1 | x; t, x_-,k) = \cos^2((x(k) - x_-) t / 2),
 \end{equation}
@@ -610,7 +610,7 @@ against the drift.
     \caption{
         \label{fig:crej-diffusion}
         Rejection filtering with diffusion in the true model according to
-        a normal random walk with standard deviation $\pi / 120$.  As expected, the error asymptotes to a value that is slightly less than the root mean square error.
+        a normal random walk with standard deviation $\pi / 120$.  As expected, the error asymptotes to approximately the root mean square error.
     }
 \end{figure}
 
@@ -630,7 +630,7 @@ and other state-space models.  Although this demonstration is quite simple, it
 is important to emphasize the minuscule memory requirements for this task
 mean that this tracking problem can be solved using a memory limited processor in
 a different device that is physically close to the system in question.
-Close proximity is necessary in many applications (such as in control problems) to make the latency
+Close proximity is necessary in applications, such as in control problems or head tracking in virtual reality~\cite{lavalle_sensor_2013,yao2014oculus}, to make the latency
 low relative to the dynamical timescale of the object or system that is being tracked.
 
 %-----------------------------------------------------------------------------
