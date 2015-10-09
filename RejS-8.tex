@@ -670,9 +670,12 @@ Bottom plots are the corresponding plots for the odd vs even data set.}\label{fi
 
 Unlike the previous experiment, we do not implement this in a memory--restricted
 setting because of the size of the MNIST training set.
-Our goal instead is to view the image classification problem through the lens of active learning.  In such
-problems, it is assumed that the feature data is very expensive to compute.  This happens frequently
-in search wherein features, such as page rank, can be expensive to compute on the fly.  It also can
+Our goal instead is to view the image classification problem through the lens of active feature learning.  
+We assume that the user has access to the entire training set, but wishes to classify a digit by reading as few of the training vectors features (pixels) to the training
+image as possible.  Although such a lookup is not typically expensive for MNIST, in more general tasks, features may be very expensive to compute, and our experiment shows that our approach enables identification of the most salient features.  This reduces the computational requirements of the classification task, and also serves to identify salient features for future 
+classification problems.
+
+Such advantages are especially relevant to search wherein features, such as term occurences and phrase matches across terms, can be expensive to compute on the fly.  It also can
 occur in experimental sciences where each data point may take minutes or hours to either measure
 or compute accurately.  In these cases it is vital to minimize the number of queries made to the training
 data.  We will show that our Bayesian inference approach to this problem allows this to be solved using
