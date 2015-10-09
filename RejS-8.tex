@@ -1,5 +1,5 @@
 \documentclass[twoside]{article}
-\usepackage{aistats2015}
+\usepackage{aistats2016}
 
 %=============================================================================
 % PACKAGES
@@ -135,7 +135,7 @@ by combining rejection sampling with particle filtering.
 We also provide an approximate form of rejection sampling that makes rejection filtering tractable
 in cases where exact rejection sampling is not efficient.
 Finally, we present several numerical examples of rejection filtering that show its ability to track
-time dependent parameters in online settings and also benchmark its performance on MNIST classification problems.
+time dependent parameters in online settings, and its performance on MNIST classification problems.
 \end{abstract}
 
 %=====================================================================
@@ -890,11 +890,14 @@ is substantially less than the ideal value.  The ability to tolerate small value
 
 \begin{figure}
     \begin{center}
-        \includegraphics[width=0.8\textwidth]{kappa_E-failure.pdf}
+        \includegraphics[width=0.8\textwidth]{kappa_E-failure-crop.pdf}
     \end{center}
     \caption{\label{fig:sensitivity-kappa}
         Sensitivity of inversion model \eq{inv-model} with PGH. The median loss
-        after 100 measurements is shown as a function of $\kappa_E$. Note that the
+        over 6,000 trials after 100 measurements is shown as a function of $\kappa_E$.
+        For clarity, we normalize the median loss by the initial loss (that is, the median
+        loss
+        before performing any rejection filtering updates). Note that the
         rejection filter continues to learn for $10^{-3} \lesssim \kappa_E < 1$,
         despite that any $\kappa_E < 1$ will tend to lead to bad samples.
     }
