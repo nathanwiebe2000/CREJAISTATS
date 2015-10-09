@@ -870,15 +870,22 @@ Note that in the previous theorem that we do not make assumptions that the compo
 %=============================================================================
 
 In \sec{approx-rej}, we bounded the error in a particular Bayes update due to
-bad samples $\{x : \kappa_E < \Pr(E | x)\}$. This bound holds for one update,
-such that it is useful to also consider the effect on an entire set of
-experiments. Here, we show the effects of choosing an inappropriate $\kappa_E$
-for the frequency estimation model of \eq{inv-model}. In particular,
-we use the particle guess heuristic to design 100 measurements, then update using
+$\kappa_E$ being chosen smaller than $\max_x P(E|x)$ for evidence $E$. 
+Theorem 1 proved upper bounds on the error incurred by choosing $\kappa_E$ in this fashion,
+but the result only applies for a single update.  An important question to ask is: ``How do such errors propagate for an entire set of experiments?''. 
+Here, we show the effects of choosing an inappropriate $\kappa_E$
+for the frequency estimation model of \eq{inv-model}. 
+
+In particular,
+we use the particle guess heuristic to design 100 measurements~\cite{wiebe_efficient_2015}, then update using
 and 100 rejection filter attempts per measurement, with a recovery factor of
 $r=2\%$. We then report in \fig{sensitivity-kappa} the median loss of this procedure as a function
-of $\kappa_E$. Importantly, since the PGH tends to result in likelihoods with
-peaks of order unity, any $\kappa_E < 1$ will generate bad samples in this case.
+of $\kappa_E$. Importantly, since the this experimental guess heuristic tends to result in likelihoods with
+peaks of order unity, any $\kappa_E < 1$ will generate bad samples with high probability over the $m$ particles.
+
+We see that taking $\kappa_E\lesssim 2/3$ does not prevent the algorithm from learning, although it certainly does
+degrade the risk corresponding to the quadratic loss.  On the other hand, for very small values of $\kappa_E$ we see no evidence of learning  and observe some evidence for modest learning for $\kappa_E \in [10^{-2}, 0.5]$.  This illustrates that learning still can take place if a value of $\kappa_E$ is used that
+is substantially greater than the ideal value.  The ability to tolerate small values of $\kappa_E$ is important in cases where $\kappa_E$ is not known apriori and empirical values, such as those obtained via Monte--Carlo sampling, must be used to make the rejection probability polynomially small.
 
 \begin{figure}
     \begin{center}
