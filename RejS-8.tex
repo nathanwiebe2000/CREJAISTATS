@@ -480,7 +480,7 @@ subsequent values of $N_a$ in a log-likelihood register $\ell$,
     \ell^{(k + 1)} = \ell^{(k)} + \ln\left[(N_a^{(k + 1)} + \beta) / (m + 2 \beta)\right],
 \end{equation}
 where superscripts are used to indicate the number of Bayes updates performed,
-and where $\beta$ is a \emph{hedging parameter} used to prevent
+and  $\beta$ is a \emph{hedging parameter} used to prevent
 divergences that occur when $N_a = 0$. Since this accumulation procedure
 estimates the total likelihood from a two-outcome event
 (acceptance/rejection of a sample), the value of $\beta = 1 / 2$ deals with the zero-likelihood case~\cite{ferrie_estimating_2012}.
@@ -490,7 +490,7 @@ is thus an asymtotically-unbiased estimator for $K$ that has well-defined
 confidence intervals \cite{cho_approximate_2013}.
 
 
-Incrementing in this way requires only constant memory, such that the utility
+Incrementing in this way requires exponentially less memory than traditional SMC methods, such that the utility
 to massively-parallel and embedded applications is preserved.
 Model selection of this form has been used, for instance, to decide if
 a diffusive model is appropriate for predicting future evidence \cite{granade_characterization_2015}.
@@ -555,7 +555,7 @@ Stability is therefore expected if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and
 \begin{equation}
 P(E) \gg {L\int_V P(E|x) \mathrm{d}^Nx }.
 \end{equation}
-Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz constant for the model is small.  In practice both of these potential failures can couple together to lead to rapidly growing errors in practice.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the variance of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm.  We deal with such instabilities with random restarts but other strategies exist.
+Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz constant for the model is small.  In practice, both of these potential failures can couple together to lead to rapid growth of errors.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the variance of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm.  We deal with such instabilities with random restarts but other strategies exist~\cite{wiebe_efficient_2015}.
 
 %=============================================================================
 \section{Numerical Experiments}
@@ -574,11 +574,11 @@ advantages over either particle filtering or rejection sampling alone.
 
 Here, we demonstrate the effectiveness of rejection filtering using as an
 example strongly multimodal and periodic likelihood functions, such as arise
-in frequency estimation problems rising from the study of quantum mechanical
+in frequency estimation problems drawn from the study of quantum mechanical
 systems \cite{ferrie_how_2013,wiebe_efficient_2015}. These likelihood functions serve as useful test cases for
 Bayesian inference algorithms more generally, as the multimodality of these
 likelihoods forces a tradeoff between informative experiments and
-multimodality in the posteriors. Thus, it succeeds in these cases only
+multimodality in the posteriors. Thus, rejection filtering succeeds in these cases only
 if our method correctly models intermediate distributions so that appropriate
 experiments can be designed.
 
@@ -589,7 +589,7 @@ The likelihood is then
  \Pr(1 | x; t, x_-,k) = \cos^2((x(k) - x_-) t / 2),
 \end{equation}
 where $x$ is the parameter of interest, $(x_-, t)$ is an experiment design,
-and where $k$ is the index of the current update.  The true model $x(k)$ is taken to
+and $k$ is the index of the current update.  The true model $x(k)$ is taken to
 follow a random walk with $x(0)\sim \operatorname{Uniform}(0,\pi/2)$ and the distribution
 of $x(k+1)$ given $x(k)$ is
 \begin{equation}
@@ -605,14 +605,14 @@ against the drift.
     \caption{
         \label{fig:crej-diffusion}
         Rejection filtering with diffusion in the true model according to
-        a normal random walk with standard deviation $\pi / 120$.  As expected, the error asymptotes to a value that is slightly less than the RMS error.
+        a normal random walk with standard deviation $\pi / 120$.  As expected, the error asymptotes to a value that is slightly less than the root mean square error.
     }
 \end{figure}
 
 We design experiments $(x_-, t)$ using a heuristic that picks $x_-$ to be a random
 vector sampled from the prior and $t=1/\sqrt{{\rm Tr}~ \Sigma}$ \cite{wiebe_efficient_2015}.
-We use this heuristic here because it is known
-to saturate the Bayesian Cramer--Rao bound for this problem and is
+We use this heuristic because it is known
+to saturate the Bayesian Cramer--Rao bound for this problem~\cite{wiebe_hamiltonian_2014} and is
 much faster than adaptively choosing $(t,x_-)$ to minimize the Bayes risk, which
 we take to be the expected quadratic loss after performing an experiment given
 the current prior.
@@ -622,9 +622,11 @@ In particular, the median error incurred by \CRej~achieves the optimal
 achievable error $(\pi / 120)^2$ with as few as $m = 100$ sampling attempts.
 Thus, our \CRej~algorithm continues to be useful in the case of time-dependent
 and other state-space models.  Although this demonstration is quite simple, it
-is important to emphasize the miniscule memory requirements for this task
+is important to emphasize the minuscule memory requirements for this task
 mean that this tracking problem can be solved using a small processor in
-close proximity to the device in question.
+a different device that is physically close to the system in question.
+This proximity means that much lower latency can be achieved than would
+be possible using.
 
 %-----------------------------------------------------------------------------
 \subsection{Handwriting Recognition}
@@ -787,7 +789,10 @@ is how large $m$ needs to be and how many bits of precision are required for the
 
 The dominant requirements for memory arise from the need to store $\Sigma$, $\mu\mu^T$ and $xx^T$.  There are at most $O({\rm dim}(x)^2)$ elements in those matrices and so if each is to be stored within error $\epsilon$ then at least $O({\rm dim}(x)^2\log(1/\epsilon))$ bits are required.  Note that the incremental formulas used in the algorithm are not very numerically stable and need $2N$-bit registers to provide an $N$-bit answer.  This necessitates doubling the bits of precision, but does not change the asymptotic scaling of the algorithm.  Similarly, the $m\in O(1/\epsilon^2)$ repetitions of the algorithm also does not change the asymptotic scaling of the memory because $\log(1/\epsilon^3) \in O(\log(1/\epsilon))$.
 
-What does change the scaling is the truncation error incurred in the matrix multiplication.  The computation of a row or column of $xx^T$, for example, involves ${\rm dim}(x)$ multiplications and additions.  Thus if each such calculation were computed to to within error $\epsilon$, the total error is at most by the triangle inequality ${\rm dim}(x) \epsilon$.  Therefore in order to ensure a total error of $\epsilon$ in each component of the matrix we need to perform the arithmetic using $O(\log({\rm dim}(x)/\epsilon))$ bits of precision.  The result then follows.
+What does change the scaling is the truncation error incurred in the matrix multiplication.  The computation of a row or column of $xx^T$, for example, involves ${\rm dim}(x)$ multiplications and additions.  Thus if each such calculation were computed to to within error $\epsilon$, the total error is at most by the triangle inequality ${\rm dim}(x) \epsilon$.  Therefore in order to ensure a total error of $\epsilon$ in each component of the matrix we need to perform the arithmetic using $O(\log({\rm dim}(x)/\epsilon))$ bits of precision.  
+
+The incremental statistics, for both quantities, involve summing over all $m$ particles used in the rejection filtering algorithm.  If we assume that fixed point arithmetic is used to represent the numbers then we run the risk of overflowing the register unless its length grows with $m$.  
+The result then follows.
 \end{proofof}
 
 \begin{proofof}{\lem{errprop}}
