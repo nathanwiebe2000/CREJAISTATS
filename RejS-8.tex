@@ -358,6 +358,7 @@ RF algorithm is given in~\alg{batchcrej} (Supplemental Material).
 
 %=============================================================================
 \subsection{Bayesian Inference using Approximate Rejection Sampling}
+\label{sec:approx-rej}
 %=============================================================================
 
 Having used resampling to combine rejection sampling and particle filtering,
@@ -388,7 +389,9 @@ The probability of accepting a sample is at least ${P(E) (1-\delta)}/{\kappa_E}$
 Result follows directly from~\thm{crej} and Theorem 1 in~\cite{WKGS15}.
 \end{proof}
 
-\cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too small for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily result in substantial errors in the posterior distribution.  This leads to an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore, it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use rejection filtering.
+\cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too small for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily result in substantial errors in the posterior distribution.
+We further elaborate in \app{sensitivity-kappa} with a numerical example.
+This leads to an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore, it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use rejection filtering.
 
 %-----------------------------------------------------------------------------
 \subsection{Filtering Distributions for Time-Dependent Models}
@@ -591,6 +594,7 @@ Concretely, we consider evidence $E\in\{0, 1\}$ drawn from a two-outcome
 experiment with controls $x_-$ and $t$ with a single model parameter $x$.
 The likelihood is
 \begin{equation}
+  \label{eq:inv-model}
  \Pr(1 | x; t, x_-,k) = \cos^2((x(k) - x_-) t / 2),
 \end{equation}
 where $x$ is the parameter of interest, $(x_-, t)$ is an experiment design,
@@ -622,7 +626,7 @@ much faster than adaptively choosing $(x_-, t)$ to minimize the Bayes risk, whic
 we take to be the expected quadratic loss after performing an experiment given
 the current prior.
 
-The performance of \CRej~applied to this case is shown ~\fig{crej-diffusion}.
+The performance of \CRej~applied to this case is shown in~\fig{crej-diffusion}.
 In particular, the median error incurred by \CRej~achieves the optimal
 achievable error $(\pi / 120)^2$ with as few as $m = 100$ sampling attempts.
 Thus, our \CRej~algorithm continues to be useful in the case of time-dependent
@@ -859,6 +863,34 @@ The theorem then follows from inserting~\eq{xxTMC} into~\eq{xxT} and applying~\l
 \end{proofof}
 
 Note that in the previous theorem that we do not make assumptions that the components of $x$ are iid.  If such assumptions are made then tighter bounds can be proven.
+
+%=============================================================================
+\section{Sensitivity to $\kappa_E$}
+\label{app:sensitivity-kappa}
+%=============================================================================
+
+In \sec{approx-rej}, we bounded the error in a particular Bayes update due to
+bad samples $\{x : \kappa_E < \Pr(E | x)\}$. This bound holds for one update,
+such that it is useful to also consider the effect on an entire set of
+experiments. Here, we show the effects of choosing an inappropriate $\kappa_E$
+for the frequency estimation model of \eq{inv-model}. In particular,
+we use the particle guess heuristic to design 100 measurements, then update using
+and 100 rejection filter attempts per measurement, with a recovery factor of
+$r=2\%$. We then report in \fig{sensitivity-kappa} the median loss of this procedure as a function
+of $\kappa_E$. Importantly, since the PGH tends to result in likelihoods with
+peaks of order unity, any $\kappa_E < 1$ will generate bad samples in this case.
+
+\begin{figure}
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{kappa_E-failure.pdf}
+    \end{center}
+    \caption{\label{fig:sensitivity-kappa}
+        Sensitivity of inversion model \eq{inv-model} with PGH. The median loss
+        after 100 measurements is shown as a function of $\kappa_E$. Note that the
+        rejection filter continues to learn for $10^{-3} \lesssim \kappa_E < 1$,
+        despite that any $\kappa_E < 1$ will tend to lead to bad samples.
+    }
+\end{figure}
 
 %=============================================================================
 \section{Batched Updating}
