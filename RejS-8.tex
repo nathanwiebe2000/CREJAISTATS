@@ -633,16 +633,16 @@ and other state-space models.  Although this demonstration is quite simple, it
 is important to emphasize the minuscule memory requirements for this task
 mean that this tracking problem can be solved using a small processor in
 a different device that is physically close to the system in question.
-This proximity means that much lower latency can be achieved than would
-be possible using.
+Close proximity is necessary in many applications (such as in control problems) to make the latency
+low relative to the dynamical timescale of the object or system that is being tracked.
 
 %-----------------------------------------------------------------------------
 \subsection{Handwriting Recognition}
 %-----------------------------------------------------------------------------
 
-A more involved example is handwriting recognition.  Our goal in this task is to use
+A more common task is handwriting recognition.  Our goal in this task is to use
 Bayesian inference to classify an unknown digit taken from the MNIST repository~\cite{lecun1998mnist} in
-one of two classes.  Here we consider two cases: $1$ vs $0$ and even vs odd.
+one of two classes.  Here we consider two cases: the restricted case of classifying only $1$ digits and $0$ digits and classifying digits as even or odd.
 
 We cast the problem in the language of Bayesian inference by assuming the likelihood
 function
