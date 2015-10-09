@@ -258,7 +258,55 @@ We see that taking $1>\kappa_E\gtrsim 2/3$ does not prevent the algorithm from l
 degrade the quadratic loss after $100$ measurements.  On the other hand, as $\kappa_E$ approaches zero the evidence of learning dissapears.  This is to be expected since if $P(E|x)>1$ for all $x$ then all samples are accepted and the approximate posterior will always equal the prior.  We similarly notice evidence for modest learning for $\kappa_E < 0.5$, and note that a plateau appears in the loss ratio for $\kappa_E \in [0.04,0.4]$ where the loss ratio does not monotonically grow with $1/\kappa_E$.  This illustrates that learning still can take place if a value of $\kappa_E$ is used that
 is substantially less than the ideal value.  The ability to tolerate small values of $\kappa_E$ is important in cases where $\kappa_E$ is not known apriori and empirical values, such as those obtained via Monte--Carlo sampling, must be used to make the rejection probability polynomially small.
 
+%=============================================================================
+\section{Feature Selection for Rejection Sampling}
+\label{app:features}
 
+In the main body we alluded to the fact that the frequency with which a feature is selected in rejection filtering can be used as an
+estimate of the importance of that feature to the classification.  We saw evidence that this application would be reasonable from
+noting in MNIST classification problems that some pixels were never, or very infrequently, used and so should be able to be culled from the 
+vectors without substantially affecting the classification accuracy.  
+
+\begin{figure}[t!]
+    \begin{center}
+        \includegraphics[width=0.5\textwidth]{Feature.pdf}
+    \end{center}
+    \caption{\label{fig:Features}
+Features
+    }
+\end{figure}
+
+Here we investigate this further for the problem of classifying zero vs one digits within MNIST.  We consider the case where $3$ restarts, each
+consisting of at most $261$ samples, are performed with $\mathcal{P}=0.001$.  Our protocol begins by computing the frequency that pixels are queried over
+the full case where all $784$ features in the MNIST images are used and then computing a histogram of how many samples were drawn for each pixel.  Then we divide the pixels
+into sets based the relative frequency that they were used.  For example, we find all pixels whose frequency is less than the $95^{\rm th}$ percentile and remove the offending pixels from the entire MNIST set.  We then perform the classification on using only these pixels and compare to the original classification accuracy.  The number of features as a function of the percentile considered for zero vs one is given below.
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+Percentile & Number of Features\\
+\hline
+0 & 784\\
+35 &784\\
+36 &503\\
+50 &392\\
+75&196\\
+80&157\\
+90&78\\
+95&39\\
+97.5&20\\
+\hline
+\end{tabular}
+\end{table}
+
+This strongly suggests that truncating at least $35\%$ of the data will not impact the classification whatsoever.  This does not, however, mean that the pixels that become significant at the $36^{\rm th}$ percentile will substantially affect classification accuracy since an acceptable classification might be reached using other, more significant, features in the set.  
+
+We examine the feature extraction ability of rejection filtering by looking at the mean classification accuracy over $100$ different random shufflings of the vectors in the two classes for MNIST digits, using a $10$ to $1$ train--test split.  The data is shown in~\fig{Features}.  We see that if we use the frequency data provided by rejection sampling to remove all but the most significant $20\%$ of the training data then the classification accuracy is not significantly reduced.  After this point the impact of ignoring features begins to grow roughly linearly with the fraction of points ignored.  This continues until only the training examples are trimmed down to $95\%$ of their original length (39 features) before the classification accuracy becomes strongly impacted by removing features from consideration.  Nonetheless, for all the points considered the classification accuracy remains high (greater than $99\%$).
+
+This shows that we can use this approach to choose salient features from an ensemble and by following this criteria we can cull unimportant features from a large set based on the frequencies that the data was needed in training rejection filtering experiments.
+
+%=============================================================================
 
 %=============================================================================
 \section{Batched Updating}
