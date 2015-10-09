@@ -869,6 +869,7 @@ Note that in the previous theorem that we do not make assumptions that the compo
 \section{Sensitivity to $\kappa_E$}
 \label{app:sensitivity-kappa}
 %=============================================================================
+
 \begin{figure}
     \begin{center}
         \includegraphics[width=0.75\textwidth]{kappa_E-failure-crop.pdf}
@@ -881,11 +882,14 @@ Note that in the previous theorem that we do not make assumptions that the compo
         before performing any rejection filtering updates). 
     }
 \end{figure}
-In \sec{approx-rej}, we bounded the error in a particular Bayes update due to
-$\kappa_E$ being chosen smaller than $\max_x P(E|x)$ for evidence $E$. 
-Theorem 1 proved upper bounds on the error incurred by choosing $\kappa_E$ in this fashion,
-but the result only applies for a single update.  An important question to ask is: ``How do such errors propagate for an entire set of experiments?''
-Here, we show the effects of choosing an inappropriate $\kappa_E$
+
+% NB: not using refs to avoid problems with the split.
+Theorem 1 in the main body guarantees a bound on the error in a particular Bayes update due to
+$\kappa_E$ being chosen smaller than $\max_x P(E|x)$ for evidence $E$.
+However, this only holds for a single update, such that it is not immediately clear
+how such errors propagate for an entire \emph{set} of experiments. This is especially
+important for heuristic online experiment design, such as via the particle guess heuristic,
+or for active learning. To address this, here we show the effects of choosing an inappropriate $\kappa_E$
 for the frequency estimation model of \eq{inv-model}. 
 
 In particular,
