@@ -359,7 +359,7 @@ model used in the next step of the inference procedure.
 Having used resampling to combine rejection sampling and particle filtering,
 we can significantly improve the complexity of the resulting rejection filtering
 algorithm by relaxing from exact rejection sampling.  Approximate rejection
-sampling similar to rejection sampling except
+sampling is similar to rejection sampling except
 that it does not require that $P(E|x) \le \kappa_E$.  This means that the rescaled
 likelihood $P(E|x)/\kappa_E$ is greater than $1$ for some
 configurations.  This inevitably results in errors in the posterior distribution but can make the inference process much more efficient
