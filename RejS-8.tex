@@ -146,7 +146,7 @@ Particle filters have become an indispensable tool for model selection, object t
 and statistical inference in
 high--dimensional problems~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined}. 
 While particle filtering works well in many conventional settings, 
-the method is less well-suited to when the
+the method is less well-suited when the
 user faces severe memory restrictions.  
 
 Memory restricted problems are more than just curiosities. In control problems
@@ -558,7 +558,7 @@ Stability is therefore expected if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and
 \begin{equation}
 P(E) \gg {L\int_V P(E|x) \mathrm{d}^Nx }.
 \end{equation}
-Thus we expect stability if (a) low likelihood events are rare, (b) the Lipshitz constant for the model is small.  In practice, both of these potential failures can couple together to lead to rapid growth of errors.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm. 
+Thus we expect stability if (a) low likelihood events are rare, and (b) the Lipshitz constant for the model is small.  In practice, both of these potential failures can couple together to lead to rapid growth of errors.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the distribution which causes the Lipshitz constant to become large.  This in turn can couple with an unexpected outcome to destabilize the learning algorithm. 
 We overcome this problem by invoking random restarts, as outlined in the next section,
 though other strategies exist~\cite{wiebe_efficient_2015}.
 
