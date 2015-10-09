@@ -132,14 +132,15 @@ Proof of~#1.}}
 
 
 \begin{abstract}
-We provide a method for approximating Bayesian inference using rejection sampling.
+We introduce a method, rejection filtering, for approximating Bayesian inference
+using rejection sampling.
 We not only make the process efficient, but also dramatically
 reduce the memory required relative to conventional methods
 by combining rejection sampling with particle filtering.
 We also provide an approximate form of rejection sampling that makes rejection filtering tractable
 in cases where exact rejection sampling is not efficient.
 Finally, we present several numerical examples of rejection filtering that show its ability to track
-time dependent parameters in online settings, and its performance on MNIST classification problems.
+time dependent parameters in online settings, and show its performance on MNIST classification problems.
 \end{abstract}
 
 %=====================================================================
@@ -195,6 +196,8 @@ also for classifying MNIST digits.
 \label{sec:smc}
 %=============================================================================
 
+We start by discussing rejection sampling and particle filter methods, as we
+will draw ideas from each to formulate our rejection filter algorithm.
 Rejection sampling provides a simple and elegant approach to Bayesian inference. 
 It draws samples
 from the posterior distribution by first sampling $x$ from the prior $P(x)$.
@@ -213,10 +216,9 @@ Rescaling the likelihood does not change the posterior probability.
 It does however make the probability of acceptance $P(E)/\kappa_E$, which
 can dramatically improve the performance in cases where rare events are observed.
 
-Two major drawbacks to this approach have prevented its widescale adoption.  The first is that the probability of success shrinks exponentially with the number of updates
+Two major drawbacks to this approach have prevented its widescale adoption.  The first is that the probability of successfully updating shrinks exponentially with the number of updates
 in online inference problems.
-The second  is that the constant $\kappa_E$ may not be precisely known and thus $P(E|x)$ cannot be appropriately rescaled to avoid exponentially small likelihoods.  Given that the dimension of the state
-space scales exponentially with the number of features, exponentially small probabilities are the norm rather than the exception. 
+The second is that the constant $\kappa_E$ may not be precisely known such that and thus $P(E|x)$ cannot be appropriately rescaled to avoid exponentially small likelihoods.  Given that the dimension of the Hilbert space that the training vectors reside in scales exponentially with the number of features, exponentially small probabilities are the norm rather than the exception. 
 Our aim is to address these problems
 by using approximate, rather than exact, rejection sampling, and
 by combining rejection sampling with other modern statistical methods.
@@ -239,7 +241,7 @@ As updates are performed, the effective sample size $n_\ess \defeq
 commonly used in state-space methods, draws each new particle from the categorical
 distribution over particle weights. 
 Since the bootstrap filter only replaces weight by multiplicity,
-such that the numerical stability is not restored in cases where $n_\ess$ is small.
+numerical stability is not restored if cases where $n_\ess$ is small.
 
 Alternatively one can draw new particles from an \emph{instrumental distribution} for
 the current posterior. For instance, using a normal distribution to resample,
@@ -376,7 +378,8 @@ configurations.  This inevitably results in errors in the posterior distribution
 in cases where a tight bound is unknown or when the prior has little support over the region where $P(E|x)/\kappa_E >1$.
 
 The main question remaining is how  the
-errors incurred from $P(E|x) > \kappa_E$ impact the posterior distribution?  To understand this, let us define
+errors incurred from $P(E|x) > \kappa_E$ impact the posterior distribution.
+To understand this, let us define
 \begin{equation}
 {\rm bad} := \left\{x: {P(E|x)} >{\kappa_E}\right\}.
 \end{equation}
@@ -460,9 +463,7 @@ $\tilde{P}(x|E;t)$ is $s+\eta (t_{k+1} - t_k)$ and the mean remains $\bar{x}$.
 
 The ability of \CRej~to include time-dependence
 is especially useful when combined with Bayesian model selection.
-That is, model selection can inform us as to when including time-dependence
-in our particle filtering provides an advantage in terms of explanatory power.
-Since random variates of $N_a$ drawn at each step give a
+Since the random variates of $N_a$ drawn at each step give a
 frequency drawn from the \emph{total likelihood} $P(E) = \expect{x}{P(E |
 x)}$, we can use \CRej~to estimate Bayes factors between two
 different likelihood functions. In particular, the probability that a hypothesis $x$ will be accepted
@@ -500,15 +501,13 @@ Letting $\ell_A$ and $\ell_B$ be the hedged log-likelihood registers for models 
 respectively. Then, the estimator $\hat{K} = e^{\ell_B} / e^{\ell_A}$ resulting from this hedging procedure
 is thus an asymtotically-unbiased estimator for $K$ that has well-defined
 confidence intervals \cite{cho_approximate_2013}.
+The $\ln(m + 2\beta)$ term can be factored out in cases where $m$ is constant across models and evidence.
 
-
-Incrementing in this way requires exponentially less memory than traditional SMC methods, such that the utility
-to massively-parallel and embedded applications is preserved.
 Model selection of this form has been used, for instance, to decide if
 a diffusive model is appropriate for predicting future evidence \cite{granade_characterization_2015}.
 Given the aggressiveness of the \CRej~resampling step, streaming model selection
 will be especially important in assessing whether a diffusive inference model has
-``lost'' the true value \cite{wiebe_efficient_2015}. The $\ln(m + 2\beta)$ term can be factored out in cases where $m$ is constant across models and evidence.
+``lost'' the true value \cite{wiebe_efficient_2015}.
 
 %=============================================================================
 \section{Error Analysis}
@@ -547,8 +546,7 @@ $$
 $$
 \end{theorem}
 
-
-An important question to ask at this juncture is when do we expect the update process discussed in~\alg{crej} to be stable.  By stable, we mean that small initial errors do not exponentially magnify throughout the update process.  \thm{meanCov} shows that small errors in the prior distribution do not propagate into large errors in the estimates of the mean and posterior matrix given that $P(E)= \langle P(E|x),P(x)\rangle$ is sufficiently large.  In particular, \thm{meanCov} and an application of the Cauchy--Schwarz inequality shows that such errors are small if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and 
+This theorem addresses the question of when we can reasonably expect the update process discussed in~\alg{crej} to be stable.  By stable, we mean that small initial errors do not exponentially magnify throughout the update process.  \thm{meanCov} shows that small errors in the prior distribution do not propagate into large errors in the estimates of the mean and posterior matrix given that $P(E)= \langle P(E|x),P(x)\rangle$ is sufficiently large.  In particular, \thm{meanCov} and an application of the Cauchy--Schwarz inequality shows that such errors are small if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and 
 $$
 \langle\Delta(x),\Delta(x)\rangle \ll \frac{P^2(E)}{{\langle P(E|x),P(E|x)\rangle}}.
 $$
@@ -588,7 +586,8 @@ advantages over either particle filtering or rejection sampling alone.
 Here, we demonstrate the effectiveness of rejection filtering using as an
 example strongly multimodal and periodic likelihood functions, such as arise
 in frequency estimation problems drawn from the study of quantum mechanical
-systems \cite{ferrie_how_2013,wiebe_efficient_2015}. These likelihood functions serve as useful test cases for
+systems \cite{wiebe_efficient_2015,ferrie_how_2013}.
+These likelihood functions serve as useful test cases for
 Bayesian inference algorithms more generally, as the multimodality of these
 likelihoods forces a tradeoff between informative experiments and
 multimodality in the posteriors. Thus, rejection filtering succeeds in these cases only
@@ -596,14 +595,13 @@ if our method correctly models intermediate distributions so that appropriate
 experiments can be designed.
 
 Concretely, we consider evidence $E\in\{0, 1\}$ drawn from a two-outcome
-experiment with controls $x_-$ and $t$ with a single model parameter $x$.
+experiment with controls $x_-$ and $t$, and with a single model parameter $x$.
 The likelihood is
 \begin{equation}
   \label{eq:inv-model}
  \Pr(1 | x; t, x_-,k) = \cos^2((x(k) - x_-) t / 2),
 \end{equation}
-where $x$ is the parameter of interest, $(x_-, t)$ is an experiment design,
-and $k$ is the index of the current update.  The true model $x(k)$ is taken to
+where $k$ is the index of the current update.  The true model $x(k)$ is taken to
 follow a random walk with $x(0)\sim \operatorname{Uniform}(0,\pi/2)$ and the distribution
 of $x(k+1)$ given $x(k)$ is
 \begin{equation}
@@ -742,7 +740,7 @@ number of queries to the test vector, but also can achieve $25\%$ less error eve
 \label{sec:conclusions}
 %=============================================================================
 
-We introduce a method, rejection filtering, that integrates
+We introduce a method, rejection filtering, that combines
 rejection sampling with particle filtering. Rejection filtering retains many of the benefits
 of each, while using substantially less memory than conventional methods for Bayesian inference in typical use cases.
 In particular, if a Gaussian resampling algorithm is used then our method only requires remembering a single sample at a time, making it ideal
