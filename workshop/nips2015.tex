@@ -319,7 +319,7 @@ Assume that $P(E|x)\le \kappa_E$ can be computed efficiently for all hypotheses 
 evidences $E$, $P(x)$ can be efficiently sampled and an efficient sampling algorithm for $\operatorname{Uniform}(0,1)$ is provided.  \alg{crej} 
 can then efficiently compute the mean and covariance of $P(x|E)$ within error $\epsilon$ in the max--norm using $O({\rm dim}(x)^2\log({\rm dim}(x)/\epsilon))$ memory.\label{thm:crej}
 \end{theorem}
-A formal proof is given in the supplemental material.  The intuition is that a sample can be non--deterministically drawn from
+A formal proof is given in \app{proofs}.  The intuition is that a sample can be non--deterministically drawn from
 the posterior distribution by drawing a
 sample from the prior distribution and rejecting it with probability $P(E|x)$.  Incremental formulas are
 used in~\alg{crej} to estimate the mean and the covariance using such samples, which obviates the need
@@ -334,7 +334,7 @@ nodes send a stream of the incremental means and
 covariance sums to a server that combines them to produce the
 model used in the next step of the inference procedure.
 Pseudocode for this version of the
-RF algorithm is given in the supplemental material.
+RF algorithm is given in \app{batched-updates}.
 
 %=============================================================================
 \subsection{Bayesian Inference using Approximate Rejection Sampling}
@@ -371,7 +371,7 @@ Result follows directly from~\thm{crej} and Theorem 1 in~\cite{WKGS15}.
 \end{proof}
 
 \cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too small for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily result in substantial errors in the posterior distribution.
-We further elaborate in the supplemental material with a numerical example.
+We further elaborate in \app{sensitivity-kappa} with a numerical example.
 This leads to an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore, it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use rejection filtering.
 
 \section{Numerical Experiments}
@@ -704,7 +704,8 @@ occur in experimental sciences where each data point may take minutes or hours t
 or process.  In these cases it is vital to minimize the number of queries made to the training
 data.  We will show that our Bayesian inference approach to this problem allows this to be solved using
 far fewer queries than other methods, such as kNN, would require.  We also show that our method can
-be used to \emph{extract} the relevant important features (i.e. pixels) from the data set.  This is examined further in the supplemental material.
+be used to \emph{extract} the relevant important features (i.e. pixels) from the data set.  This is examined further in
+\app{features}.
 
 We perform these experiments using an adaptive guess heuristic, similar to that employed in the frequency estimation example.
 The heuristic chooses the pixel label, $i$, that has the largest variance of intensity
@@ -756,6 +757,7 @@ number of queries to the test vector, but also can achieve $25\%$ less error eve
 
 %=============================================================================
 \section{Proofs of Theorems}
+\label{app:proofs}
 %=============================================================================
 
 In this Appendix, we present proofs for the theorems presented in the main
@@ -937,7 +939,7 @@ This shows that we can use this approach to choose salient features from an ense
 Although we focused in the main body on memory restricted applications, it is also possible to exploit the fact that the
 rejection sampling procedure is inherently parallelizable.
 This comes at the price of increasing the overall
-memory usage. Here, we describe a batched form of our algorithm, assuming a model in which samples are sent by a server to individual processing nodes and the accepted samples are then returned to the server.
+memory usage. In \alg{batchcrej}, we describe a batched form of our algorithm, assuming a model in which samples are sent by a server to individual processing nodes and the accepted samples are then returned to the server.
 
 \begin{algorithm}
     \caption{Batched update for \CRej}
