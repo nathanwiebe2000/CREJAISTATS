@@ -209,12 +209,17 @@ filtering.
 This amounts to a form of selective sampling that is computationally inexpensive, easy to parallelize, simple to program and can operate in a much more memory restricted environment than existing approaches~\cite{sivaraman2010general,kapoor2007active}.
 
 %=============================================================================
-\section{Rejection Sampling and Particle Filters}
-\label{sec:smc}
+\section{Rejection Filtering}
+\label{sec:method}
 %=============================================================================
 
-We start by discussing rejection sampling and particle filter methods, as we
-will draw ideas from each to formulate our rejection filter algorithm.
+%-----------------------------------------------------------------------------
+\subsection{Rejection Sampling}
+\label{sec:smc}
+%-----------------------------------------------------------------------------
+
+We start by discussing rejection sampling methods, as we
+will draw ideas from these methods to formulate our rejection filter algorithm.
 Rejection sampling provides a simple and elegant approach to Bayesian inference. 
 It samples
 from the posterior distribution by first sampling from the prior $P(x)$.
@@ -239,31 +244,6 @@ The second is that the constant $\kappa_E$ may not be precisely known such that 
 Our aim is to address these problems
 by using approximate, rather than exact, rejection sampling, and
 by combining rejection sampling with ideas from  \emph{sequential Monte Carlo} methods to allow approximate inference to be performed while only storing summary statistics of the prior distribution.
-
-
-
-
-%---------------------------------------------------------------------
-\section{Rejection Filtering}\label{sec:method}
-%---------------------------------------------------------------------
-
-
-
-%{\bf CG: rewrite this to consolidate notation, esp $M$ vs $\kappa_E$.}
-%More generally, rejection sampling is a
-%popular algorithm for drawing samples from a distribution $p$ given the
-%ability to sample from an instrumental distribution $q$.  The algorithm works
-%as follows. Draw a sample  $x$ from $q$, and then with probability $P(x)/M
-%Q(x)$ accept the sample, where $M > 0$ is a normalizing constant inserted to
-%guarantee that $p(x)/q(x) \le 1$.  The expected number of times that this
-%process needs to be repeated before a sample is accepted is given by the
-%geometric distribution to be $M$, if $q(x)$ is a normalized distribution.
-
-
-%Here we introduce rejection filtering as a method to
-%integrate rejection sampling and particle filtering using resampling to
-%address the problems of na\"ive rejection sampling--based inference.
-%We also introduce 
 
 %---------------------------------------------------------------------
 \subsection{Resampling in Rejection Filtering}
