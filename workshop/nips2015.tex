@@ -216,9 +216,9 @@ This amounts to a form of selective sampling that is computationally inexpensive
 We start by discussing rejection sampling and particle filter methods, as we
 will draw ideas from each to formulate our rejection filter algorithm.
 Rejection sampling provides a simple and elegant approach to Bayesian inference. 
-It draws samples
-from the posterior distribution by first sampling $x$ from the prior $P(x)$.
-The samples are then each accepted with
+It samples
+from the posterior distribution by first sampling from the prior $P(x)$.
+The samples are then accepted with
 probability $P(E|x)$.  The probability 
 distribution of the accepted samples is 
 \begin{equation}
@@ -231,7 +231,7 @@ can be increased by instead accepting a sample with probability $P(x|E)/\kappa_E
 $\kappa_E$ is a constant that depends on the evidence $E$ such that $P(x|E) \le \kappa_E \le 1$.
 Rescaling the likelihood does not change the posterior probability.
 It does however make the probability of acceptance $P(E)/\kappa_E$, which
-can dramatically improve the performance in cases where rare events are observed.
+can dramatically improve the performance when rare events are observed.
 
 Two major drawbacks to this approach have prevented its widescale adoption.  The first is that the probability of successfully updating shrinks exponentially with the number of updates
 in online inference problems.
@@ -333,8 +333,7 @@ We use a computational model wherein $N_{\rm batch}$ processing
 nodes send a stream of the incremental means and
 covariance sums to a server that combines them to produce the
 model used in the next step of the inference procedure.
-Pseudocode for this version of the
-RF algorithm is given in \app{batched-updates}.
+Pseudocode for this version  is given in \app{batched-updates}.
 
 %=============================================================================
 \subsection{Bayesian Inference using Approximate Rejection Sampling}
@@ -388,12 +387,12 @@ This leads to an efficient method for approximate sampling from the posterior di
 \hspace{1mm}
 \begin{minipage}[b]{0.45\linewidth}
 \centering
-\includegraphics[width=0.3\columnwidth]{expHM.pdf}
-\includegraphics[width=0.3\columnwidth]{01HM.pdf}\\
-\includegraphics[width=0.3\columnwidth]{OEexpHM.pdf}
-\includegraphics[width=0.3\columnwidth]{OEHM.pdf}
-\caption{(top left) Heat map of frequency pixel is queried in zero vs one data set.  (top right) Heat map of variance of the pixels over data set.
-Bottom plots are the corresponding to the even vs odd data set.}\label{fig:HM}
+\includegraphics[width=0.45\columnwidth]{expHM.pdf}
+\includegraphics[width=0.45\columnwidth]{01HM.pdf}\\
+\includegraphics[width=0.45\columnwidth]{OEexpHM.pdf}
+\includegraphics[width=0.45\columnwidth]{OEHM.pdf}
+\caption{(left) Heat map of frequency pixel is queried using RF.  (right) Variance of the pixels over data set.
+Bottom plots are for even vs odd digits top is zero vs one.}\label{fig:HM}
 \end{minipage}
 \end{figure}
 
@@ -408,7 +407,7 @@ experiment given the current knowledge of the system.  We take $\phi(t_k)$ to fo
 
 \fig{crej-diffusion} shows that rejection filtering is capable of accurately tracking this unknown frequancy using fewer than $100$ samples drawn from the prior distribution.  Furthermore, rejection filtering is capable of achieving this using less than $1$ kilobit of memory.  In contrast, sequential Monte--Carlo methods using Liu--West resampling  typically require roughly $100$ times the memory that rejection filtering requires because of their need to store an entire particle cloud rather than a single sample.
 
-We provide further details of our experimental design heuristics and examples of rejection filtering applied to MNIST digit classification in an active learning setting in the appendix.  We furthermore see, as shown in~\fig{HM}, that the experiments output by rejection sampling can give a much clearer identification of the importance of features in a data set than the variance provides.
+We provide further details of our experimental design heuristics and apply RF to digit classification in an active learning setting in the appendix.  We see,  in~\fig{HM}, that some low variance features are frequently used to classify digits whereas many high variance features are not.  We show in the appendix that RF can also beat KNN  for an appropriate choice of resampler.
 
 %=============================================================================
 \section{Conclusion}
@@ -425,8 +424,7 @@ involving tracking the time-dependent drift of an unknown frequency and also in 
 
 While our work has shown that rejection sampling can be a viable method for performing Bayesian inference, there are many
 avenues for future work that remain open.  One such avenue involves investigating whether ideas borrowed from the particle
-filter literature, such as the unscented transformation~\cite{van2000unscented} or genetic mutation-selection algorithms~\cite{del2012adaptive,del2000branching}, can be adapted to fit our setting.
-  These improvements may help mitigate the information loss that necessarily occurs in the resampling step.  An even more exciting
+filter literature, such as the unscented transformation~\cite{van2000unscented} or genetic mutation-selection algorithms~\cite{del2012adaptive,del2000branching}, can be adapted to fit our setting.  An even more exciting
 application of these ideas may be to examine their application in online data acquisition in science and engineering.  Rejection
 filtering provides the ability to perform adaptive experiments using embedded hardware, which may lead to a host of applications
 within object tracking, robotics, and experimental physics that are impractical with existing technology.
