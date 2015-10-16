@@ -331,12 +331,12 @@ in cases where a tight bound is unknown or when the prior has little support ove
 
 The main question remaining is how  the
 errors incurred from $P(E|x) > \kappa_E$ impact the posterior distribution.
-To understand this, let us define
+To answer this, we first define the space on which $P(E|x)\le \kappa_E$ is violated:
 \begin{equation}
 {\rm bad} := \left\{x: {P(E|x)} >{\kappa_E}\right\}.
 \end{equation}
-If the set of bad configurations is non--empty then it naturally leads to errors in the posterior and
-can degrade the success probability in rejection filtering.  Bounds on these effects are
+If the set of bad configurations is non--empty then errors will appear in the posterior samples and
+can the success probability may also fall.  Bounds on these effects are
 provided below.
 
 \begin{corollary}\label{cor:badalgorithm}
