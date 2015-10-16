@@ -246,7 +246,7 @@ Rejection filtering does not try to
 to propagate samples through many rounds of rejection sampling, but instead
 uses these samples to inform a new model for the posterior distribution. 
 The samples used in the next round of rejection filtering are then drawn from this new
-distribution and we dub this process resampling because of its similarity to resampling in sequential Monte Carlo methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined}.
+distribution; we dub this process resampling because of its similarity to resampling in sequential Monte Carlo methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined}.
 
 For example, if
 we assume that our prior distribution is a Gaussian, then a Gaussian model for the posterior
@@ -301,7 +301,8 @@ to store $O(1/\epsilon^2)$ samples in memory in order to estimate the moments of
 In practice, one can use the Welford algorithm \cite{welford_note_1962} to  accumulate means
 and variances more precisely, but doing so does not change the asymptotic scaling with $\epsilon$ of the memory required by~\alg{crej}.
 
-In Apx G, we give a version of our algorithm that treads width for depth by batching the data.
+In \app{batched-updates}, we give a version of our algorithm that treads width for depth by batching the data
+and evaluating particles in parallel.
 
 %=============================================================================
 \subsection{Bayesian Inference using Approximate Rejection Sampling}
