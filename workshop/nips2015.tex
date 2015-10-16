@@ -159,13 +159,12 @@ Address \\
 \begin{abstract}
 We introduce a method, rejection filtering, for approximating Bayesian inference
 using rejection sampling.
-We not only make the process efficient, but also dramatically
-reduce the memory required relative to conventional methods
-by combining rejection sampling with particle filtering.
-We also provide an approximate form of rejection sampling that makes rejection filtering tractable
-in cases where exact rejection sampling is not efficient.
-Finally, we present several numerical examples of rejection filtering that show its ability to track
-time dependent parameters in online settings, and show its performance on MNIST classification problems.
+Although rejection sampling is typically inefficient for approximate Bayesian inference, 
+we make it efficient by using summary statistics drawn from the accepted samples to update a model for the prior distribution.
+Apart from making the algorithm efficient, rejection filtering often requires
+much less memory than conventional methods particle filtering.  We provide a thorough analysis
+of the computational resources required for our algorithm and also discuss error propagation through the updates.
+Finally, we provide proof of principle demonstrations that show the method's viability for solving real--world problems.
 \end{abstract}
 
 %=====================================================================
