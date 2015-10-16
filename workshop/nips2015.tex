@@ -178,7 +178,7 @@ and the computer used to control its dynamics \cite{halloin_long_2013,shulman_su
 the device itself \cite{lavalle_sensor_2013}, but this often places prohibitive restrictions on the processing power and memory of the embedded processors.
 These restrictions can preclude the use of traditional particle filter methods.
 
-We present an approach that we call \emph{rejection filtering} (RF) that samples from
+We present an approach that we call \emph{rejection filtering} (RF), which samples from
 an approximation to the posterior by using rejection sampling and resampling in concert.
 This allows it approximately update the prior distribution while considering no more
 than one sample at a time in typical use cases.
@@ -231,9 +231,9 @@ can dramatically improve the performance when rare events are observed.
 Two major drawbacks to this approach have prevented its widescale adoption.  The first is that the probability of successfully updating shrinks exponentially with the number of updates
 in online inference problems.
 The second is that the constant $\kappa_E$ may not be precisely known such that and thus $P(E|x)$ cannot be appropriately rescaled to avoid exponentially small likelihoods.  Given that the dimension of the Hilbert space that the training vectors reside in scales exponentially with the number of features, exponentially small probabilities are the norm rather than the exception. 
-Our aim is to address these problems
+We address these problems
 by using approximate, rather than exact, rejection sampling, and
-by combining rejection sampling with ideas from  \emph{sequential Monte Carlo} methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined} to allow approximate inference to be performed while only storing summary statistics of the prior distribution.
+by combining rejection sampling with ideas from  \emph{sequential Monte Carlo} methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined} to allow approximate inference to be performed while retaining only summary statistics of the accepted samples.
 
 %---------------------------------------------------------------------
 \subsection{Resampling in Rejection Filtering}
