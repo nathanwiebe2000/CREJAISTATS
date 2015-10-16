@@ -122,34 +122,25 @@ Proof of~#1.}}
 %=============================================================================
 \title{Approximate Bayesian Inference via Rejection Filtering}
 \author{
-David S.~Hippocampus\thanks{ Use footnote for providing further information
-about author (webpage, alternative address)---\emph{not} for acknowledging
-funding agencies.} \\
-Department of Computer Science\\
-Cranberry-Lemon University\\
-Pittsburgh, PA 15213 \\
-\texttt{hippo@cs.cranberry-lemon.edu} \\
+Nathan Wiebe \\
+Microsoft Research\\
+Redmond, WA 98052 \\
+\texttt{nawiebe@microsoft.com} \\
 \And
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
+Christopher Granade \\
+Centre for Engineered Quantum Systems \\
+Sydney, NSW \\
+\texttt{cgranade@cgranade.com} \\
 \AND
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
+Ashish Kapoor \\
+Microsoft Research \\
+Redmond, WA 98052 \\
+\texttt{akapoor@microsoft.com} \\
 \And
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
-\And
-Coauthor \\
-Affiliation \\
-Address \\
-\texttt{email} \\
-(if needed)\\
+Krysta M Svore \\
+Microsoft Research \\
+Redmond, WA 98052 \\
+\texttt{ksvore@microsoft.com} \\
 }
 
 \maketitle
@@ -187,10 +178,10 @@ and the computer used to control its dynamics \cite{halloin_long_2013,shulman_su
 the device itself \cite{lavalle_sensor_2013}, but this often places prohibitive restrictions on the processing power and memory of the embedded processors.
 These restrictions can preclude the use of traditional particle filter methods.
 
-We present an approach that we call \emph{rejection filtering} (RF) that efficiently samples from
-an approximation to the posterior by using rejection sampling and resampling together.
-This allows rejection filtering to perform the inference task while storing no more
-than a constant number of samples at a time in typical use cases.
+We present an approach that we call \emph{rejection filtering} (RF) that samples from
+an approximation to the posterior by using rejection sampling and resampling in concert.
+This allows it approximately update the prior distribution while considering no more
+than one sample at a time in typical use cases.
 Rejection filtering therefore can require significantly
 less memory than traditional particle filter methods. Moreover, RF can be
 easily parallelized at a fine-grained level, such that it can be used with an
@@ -358,6 +349,7 @@ This leads to an efficient method for approximate sampling from the posterior di
     \center{
         \includegraphics[width=\columnwidth]{crej-diffusion3.pdf}
     }
+
     \caption{
         \label{fig:crej-diffusion}
         Rejection filtering for the frequency estimation problem.  As expected, the error asymptotes to approximately the root mean square error.
@@ -376,13 +368,13 @@ Bottom plots are for even vs odd digits top is zero vs one.}\label{fig:HM}
 \end{figure}
 
 Our first numerical experiment is a proof of principle experiment involving inferring an unknown, time--dependent, frequency of an oscillator.
-This application is of central importance in quantum mechanics wherein the precise estimation of such frequencies involves substantial
+This application is of central importance in quantum physics experiments wherein the precise estimation of such frequencies involves substantial
 computational and experimental effort using traditional techniques~\cite{wiebe_efficient_2015,ferrie_how_2013}.  In this case, measurements have two outcomes and the likelihood function takes the form
 $
 P(0|\phi(t_k);M,\theta) = \cos^2(M[\phi(t_k)-\theta]),
 $
-where $\phi(t_k)$ is the unknown frequency evaluated at time $t_k$ and $M$ and $\theta$ are experimental settings that we optimize over to find a near--optimal
-experiment given the current knowledge of the system.  We take $\phi(t_k)$ to follow a normal random walk in $k$ with standard deviation $\pi / 120$.
+where $\phi(t_k)$ is the unknown frequency evaluated at time $t_k$ and $M$ and $\theta$ are experimental settings that are chosen to yield a near--optimal
+experiment given the prior distribution.  We take $\phi(t_k)$ to follow a normal random walk in $k$ with standard deviation $\pi / 120$.
 
 \fig{crej-diffusion} shows that rejection filtering is capable of accurately tracking this unknown frequancy using fewer than $100$ samples drawn from the prior distribution.  Furthermore, rejection filtering is capable of achieving this using less than $1$ kilobit of memory.  In contrast, sequential Monte--Carlo methods using Liu--West resampling  typically require roughly $100$ times the memory that rejection filtering requires because of their need to store an entire particle cloud rather than a single sample.
 
