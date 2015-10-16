@@ -387,7 +387,7 @@ experiment given the current knowledge of the system.  We take $\phi(t_k)$ to fo
 
 \fig{crej-diffusion} shows that rejection filtering is capable of accurately tracking this unknown frequancy using fewer than $100$ samples drawn from the prior distribution.  Furthermore, rejection filtering is capable of achieving this using less than $1$ kilobit of memory.  In contrast, sequential Monte--Carlo methods using Liu--West resampling  typically require roughly $100$ times the memory that rejection filtering requires because of their need to store an entire particle cloud rather than a single sample.
 
-We provide further details of our experimental design heuristics and apply RF to digit classification in an active learning setting in the appendix.  We see,  in~\fig{HM}, that some low variance features are frequently used to classify digits whereas many high variance features are not.  We show in the appendix that RF can also beat KNN  for an appropriate choice of resampler.
+We provide further details of our experimental design heuristics and apply RF to digit classification in an active learning setting in \app{features}.  We see,  in~\fig{HM}, that some low variance features are frequently used to classify digits whereas many high variance features are not.  We show in the appendix that RF can also beat KNN  for an appropriate choice of resampler.
 
 %=============================================================================
 \section{Conclusion}
@@ -454,7 +454,7 @@ affecting the prior mean.
 In a similar way, \CRej~can be extended to include diffusion by using a resampling kernel
 that has a broader variance than that of the accepted posterior samples. Doing so
 allows \CRej~to track stochastic processes in a similar way to \CSMC, as described
- in \sec{numerical-experiments}.
+ in \app{numerical-experiments}.
 
 Formally, we model our posterior distribution as
 \begin{equation}
@@ -585,10 +585,10 @@ though other strategies exist~\cite{wiebe_efficient_2015}.
 
 %=============================================================================
 \section{Numerical Experiments}
-\label{sec:numerical-experiments}
+\label{app:numerical-experiments}
 %=============================================================================
 
-In this section, we demonstrate rejection filtering both in the context of
+In this appendix, we demonstrate rejection filtering both in the context of
 learning simple functions in a memory-restricted and time-dependent fashion,
 and in the context of learning more involved models such as handwriting
 recognition. In both cases, we see that rejection filtering provides significant
