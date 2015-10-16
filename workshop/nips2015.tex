@@ -243,7 +243,7 @@ in online inference problems.
 The second is that the constant $\kappa_E$ may not be precisely known such that and thus $P(E|x)$ cannot be appropriately rescaled to avoid exponentially small likelihoods.  Given that the dimension of the Hilbert space that the training vectors reside in scales exponentially with the number of features, exponentially small probabilities are the norm rather than the exception. 
 Our aim is to address these problems
 by using approximate, rather than exact, rejection sampling, and
-by combining rejection sampling with ideas from  \emph{sequential Monte Carlo} methods to allow approximate inference to be performed while only storing summary statistics of the prior distribution.
+by combining rejection sampling with ideas from  \emph{sequential Monte Carlo} methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined} to allow approximate inference to be performed while only storing summary statistics of the prior distribution.
 
 %---------------------------------------------------------------------
 \subsection{Resampling in Rejection Filtering}
