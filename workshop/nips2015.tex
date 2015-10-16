@@ -208,8 +208,8 @@ This amounts to a form of selective sampling that is computationally inexpensive
 \label{sec:smc}
 %-----------------------------------------------------------------------------
 
-We start by discussing rejection sampling methods, as we
-will draw ideas from these methods to formulate our rejection filter algorithm.
+%We start by discussing rejection sampling methods, as we
+%will draw ideas from these methods to formulate our rejection filter algorithm.
 Rejection sampling provides a simple and elegant approach to Bayesian inference. 
 It samples
 from the posterior distribution by first sampling from the prior $P(x)$.
@@ -220,13 +220,14 @@ distribution of the accepted samples is
   \frac{P(E|x)P(x)}{\sum_x P(E|x)P(x)}= P(x|E),
 \end{equation}
 and the probability of drawing a sample which is then accepted is $\sum_x P(E|x)P(x)=P(E)$.  
+Thus the accepted samples are distributed identically to those drawn from the posterior distribution.
 
-This probability
-can be increased by instead accepting a sample with probability $P(x|E)/\kappa_E$ where
+The acceptance probability
+can be increased by the following rescaling $P(x|E) \rightarrow P(x|E)/\kappa_E$ where
 $\kappa_E$ is a constant that depends on the evidence $E$ such that $P(x|E) \le \kappa_E \le 1$.
 Rescaling the likelihood does not change the posterior probability.
-It does however make the probability of acceptance $P(E)/\kappa_E$, which
-can dramatically improve the performance when rare events are observed.
+It does, however, boost the probability of acceptance to $P(E)/\kappa_E$, which
+can dramatically improve performance if $\max_x P(E|x) \ll 1$.
 
 Two major drawbacks to this approach have prevented its widescale adoption.  The first is that the probability of successfully updating shrinks exponentially with the number of updates
 in online inference problems.
@@ -244,6 +245,9 @@ filtering methods through \emph{resampling}.
 Rejection filtering does not try to
 to propagate samples through many rounds of rejection sampling, but instead
 uses these samples to inform a new model for the posterior distribution. 
+The samples used in the next round of rejection filtering are then drawn from this new
+distribution and we dub this process resampling because of its similarity to resampling in sequential Monte Carlo methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined}.
+
 For example, if
 we assume that our prior distribution is a Gaussian, then a Gaussian model for the posterior
 distribution can be found by computing the mean and the covariance matrix for the samples
@@ -297,13 +301,7 @@ to store $O(1/\epsilon^2)$ samples in memory in order to estimate the moments of
 In practice, one can use the Welford algorithm \cite{welford_note_1962} to  accumulate means
 and variances more precisely, but doing so does not change the asymptotic scaling with $\epsilon$ of the memory required by~\alg{crej}.
 
-Width can be traded for depth by batching the data and processing each of
-these pieces of evidence separately. 
-We use a computational model wherein $N_{\rm batch}$ processing
-nodes send a stream of the incremental means and
-covariance sums to a server that combines them to produce the
-model used in the next step of the inference procedure.
-Pseudocode for this version  is given in \app{batched-updates}.
+In Apx G, we give a version of our algorithm that treads width for depth by batching the data.
 
 %=============================================================================
 \subsection{Bayesian Inference using Approximate Rejection Sampling}
