@@ -142,13 +142,12 @@ Microsoft Research \\
 \begin{abstract}
 We introduce a method, rejection filtering, for approximating Bayesian inference
 using rejection sampling.
-We not only make the process efficient, but also dramatically
-reduce the memory required relative to conventional methods
-by combining rejection sampling with particle filtering to estimate the first two moments of the posterior distribution.
-We also provide an approximate form of rejection sampling that makes rejection filtering tractable
-in cases where exact rejection sampling is not efficient.
-Finally, we present several numerical examples of rejection filtering that show its ability to track
-time dependent parameters in online settings, and show its performance on MNIST classification problems.
+Although rejection sampling is typically inefficient for approximate Bayesian inference, 
+we make it efficient by using summary statistics drawn from the accepted samples to update a model for the prior distribution.
+Apart from making the algorithm efficient, rejection filtering often requires
+much less memory than conventional methods particle filtering.  We provide a thorough analysis
+of the computational resources required for our algorithm and also discuss error propagation through the updates.
+Finally, we provide proof of principle demonstrations that show the method's viability for solving real--world problems.
 \end{abstract}
 
 %=====================================================================
@@ -171,10 +170,12 @@ and the computer used to control its dynamics \cite{halloin_long_2013,shulman_su
 the device itself \cite{lavalle_sensor_2013}, but this often places prohibitive restrictions on the processing power and memory of the embedded processors.
 These restrictions can preclude the use of traditional particle filter methods.
 
-We present an approach that we call \emph{rejection filtering} (RF) that efficiently samples from
-an approximation to the posterior by using rejection sampling and resampling together.
-This allows rejection filtering to estimate the first two moments of the posterior distribution while storing no more
-than a constant number of samples at a time in typical use cases.
+
+We present an approach that we call \emph{rejection filtering} (RF), which samples from
+an approximation to the posterior by using rejection sampling and resampling in concert.
+This allows it approximately update the prior distribution while considering no more
+than one sample at a time in typical use cases.
+
 Rejection filtering therefore can require significantly
 less memory than traditional particle filter methods. Moreover, RF can be
 easily parallelized at a fine-grained level, such that it can be used with an
@@ -201,10 +202,12 @@ This amounts to a form of selective sampling that is computationally inexpensive
 %\label{sec:smc}
 %-----------------------------------------------------------------------------
 
+
 We start by discussing rejection sampling methods, as we
 will draw ideas from these methods to formulate our rejection filter algorithm.
 For simplicity we take all variables to be discrete in the following, however, the generalization to the continuous
 case is trivial.
+
 Rejection sampling provides a simple and elegant approach to Bayesian inference. 
 It samples
 from the posterior distribution by first sampling from the prior $P(x)$.
@@ -215,20 +218,21 @@ distribution of the accepted samples is
   \frac{P(E|x)P(x)}{\sum_x P(E|x)P(x)}= P(x|E),
 \end{equation}
 and the probability of drawing a sample which is then accepted is $\sum_x P(E|x)P(x)=P(E)$.  
+Thus the accepted samples are distributed identically to those drawn from the posterior distribution.
 
-This probability
-can be increased by instead accepting a sample with probability $P(x|E)/\kappa_E$ where
+The acceptance probability
+can be increased by the following rescaling $P(x|E) \rightarrow P(x|E)/\kappa_E$ where
 $\kappa_E$ is a constant that depends on the evidence $E$ such that $P(x|E) \le \kappa_E \le 1$.
 Rescaling the likelihood does not change the posterior probability.
-It does however make the probability of acceptance $P(E)/\kappa_E$, which
-can dramatically improve the performance when rare events are observed.
+It does, however, boost the probability of acceptance to $P(E)/\kappa_E$, which
+can dramatically improve performance if $\max_x P(E|x) \ll 1$.
 
 Two major drawbacks to this approach have prevented its widescale adoption.  The first is that the probability of successfully updating shrinks exponentially with the number of updates
 in online inference problems.
 The second is that the constant $\kappa_E$ may not be precisely known such that and thus $P(E|x)$ cannot be appropriately rescaled to avoid exponentially small likelihoods.  Given that the dimension of the Hilbert space that the training vectors reside in scales exponentially with the number of features, exponentially small probabilities are the norm rather than the exception. 
-Our aim is to address these problems
+We address these problems
 by using approximate, rather than exact, rejection sampling, and
-by combining rejection sampling with ideas from  \emph{sequential Monte Carlo} methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined} to allow approximate inference to be performed while only storing summary statistics of the prior distribution.
+by combining rejection sampling with ideas from  \emph{sequential Monte Carlo} methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined} to allow approximate inference to be performed while retaining only summary statistics of the accepted samples.
 
 %---------------------------------------------------------------------
 %\subsection{Resampling in Rejection Filtering}
@@ -239,9 +243,10 @@ filtering methods through \emph{resampling}.
 Rejection filtering does not try to
 to propagate samples through many rounds of rejection sampling, but instead
 uses these samples to inform a new model for the posterior distribution. 
-For example, if
-we assume that our prior distribution is a Gaussian, then a Gaussian model for the posterior
-distribution can be found by computing the mean and the covariance matrix for the samples
+The samples used in the next round of rejection filtering are then drawn from this new
+distribution; we dub this process resampling because of its similarity to resampling in sequential Monte Carlo methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined}.
+
+To clarify how resampling is used in practice in rejection filtering, let us consider the case of a Gaussian model for the posterior.  This model is uniquely specified by computing the mean and the covariance matrix for the samples
 that are accepted by the rejection sampling algorithm.  This approach is
 reminiscent of assumed density filtering~\cite{minka_expectation_2001}, which uses an analogous strategy
 for modeling the prior distribution but is less memory efficient than
@@ -276,7 +281,7 @@ our method.
     \end{algorithmic}
 \end{algorithm}
 
-Our method is described in detail in~\alg{crej}. We discuss the efficiency of the algorithm in the following theorem.
+The rejection filtering algorithm is described in detail in~\alg{crej} for the case of a prior model that depends only on the first two moments of the accepted samples. We discuss the efficiency of the algorithm in the following theorem.
 We consider an algorithm to be efficient if it runs in $O(\operatorname{poly}(\operatorname{dim}(x)))$ time, where ${\rm dim}(x)$ is the number of features in the training vectors.
 
 \begin{theorem}
@@ -292,13 +297,8 @@ to store $O(1/\epsilon^2)$ samples in memory in order to estimate the moments of
 In practice, one can use the Welford algorithm \cite{welford_note_1962} to  accumulate means
 and variances more precisely, but doing so does not change the asymptotic scaling with $\epsilon$ of the memory required by~\alg{crej}.
 
-Width can be traded for depth by batching the data and processing each of
-these pieces of evidence separately. 
-We use a computational model wherein $N_{\rm batch}$ processing
-nodes send a stream of the incremental means and
-covariance sums to a server that combines them to produce the
-model used in the next step of the inference procedure.
-Pseudocode for this version  is given in \app{batched-updates}.
+In \app{batched-updates}, we give a version of our algorithm that treads width for depth by batching the data
+and evaluating particles in parallel.
 
 %=============================================================================
 \subsection{Bayesian Inference using Approximate Rejection Sampling}
@@ -316,12 +316,12 @@ in cases where a tight bound is unknown or when the prior has little support ove
 
 The main question remaining is how  the
 errors incurred from $P(E|x) > \kappa_E$ impact the posterior distribution.
-To understand this, let us define
+To answer this, we first define the space on which $P(E|x)\le \kappa_E$ is violated:
 \begin{equation}
 {\rm bad} := \left\{x: {P(E|x)} >{\kappa_E}\right\}.
 \end{equation}
-If the set of bad configurations is non--empty then it naturally leads to errors in the posterior and
-can degrade the success probability in rejection filtering.  Bounds on these effects are
+If the set of bad configurations is non--empty then errors will appear in the posterior samples and
+can the success probability may also fall.  Bounds on these effects are
 provided below.
 
 \begin{corollary}\label{cor:badalgorithm}
@@ -336,14 +336,14 @@ Result follows directly from~\thm{crej} and Theorem 1 in~\cite{WKGS15}.
 
 \cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too small for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily result in substantial errors in the posterior distribution.
 We further elaborate in \app{sensitivity-kappa} with a numerical example.
-This leads to an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore, it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use rejection filtering.
-
+This leads to an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E)/\kappa_E$ is at most polynomially small.  
 \section{Numerical Experiments}
 \begin{figure}
 \begin{minipage}[b]{0.45\linewidth}
     \center{
         \includegraphics[width=\columnwidth]{crej-diffusion3.pdf}
     }
+
     \caption{
         \label{fig:crej-diffusion}
         Rejection filtering for the frequency estimation problem.  As expected, the error asymptotes to approximately the root mean square error.
@@ -362,17 +362,17 @@ Bottom plots are for even vs odd digits top is zero vs one.}\label{fig:HM}
 \end{figure}
 
 Our first numerical experiment is a proof of principle experiment involving inferring an unknown, time--dependent, frequency of an oscillator.
-This application is of central importance in quantum mechanics wherein the precise estimation of such frequencies involves substantial
+This application is of central importance in quantum physics experiments wherein the precise estimation of such frequencies involves substantial
 computational and experimental effort using traditional techniques~\cite{wiebe_efficient_2015,ferrie_how_2013}.  In this case, measurements have two outcomes and the likelihood function takes the form
 $
 P(0|\phi(t_k);M,\theta) = \cos^2(M[\phi(t_k)-\theta]),
 $
-where $\phi(t_k)$ is the unknown frequency evaluated at time $t_k$ and $M$ and $\theta$ are experimental settings that we optimize over to find a near--optimal
-experiment given the current knowledge of the system.  We take $\phi(t_k)$ to follow a normal random walk in $k$ with standard deviation $\pi / 120$.
+where $\phi(t_k)$ is the unknown frequency evaluated at time $t_k$ and $M$ and $\theta$ are experimental settings that are chosen to yield a near--optimal
+experiment given the prior distribution.  We take $\phi(t_k)$ to follow a normal random walk in $k$ with standard deviation $\pi / 120$.
 
 \fig{crej-diffusion} shows that rejection filtering is capable of accurately tracking this unknown frequancy using fewer than $100$ samples drawn from the prior distribution.  Furthermore, rejection filtering is capable of achieving this using less than $1$ kilobit of memory.  In contrast, sequential Monte--Carlo methods using Liu--West resampling  typically require roughly $100$ times the memory that rejection filtering requires because of their need to store an entire particle cloud rather than a single sample.
 
-We provide further details of our experimental design heuristics and apply RF to digit classification in an active learning setting in the appendix.  We see,  in~\fig{HM}, that some low variance features are frequently used to classify digits whereas many high variance features are not.  We show in the appendix that RF can also beat KNN  for an appropriate choice of resampler.
+We provide further details of our experimental design heuristics and apply RF to digit classification in an active learning setting in \app{features}.  We see,  in~\fig{HM}, that some low variance features are frequently used to classify digits whereas many high variance features are not.  We show in the appendix that RF can also beat KNN  for an appropriate choice of resampler.
 
 %=============================================================================
 \section{Conclusion}
@@ -439,7 +439,7 @@ affecting the prior mean.
 In a similar way, \CRej~can be extended to include diffusion by using a resampling kernel
 that has a broader variance than that of the accepted posterior samples. Doing so
 allows \CRej~to track stochastic processes in a similar way to \CSMC, as described
- in \sec{numerical-experiments}.
+ in \app{numerical-experiments}.
 
 Formally, we model our posterior distribution as
 \begin{equation}
@@ -570,10 +570,10 @@ though other strategies exist~\cite{wiebe_efficient_2015}.
 
 %=============================================================================
 \section{Numerical Experiments}
-\label{sec:numerical-experiments}
+\label{app:numerical-experiments}
 %=============================================================================
 
-In this section, we demonstrate rejection filtering both in the context of
+In this appendix, we demonstrate rejection filtering both in the context of
 learning simple functions in a memory-restricted and time-dependent fashion,
 and in the context of learning more involved models such as handwriting
 recognition. In both cases, we see that rejection filtering provides significant
