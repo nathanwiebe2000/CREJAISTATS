@@ -73,3 +73,5 @@ Temporary Items
 *.synctex.gz
 *.auxlock
 *.synctex
+*.pdf
+icml2016
