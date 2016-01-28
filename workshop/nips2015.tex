@@ -248,9 +248,7 @@ uses these samples to inform a new model for the posterior distribution.
 The samples used in the next round of rejection filtering are then drawn from this new
 distribution; we dub this process resampling because of its similarity to resampling in sequential Monte Carlo methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined}.
 
-For example, if
-we assume that our prior distribution is a Gaussian, then a Gaussian model for the posterior
-distribution can be found by computing the mean and the covariance matrix for the samples
+To clarify how resampling is used in practice in rejection filtering, let us consider the case of a Gaussian model for the posterior.  This model is uniquely specified by computing the mean and the covariance matrix for the samples
 that are accepted by the rejection sampling algorithm.  This approach is
 reminiscent of assumed density filtering~\cite{minka_expectation_2001}, which uses an analogous strategy
 for modeling the prior distribution but is less memory efficient than
@@ -285,7 +283,7 @@ our method.
     \end{algorithmic}
 \end{algorithm}
 
-Our method is described in detail in~\alg{crej}. We discuss the efficiency of the algorithm in the following theorem.
+The rejection filtering algorithm is described in detail in~\alg{crej} for the case of a prior model that depends only on the first two moments of the accepted samples. We discuss the efficiency of the algorithm in the following theorem.
 We consider an algorithm to be efficient if it runs in $O(\operatorname{poly}(\operatorname{dim}(x)))$ time, where ${\rm dim}(x)$ is the number of features in the training vectors.
 
 \begin{theorem}
@@ -340,8 +338,7 @@ Result follows directly from~\thm{crej} and Theorem 1 in~\cite{WKGS15}.
 
 \cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too small for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily result in substantial errors in the posterior distribution.
 We further elaborate in \app{sensitivity-kappa} with a numerical example.
-This leads to an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore, it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use rejection filtering.
-
+This leads to an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E)/\kappa_E$ is at most polynomially small.  
 \section{Numerical Experiments}
 \begin{figure}
 \begin{minipage}[b]{0.45\linewidth}
