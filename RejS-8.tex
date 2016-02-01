@@ -1,5 +1,4 @@
 \documentclass[twoside]{article}
-\usepackage{aistats2016}
 
 %=============================================================================
 % PACKAGES
@@ -17,7 +16,8 @@
 \usepackage{bm}% bold math
 \usepackage{hyperref}
 \usepackage{enumerate}
-\usepackage{algorithm}
+\usepackage{icml2016}
+
 \usepackage{algpseudocode}
     \renewcommand{\algorithmicrequire}{\textbf{Input:}}
     \renewcommand{\algorithmicensure}{\textbf{Output:}}
@@ -116,24 +116,45 @@ Proof of~#1.}}
 
 \newcommand{\thetitle}{Bayesian inference via rejection filtering}
 
-
 \twocolumn[
-  \aistatstitle{\thetitle}
-  \aistatsauthor{
- Anonymous Author 1 \And Anonymous Author 2 \And Anonymous Author 3 \And Anonymous Author 4
-    %Nathan Wiebe$^\dagger$ \And
-    %Christopher Granade$^*$ \And
-    %Ashish Kapoor$^\ddagger$ \And
-    %Krysta M Svore$^\dagger$
+\icmltitle{\thetitle}
 
-  }
-  \aistatsaddress{
- Unknown Institution 1 \And Unknown Institution 2 \And Unknown Institution 3 \And Anonymous Institution 4
-    %$^\dagger$QuArC \\ Microsoft Research \And
-    %$^*$EQuS \\ University of Sydney \And
-    %$^\ddagger$ASIG \\ Microsoft Research
-  }
+% It is OKAY to include author information, even for blind
+% submissions: the style file will automatically remove it for you
+% unless you've provided the [accepted] option to the icml2016
+% package.
+\icmlauthor{Your Name}{email@yourdomain.edu}
+\icmladdress{Your Fantastic Institute,
+            314159 Pi St., Palo Alto, CA 94306 USA}
+\icmlauthor{Your CoAuthor's Name}{email@coauthordomain.edu}
+\icmladdress{Their Fantastic Institute,
+            27182 Exp St., Toronto, ON M6H 2T1 CANADA}
+
+% You may provide any keywords that you 
+% find helpful for describing your paper; these are used to populate 
+% the "keywords" metadata in the PDF but will not be shown in the document
+\icmlkeywords{boring formatting information, machine learning, ICML}
+
+\vskip 0.3in
 ]
+
+
+% \twocolumn[
+%   \icmltitle{\thetitle}
+%   \icmlauthor{
+%  Anonymous Author 1 \And Anonymous Author 2 \And Anonymous Author 3 \And Anonymous Author 4
+%     %Nathan Wiebe$^\dagger$ \And
+%     %Christopher Granade$^*$ \And
+%     %Ashish Kapoor$^\ddagger$ \And
+%     %Krysta M Svore$^\dagger$
+%   }
+%   \icmlsaddress{
+%  Unknown Institution 1 \And Unknown Institution 2 \And Unknown Institution 3 \And Anonymous Institution 4
+%     %$^\dagger$QuArC \\ Microsoft Research \And
+%     %$^*$EQuS \\ University of Sydney \And
+%     %$^\ddagger$ASIG \\ Microsoft Research
+%   }
+% ]
 
 
 \begin{abstract}
@@ -484,13 +505,13 @@ distinct models $M \in \{A, B\}$, such that all likelihoods are conditioned on a
 for $M$, $P(E | x, M)$. The estimated total likelihoods for each \CRej~run then give an
 estimate of the Bayes factor $K$ \cite{akaike_likelihood_1981},
 \begin{equation}
-    K := \frac{\prod_i P(E_i | A)}{\prod_i P(E_i | B)} = \frac{\expect{\prod_i P(E_i | x, A)}{x}}{\expect{\prod_i P(E_i | x, B)}{x}}.
+    K := \expect{\textstyle \prod_i P(E_i | x, A)}{x} / \expect{\textstyle \prod_i P(E_i | x, B)}{x}.
 \end{equation}
 If $K > 1$, then model $A$ is to be preferred as an explanation
 of the evidence seen thus far. In particular, the expectation over model parameters
 penalizes overfitting, such that a model preferred by $K$ must justify the dimensionality
 of $x$. This is made concrete by noting that $K$ is well-approximated by the Bayesian information
-criterion when the prior is a multivariate normal distributon \cite{akaike_likelihood_1980,raftery1999bayes}.
+criterion when the prior is a multivariate normal distribution \cite{akaike_likelihood_1980,raftery1999bayes}.
 
 Using \CRej~to perform model selection, then, consists of accumulating
 subsequent values of $N_a$ in a log-likelihood register $\ell$,
@@ -528,11 +549,11 @@ we take $\langle \cdot\!~,\cdot \rangle$ to be the inner product between two dis
 
     Let $P(x)$ be the prior distribution and $\tilde{P}(x)$ be an approximation to the prior such that $\tilde{P}(x) = P(x) -\Delta(x)$ and let $P(x|E)$ and $\tilde{P}(x|E)$ be the posterior distributions after event $E$ is observed for $x\in V\subset \mathbb{R}^N$ where $V$ is compact and $\|x\|\le \|x_{\rm max}\|$ for all $x\in V$.  If $|\langle P(E|x),\Delta(x) \rangle|/P(E) \le 1/2$ then the error in the posterior mean then satisfies
     $$
-    E_1 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{P(E)}\|x_{\max}\|,
+    E_1 \le 4 \langle P(E|x), |\Delta(x)|\rangle\|x_{\max}\| / P(E),
     $$
     and similarly the error in the expectation of $xx^T$ is
     $$
-    E_2 \le 4 \frac{\langle P(E|x), |\Delta(x)|\rangle}{P(E)}\|x_{\max}\|^2,
+    E_2 \le 4 \langle P(E|x), |\Delta(x)|\rangle\|x_{\max}\|^2 / P(E),
     $$
 where $E_1:=\left\|\int_V  (P(x|E) -\tilde{P}(x|E)) x \mathrm{d}^N x \right\|$ and $E_2 := \left\|\int_V  (P(E|x) -\tilde{P}(E|x)) xx^T \mathrm{d}^N x \right\|$
 \end{lemma}
@@ -542,18 +563,17 @@ where $E_1:=\left\|\int_V  (P(x|E) -\tilde{P}(x|E)) x \mathrm{d}^N x \right\|$ a
 \begin{theorem}\label{thm:meanCov}
 If the assumptions of~\lem{errprop} are met and the rejection sampling algorithm uses $m$ samples from the approximate posterior distribution to infer the posterior mean  and $x_j\sim \tilde{P}(x|E)$ then the error in the posterior mean scales as
 $$
- O\left(\left[\frac{{N}}{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{P(E)}\right]\|x_{\max}\|\right).
+ O\left(\left[{N} / \sqrt{m} +\langle P(E|x), |\Delta(x)|\rangle / P(E)\right]\|x_{\max}\|\right).
 $$
 and the error in the estimate of $\Sigma$ is
-
 $$
- O\left(\left[\frac{{N} }{\sqrt{m}} +\frac{\langle P(E|x), |\Delta(x)|\rangle}{P(E)}\right]\|x_{\max}\|^2\right).
+ O\left(\left[{N}/\sqrt{m} + \langle P(E|x), |\Delta(x)|\rangle / P(E)\right]\|x_{\max}\|^2\right).
 $$
 \end{theorem}
 
 This theorem addresses the question of when we can reasonably expect the update process discussed in~\alg{crej} to be stable.  By stable, we mean that small initial errors do not exponentially magnify throughout the update process.  \thm{meanCov} shows that small errors in the prior distribution do not propagate into large errors in the estimates of the mean and posterior matrix given that $P(E)= \langle P(E|x),P(x)\rangle$ is sufficiently large.  In particular, \thm{meanCov} and an application of the Cauchy--Schwarz inequality show that such errors are small if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and 
 $$
-\langle\Delta(x),\Delta(x)\rangle \ll \frac{P^2(E)}{{\langle P(E|x),P(E|x)\rangle}}.
+  \langle\Delta(x),\Delta(x)\rangle \ll P^2(E) / {\langle P(E|x),P(E|x)\rangle}.
 $$
 However, this does not fully address the question of stability because it does not consider the errors that are incurred from the resampling step.
 
@@ -764,7 +784,7 @@ within object tracking, robotics, and experimental physics that are impractical 
 \appendix
 
 %=====================================================================
-\bibliographystyle{unsrt}
+\bibliographystyle{icml2016}
 \bibliography{qsmc}
 %=====================================================================
 
