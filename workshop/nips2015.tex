@@ -3,7 +3,7 @@
 \usepackage{hyperref}
 \usepackage{url}
 %\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
-
+\nipsfinalcopy
 
 
 
@@ -124,23 +124,15 @@ Proof of~#1.}}
 \author{
 Nathan Wiebe \\
 Microsoft Research\\
-Redmond, WA 98052 \\
-\texttt{nawiebe@microsoft.com} \\
 \And
 Christopher Granade \\
-Centre for Engineered Quantum Systems \\
-Sydney, NSW \\
-\texttt{cgranade@cgranade.com} \\
+ University of Sydney\\
 \AND
 Ashish Kapoor \\
 Microsoft Research \\
-Redmond, WA 98052 \\
-\texttt{akapoor@microsoft.com} \\
 \And
-Krysta M Svore \\
+Krysta M. Svore \\
 Microsoft Research \\
-Redmond, WA 98052 \\
-\texttt{ksvore@microsoft.com} \\
 }
 
 \maketitle
@@ -178,10 +170,12 @@ and the computer used to control its dynamics \cite{halloin_long_2013,shulman_su
 the device itself \cite{lavalle_sensor_2013}, but this often places prohibitive restrictions on the processing power and memory of the embedded processors.
 These restrictions can preclude the use of traditional particle filter methods.
 
+
 We present an approach that we call \emph{rejection filtering} (RF), which samples from
 an approximation to the posterior by using rejection sampling and resampling in concert.
 This allows it approximately update the prior distribution while considering no more
 than one sample at a time in typical use cases.
+
 Rejection filtering therefore can require significantly
 less memory than traditional particle filter methods. Moreover, RF can be
 easily parallelized at a fine-grained level, such that it can be used with an
@@ -204,12 +198,16 @@ This amounts to a form of selective sampling that is computationally inexpensive
 %=============================================================================
 
 %-----------------------------------------------------------------------------
-\subsection{Rejection Sampling}
-\label{sec:smc}
+%\subsection{Rejection Sampling}
+%\label{sec:smc}
 %-----------------------------------------------------------------------------
 
-%We start by discussing rejection sampling methods, as we
-%will draw ideas from these methods to formulate our rejection filter algorithm.
+
+We start by discussing rejection sampling methods, as we
+will draw ideas from these methods to formulate our rejection filter algorithm.
+For simplicity we take all variables to be discrete in the following, however, the generalization to the continuous
+case is trivial.
+
 Rejection sampling provides a simple and elegant approach to Bayesian inference. 
 It samples
 from the posterior distribution by first sampling from the prior $P(x)$.
@@ -237,7 +235,7 @@ by using approximate, rather than exact, rejection sampling, and
 by combining rejection sampling with ideas from  \emph{sequential Monte Carlo} methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined} to allow approximate inference to be performed while retaining only summary statistics of the accepted samples.
 
 %---------------------------------------------------------------------
-\subsection{Resampling in Rejection Filtering}
+%\subsection{Resampling in Rejection Filtering}
 %---------------------------------------------------------------------
 
 We make rejection sampling efficient by combining it with particle
@@ -248,9 +246,7 @@ uses these samples to inform a new model for the posterior distribution.
 The samples used in the next round of rejection filtering are then drawn from this new
 distribution; we dub this process resampling because of its similarity to resampling in sequential Monte Carlo methods~\cite{doucet2000sequential,del2012adaptive,van2000unscented,liu2001combined}.
 
-For example, if
-we assume that our prior distribution is a Gaussian, then a Gaussian model for the posterior
-distribution can be found by computing the mean and the covariance matrix for the samples
+To clarify how resampling is used in practice in rejection filtering, let us consider the case of a Gaussian model for the posterior.  This model is uniquely specified by computing the mean and the covariance matrix for the samples
 that are accepted by the rejection sampling algorithm.  This approach is
 reminiscent of assumed density filtering~\cite{minka_expectation_2001}, which uses an analogous strategy
 for modeling the prior distribution but is less memory efficient than
@@ -285,7 +281,7 @@ our method.
     \end{algorithmic}
 \end{algorithm}
 
-Our method is described in detail in~\alg{crej}. We discuss the efficiency of the algorithm in the following theorem.
+The rejection filtering algorithm is described in detail in~\alg{crej} for the case of a prior model that depends only on the first two moments of the accepted samples. We discuss the efficiency of the algorithm in the following theorem.
 We consider an algorithm to be efficient if it runs in $O(\operatorname{poly}(\operatorname{dim}(x)))$ time, where ${\rm dim}(x)$ is the number of features in the training vectors.
 
 \begin{theorem}
@@ -340,8 +336,7 @@ Result follows directly from~\thm{crej} and Theorem 1 in~\cite{WKGS15}.
 
 \cor{badalgorithm} shows that taking a value of $\kappa_E$ that is too small for $P(E|x)/\kappa_E$ to be a valid likelihood function does not necessarily result in substantial errors in the posterior distribution.
 We further elaborate in \app{sensitivity-kappa} with a numerical example.
-This leads to an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E|x)/\kappa_E$ is at most polynomially small.  Furthermore, it remains incredibly space efficient since the posterior distribution does not have to be explicitly stored to use rejection filtering.
-
+This leads to an efficient method for approximate sampling from the posterior distribution assuming that $\delta$ is constant and $P(E)/\kappa_E$ is at most polynomially small.  
 \section{Numerical Experiments}
 \begin{figure}
 \begin{minipage}[b]{0.45\linewidth}
@@ -556,7 +551,7 @@ $$
 $$
 However, this does not fully address the question of stability because it does not consider the errors that are incurred from the resampling step.
 
-We can assess the effect of these errors by assuming that, in the domain of interest, the updated model after an experiment satisfies a Lipshitz condition
+We can assess the effect of these errors by assuming that, in the domain of interest, the updated model after an experiment satisfies a Lipschitz condition
 \begin{equation}
 \max_x|P_{\mu,\Sigma}(x) - P_{\mu' ,\Sigma'}(x)| \le L(\|\mu- \mu'\| +\|\sqrt{\Sigma}- \sqrt{\Sigma'}\|),
 \end{equation}
@@ -568,7 +563,7 @@ Stability is therefore expected if $\|x_{\max}\|\le 1$, $m\in \Omega(N^2)$ and
 \begin{equation}
 P(E) \gg {L\int_V P(E|x) \mathrm{d}^Nx }.
 \end{equation}
-Thus we expect stability if (a) low likelihood events are rare, and (b) the Lipshitz constant for the model is small.  In practice, both of these potential failures can couple together to lead to rapid growth of errors.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the distribution which causes the Lipshitz constant to become large.  This in turn could coincide with an unexpected outcome to destabilize the learning algorithm. 
+Thus we expect stability if (a) low likelihood events are rare, and (b) the Lipschitz constant for the model is small.  In practice, both of these potential failures can couple together to lead to rapid growth of errors.  It is quite common, for example, for errors in the procedure to lead to unrealistically low estimates of the distribution which causes the Lipschitz constant to become large.  This in turn could coincide with an unexpected outcome to destabilize the learning algorithm. 
 We overcome this problem by invoking random restarts, as outlined in the next section,
 though other strategies exist~\cite{wiebe_efficient_2015}.
 
@@ -599,9 +594,10 @@ multimodality in the posteriors. Thus, rejection filtering succeeds in these cas
 if our method correctly models intermediate distributions so that appropriate
 experiments can be designed.
 
-Concretely, we consider evidence $E\in\{0, 1\}$ drawn from a two-outcome
-experiment with controls $x_-$ and $t$, and with a single model parameter $x$.
-The likelihood is
+Concretely, we consider an inference problem with a single observed variable $E\in\{0, 1\}$, decision variables $x_-$ and $t$ and with a single hidden variable $x$ that we allow
+to vary with time.
+Our aim is to infer the current value of $x$ given values of $E$ obtained for different values of $(x_-,t)$.
+The likelihood of measuring $E=1$ for these experiments is
 \begin{equation}
   \label{eq:inv-model}
  \Pr(1 | x; t, x_-,k) = \cos^2((x(k) - x_-) t / 2),
@@ -863,7 +859,7 @@ vectors without substantially affecting the classification accuracy.
         \includegraphics[width=0.5\textwidth]{Feature.pdf}
     \end{center}
     \caption{\label{fig:Features}
-Features
+Scaling of the classification error as a function of the number of pixels considered in MNIST digit classification.
     }
 \end{figure}
 
